@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    The Ant Build File
+    Provides targets for compiling, packaging (JAR), and testing
+    Author: Shiran Pasternak
+-->
+<project name="SequenceFetcher" default="jar" basedir=".">
+    <property name="src.home" location="src"/>
+    <property name="build.home" location="build"/>
+    <property name="lib.home" location="lib"/>
+    <property name="dist.home" location="dist"/>
+    <property name="jarfile" location="${dist.home}/${ant.project.name}.jar"/>
+    <property name="compile.debug" value="true"/>
+
+    <!-- Third-party libraries required by the project -->
+    <path id="compile.classpath">
+        <fileset id="lib.jars" dir="${lib.home}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+    
+    <!-- Prepare directories for build -->
+	<target name="prepare" description="Prepare project for build">
+        <mkdir dir="${build.home}"/>
+        <mkdir dir="${dist.home}"/>
+	</target>
+
+    <!-- Compile the source files -->
+    <target name="compile" description="Compile code" depends="prepare">
+        <javac srcdir="${src.home}" destdir="${build.home}"
+               includeAntRuntime="no"
+               classpathref="compile.classpath"
+               debug="${compile.debug}">
+        </javac>
+    </target>
+
+    <!-- Package all compiled classes, along with necessary libraries, into
+         the target JAR -->
+    <target name="jar" depends="compile" description="Build jar">
+        <jar jarfile="${jarfile}" basedir="${build.home}" manifest="Manifest">
+            <!-- Merge library jars into final jar file -->
+            <zipgroupfileset refid="lib.jars"/>
+        </jar>
+    </target>
+
+    <!-- Clean the project, removing all generated artifacts -->
+    <target name="clean" description="Remove build and dist directories">
+        <delete dir="${build.home}"/>
+        <delete dir="${dist.home}"/>
+    </target>
+    
+    <!-- Run the unit-test suite -->
+    <target name="test" depends="jar" description="Run test suite">
+    	<junit printsummary="true">
+			<formatter type="brief" usefile="false"/>
+            <classpath path="${jarfile}"/>
+			<test name="pasternak.shiran.MasterSuite"/>
+		</junit>
+    </target>
+</project>

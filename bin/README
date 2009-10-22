@@ -1,0 +1,20 @@
+
+New rational... I want to easily edit them from TextMate without having to drill down a package hiearchy...
+
+
+
+
+
+----------------------------------------------------------------------
+*  OK, I was wrong about this... Groovy is VERY forgiving about package imports
+*  At least when the relevant jar files are in groovy/lib/ 
+* 
+
+*What are all of these .java files doing here without any packages?  
+*This is basically the kitchen sink.   The purpose is to provide classes that add 
+*functionality to Groovy without having to remember their package names and what not. 
+*Sure, that's what Eclipse is for, but unlike Java, most of my Groovy code is less than 
+*one page long, edited in TextMate, and started and finished in less than an hour.  It's
+*a different development model, and what I want out of Groovy is for lots of useful functionality 
+*to "just be there".
+

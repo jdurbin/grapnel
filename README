@@ -1,0 +1,26 @@
+durbinlib.jar 
+
+The idea is simple.  This is the Kitchen Sink.   Whenever I develop some highly useful utility class, I'll put in 
+here so that I can just grab durbinlib.jar and have all my Favorites in one fell swoop.  It's called durbinlib because
+I expect that my own personal usage cases will be the only real commonality.   I don't want to have to think about it, 
+I just want to write the java code and forget about it.  
+
+Mainly this is for Groovy.  Groovy is great, but there are some things that I need to do frequently that I 
+need to do either more cleanly or with faster code than I can in Groovy. For example, consider the
+Perl tr() functionality.   That's handy for a DNA guy who frequently needs to change characters in a string 
+from one set into those in another set.  Groovy-only versions of this I have written are too slow by a factor of 10. 
+
+The lack of a fast tr is also the sort of built-in functionality that Perl people like to lord over you.  But no reason 
+to despair.  The whole benefit of Groovy is that it's sugar for Java.  I can write Java classes and just use them in
+Groovy.  Better, with operator overloading and so on, I can make Java classes that have sugar too.   
+
+So, that's the goal here.   A lot of stuff will just be in classes/*.java, with no package.  That's on purpose, since
+the goal is to make these things feel like part of Groovy's built-in support, stuff that is just there when you need it. 
+No packages to remember. 
+
+Similarly, doing "ant install" here will copy durbinlib.jar into ~/.groovy/lib where it will immediately 
+be available to any Groovy scripts. 
+
+
+03/06/08
+James

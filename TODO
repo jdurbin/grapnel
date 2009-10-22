@@ -1,0 +1,23 @@
+Some things TODO, in case I'm ever at a loss:
+
+
+* Probably want to create a C++ durbinlib as well... so maybe move this into durbinlib/java
+* 
+* I dream of a space-efficent String replacement. I'm an ASCII-only guy.  I only need 1 byte/character.  DString? 
+* 
+
+
+** Add GroovyDoc ()
+
+<taskdef name="Groovydoc" classname="org.codehaus.groovy.ant.Groovydoc">
+   <classpath>
+      <path path="${mainClassesDirectory}"/>
+      <path refid="compilePath"/>
+   </classpath>
+</taskdef>
+
+<Groovydoc 
+      destdir="${docsDirectory}/gapi"
+      sourcepath="${mainSourceDirectory}" 
+      packagenames="**.*" use="true"
+      windowtitle="Groovydoc" private="false"/>

@@ -1,0 +1,47 @@
+	public NamedInstances tableColsToInstances(Table t,String relationName) {
+		// Set up attributes, which for colInstances will be the rowNames...
+		FastVector atts = new FastVector();
+		
+		for (int r = 0;r < t.numRows;r++) {
+			atts.addElement(new Attribute(t.rowNames[r]));
+		}
+
+		// Create Instances object..
+		NamedInstances data = new NamedInstances(relationName,atts,0);
+
+		// Fill the instances with data...	
+		// For each instance...
+		for (int c = 0;c < t.numCols;c++) {
+			double[] vals = new double[data.numAttributes()];			
+
+			// For each attribute...
+			for (int r = 0;r < t.numRows;r++) {			    
+				Object val = t.matrix.getQuick(r,c);
+				if (val == null) 	vals[r] = Instance.missingValue();
+				else vals[r] = (Double) val;
+			}						
+			// Add the a newly minted instance with those attribute values...
+			data.add(new Instance(1.0,vals),colNames[c]);
+		}		
+	
+		
+		if (addInstanceNamesAsFeatures){		  
+		  NamedInstances newData = new Instances(data);
+//      newData.insertAttributeAt(new Attribute("InstanceName",(FastVector)null), newData.numAttributes());	
+
+      // Create a sorted list of column headings...
+      String[] colNames = new String[t.colNames.length-1];
+      for(int i = 1;i < t.colNames.length;i++) colNames[i-1] = t.colNames[i];
+      Arrays.sort(colNames);
+      FastVector values = new FastVector();
+      for(String name : colNames) values.addElement(name);
+
+      newData.insertAttributeAt(new Attribute("InstanceName",(FastVector)values), newData.numAttributes());	
+      int attrIdx = newData.attribute("InstanceName").index();
+      for(int c = 0;c < t.numCols;c++){
+        newData.instance(c).setValue(attrIdx,t.colNames[c+1]);
+      }            
+      data = newData;
+		}				
+		return(data);
+	}

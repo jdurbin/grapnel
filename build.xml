@@ -1,0 +1,71 @@
+<project name="DurbinLib" default="jar" basedir=".">
+    <target name="clean">
+        <delete dir="target/classes"/>
+        <delete dir="target/classes"/>
+        <delete file="target/jar/*"/>
+        <delete dir="doc/"/>
+    </target>
+
+
+	<fileset id="groovylib.jars" dir="/usr/local/groovy/lib/">
+		<include name="**/*.jar"/>
+	</fileset>
+	
+	<fileset id="mygroovylib.jars" dir="/Users/kdurbin/.groovy/lib/">
+		<include name="**/*.jar"/>
+	</fileset>
+	
+	<fileset id="durbinlib.jars" dir="./target/jar/">
+		<include name="**/*.jar"/>
+	</fileset>
+
+	<path id="lib.path">
+		<fileset refid="groovylib.jars"/>
+		<fileset refid="mygroovylib.jars"/>
+		<fileset refid="durbinlib.jars"/>
+	</path>
+
+	<taskdef 
+		name="groovyc" 
+		classname="org.codehaus.groovy.ant.Groovyc" 
+		classpathref="lib.path"/>
+
+
+    <target name="compile">
+        <mkdir dir="target/classes"/>
+        <javac srcdir="src" 
+			   destdir="target/classes"
+	       	  classpathref="lib.path"
+	     />
+    </target>
+	
+	<target name="doc" description="Builds the JavaDoc" depends="clean">
+	    <javadoc destdir="doc">
+	      <fileset dir="src" includes="**/*.java"/>
+	    </javadoc>
+	 </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="target/jar"/>
+		<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
+            <manifest>
+                <attribute name="Main-Class" value="Perlism"/>
+            </manifest>
+        </jar>
+    </target>
+
+	<target name="groovy" depends="jar">
+		<groovyc srcdir="src" destdir="target/classes"/>
+		<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
+            <manifest>
+                <attribute name="Main-Class" value="Perlism"/>
+            </manifest>
+        </jar>
+	</target>
+
+
+    <target name="install" depends="groovy">
+ 		<copy file="target/jar/durbinlib.jar" tofile="/Users/kdurbin/.groovy/lib/durbinlib.jar"/>
+    </target>
+
+</project>
