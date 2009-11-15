@@ -11,21 +11,23 @@ import java.util.Random
 
 public class EvaluationResult{
   
-  def EvaluationResult(a,p,s,m){
+  def EvaluationResult(a,p,s,m,pr){
     actual = a
     predicted = p
     sample = s
     isMatch = m
+    probability = pr
   }
   
   String toString(){
-    def rval = actual+"\t"+predicted+"\t"+sample+"\t"+isMatch;
+    def rval = actual+"\t"+predicted+"\t"+sample+"\t"+isMatch+"\t"+probability;
     return(rval)
   }
   
   def actual;
   def predicted;
   def sample;
+  def probability
   boolean isMatch;
 }
 
@@ -48,7 +50,7 @@ public class CVUtils{
 
       def lines = predictions.toString().split("\n")
 
-      System.err.println predictions
+      //System.err.println predictions
 
       // Output of predictions looks like:  
       // inst#     actual  predicted error prediction (ID)
@@ -58,13 +60,17 @@ public class CVUtils{
       lines[1..-1].each{line->
         // Parse out fields we're interested in..
         //def m = line =~ /\d:(\w+).*\d:(\w+).*\((.+)\)/    
-        def m = line =~ /\d:(.+).*\d:(\w+).*\((.+)\)/     
-        
+        //def m = line =~ /\d:(.+).*\d:(\w+).*\((.+)\)/         
+        def m = line =~ /\d:(.+).*\d:(\w+)(\s+.*\s+)(\d.*)\s.*\((.+)\)/   
         def actual = m[0][1]
         def predicted = m[0][2]
-        def sample = m[0][3]
-        
-        def result = new EvaluationResult(actual,predicted,sample,!line.contains("+"))
+        //def spaces = m[0][3] // or + 
+        def probability = m[0][4]
+        def sample = m[0][5]
+        //println "$actual $predicted [$spaces] [$probability] $sample"
+                
+        def result = new EvaluationResult(actual,predicted,sample,
+                                          !line.contains("+"),probability)
         results.add(result);
       }
       return(results);

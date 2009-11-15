@@ -6,11 +6,34 @@ import weka.core.*;
 import weka.filters.*;
 import weka.filters.unsupervised.attribute.Remove;
 
+// KJD:  Perhaps I should make my own Instances class that has this functionality? 
+// Of course, when I get Instances back from some weka function, it won't come with this...
+
+
 /**************************************************************
 * Utilities to help with manipulation of Instances, especially going 
 * back and forth between instance/attribute names and indices. 
 */
 public class InstanceUtils {
+
+  
+  /***********************************
+	 *  Takes a collection of attribute names and returns an array of the corresponding
+	 *  attribute indices for those names.
+	 */
+	public static int[] getAttributeIndexArray(Instances inst, Collection<String> attributes) {
+		int [] indexArray = new int[attributes.size()];
+		int i = 0;
+for (String name : attributes) {
+			int attrIdx = inst.attribute(name).index();
+			
+			System.err.println("attrIdx: "+attrIdx+" i: "+i+" name: "+name);
+			
+			indexArray[i] = attrIdx;
+			i++;
+		}
+		return(indexArray);
+	}
 
 	/***********************************
 	*  Takes a collection of attribute names and returns a Set of the corresponding attribute
@@ -25,20 +48,7 @@ for (String name : attributes) {
 		return(indexSet);
 	}
 
-	/***********************************
-	 *  Takes a collection of attribute names and returns an array of the corresponding
-	 *  attribute indices for those names.
-	 */
-	public static int[] getAttributeIndexArray(Instances inst, Collection<String> attributes) {
-		int [] indexArray = new int[attributes.size()];
-		int i = 0;
-for (String name : attributes) {
-			int attrIdx = inst.attribute(name).index();
-			indexArray[i] = attrIdx;
-			i++;
-		}
-		return(indexArray);
-	}
+	
 
 
 	/***********************************************
@@ -52,16 +62,33 @@ for (String name : attributes) {
 		return(Instances.mergeInstances(first,second));
 	}
 	
-	
-	/*
-	public static Set<String> getInstanceNames(Instances data){
-	  HashSet<String> = new HashSet<String>()
-	  for(int instIdx = 0;instIdx < data.numInstances();instIdx++){
-      Instance instance = data.instance(instIdx);
-      name = instance.
+	/***********************************************
+	*  Return the attributes as a set of strings. 
+	*
+	*/	
+  public static Set<String> getAttributeNames(Instances data){
+    Set<String> rval = new HashSet<String>();
+    for(int i = 0;i < data.numAttributes();i++){
+      Attribute a = data.attribute(i);
+      String attrName = a.name();
+      rval.add(attrName);
     }
-	}
-	*/
+    return(rval);
+  }
+  
+  /*****************************************
+  * Return a list of instance names. 
+  */ 
+  public static List<String> getInstanceNames(Instances data){
+    List<String> rList = new ArrayList<String>();
+    Attribute id = data.attribute("ID");
+    for(int instIdx = 0;instIdx < data.numInstances();instIdx++){
+      Instance instance = data.instance(instIdx);
+      String value = instance.stringValue(id);
+      rList.add(value);
+    }
+    return(rList);    
+  }
 	
 	/************************************************************
 	*  Make a map between instance names and instance indices...
@@ -94,7 +121,7 @@ for (String name : attributes) {
 	* but should be fine for hundreds or a few thousand.  </i>
 	*/
 	public static Instances removeNamedInstances(Instances data,Collection<String> names){
-	  Map<String,Integer> name2idx = createInstanceNameMap(data);	    
+	  Map<String,Integer> name2idx = createInstanceNameMap(data);	    	    
 	  for(String name : names){
 	    if (name2idx.containsKey(name)){
 	      int idx = name2idx.get(name);
@@ -106,6 +133,7 @@ for (String name : attributes) {
 	  }	
 	  return(data);    	     
 	}
+	
 	
 	/***********************************************************
 	*  Takes a list of attribute names and converts them into a string representation
