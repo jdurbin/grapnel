@@ -137,18 +137,24 @@ for (String name : attributes) {
 	
 	/***********************************************************
 	*  Takes a list of attribute names and converts them into a string representation
-	*  of a list of attribute indices. 
+	*  of a list of attribute indices sutible for input to filters and the such. 
 	*/
 	public static String attributeNames2Indices(Instances data,Collection<String> names){
-	  StringBuilder rval = new StringBuilder();
+	  List<Integer> indices = new ArrayList<Integer>();
 	  for(String name: names){
 	    Attribute attribute = data.attribute(name);
 	    int idx = attribute.index();
-	    // +1 because the attribute numbers given externally are 1 based...
-	    rval.append(Integer.toString(idx+1)+",");
+
+	    // +1 because the attribute numbers given externally are 1 based...	    
+	    indices.add(idx+1);
 	  }
-	  // Remove specious end ","
-    rval = rval.deleteCharAt(rval.length()-1);
+	  Collections.sort(indices);
+
+	  StringBuilder rval = new StringBuilder();	
+	  for(int i = 0;i < indices.size()-1;i++){
+	    rval.append(Integer.toString(indices.get(i))+",");
+	  }
+	  rval.append(Integer.toString(indices.get(indices.size()-1)));
     return(rval.toString());
 	}
 		
@@ -264,7 +270,8 @@ for (String name : attributes) {
       merged.add(first.instance(firstIdx).mergeInstance(second.instance(secondIdx)));
     }
     
-    // OK, now we have the problem of duplicate ID's... remove the duplicate...
+    // OK, now we have two copies of ID's.  Some code expects ID to be at 0, so 
+    // remove the duplicate not at index 0. 
     int removeIDIdx = -1;
     for(int i = 0;i < merged.numAttributes();i++){
       String attrName = merged.attribute(i).name();
