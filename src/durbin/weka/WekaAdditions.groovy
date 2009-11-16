@@ -74,7 +74,7 @@ public class WekaAdditions{
         }
       }
       return(rvals)
-    }
+    }    
     
     /*********************************
     * Returns all of the attribute names...

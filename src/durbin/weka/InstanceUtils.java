@@ -27,7 +27,7 @@ public class InstanceUtils {
 for (String name : attributes) {
 			int attrIdx = inst.attribute(name).index();
 			
-			System.err.println("attrIdx: "+attrIdx+" i: "+i+" name: "+name);
+			//System.err.println("attrIdx: "+attrIdx+" i: "+i+" name: "+name);
 			
 			indexArray[i] = attrIdx;
 			i++;
@@ -99,11 +99,11 @@ for (String name : attributes) {
   */ 
   public static Map<String,Integer> createInstanceNameMap(Instances data){
     Attribute id = data.attribute("ID");
-    Map<String,Integer> instanceNameMap = new HashMap<String,Integer>();
-    for(int instIdx = 0;instIdx < data.numInstances();instIdx++){
-      Instance instance = data.instance(instIdx);
+    Map<String,Integer> instanceNameMap = new HashMap<String,Integer>();    
+    
+    for(int instIdx = 0;instIdx < data.numInstances();instIdx++){            
+      Instance instance = data.instance(instIdx);          
       String value = instance.stringValue(id);
-      //System.err.println("instanceNameMap.put: "+value+" "+instIdx);
       instanceNameMap.put(value,instIdx);
     }
     return(instanceNameMap);
@@ -187,8 +187,12 @@ for (String name : attributes) {
 	*
 	* @return New set of instances merging all attributes from first with selected attributes from second.
 	*
+	* KJD: The problem with this approach is that it assumes that the instances in first and second
+	* are in the same order.  However, as the files come to me, the clinical instances are completely 
+	* jumbled with respect to the original data, so I need to merge them by picking out clinical 
+	* values. 
 	*/
-	public static Instances mergeAttributes(Instances first, Instances second,
+	public static Instances mergeInstances(Instances first, Instances second,
 	                                        Collection<String> secondAttributes) throws Exception {
 
 		if (first.numInstances() != second.numInstances()) {
@@ -209,6 +213,68 @@ for (String name : attributes) {
 
 
 		return(Instances.mergeInstances(first,secondNew));
+	}
+		
+	/********************************************************
+	* Like Instances.mergeInstances, but uses named ID's to merge two sets of 
+	* Instances that may not have the same number of elements or the elements in 
+	* the same order. 
+	* 
+	* Merges two sets of named Instances together (i.e. instances have ID field) 
+	* The resulting set will have all the attributes of the first set plus all 
+	* the attributes of the second set. With the exception of the required "ID"
+	* attribute, attributes of the two sets of instances are assumed to be non-overlapping. 
+	* Only instances that occur in both sets will be returned, all other instances 
+	* will be omitted. 
+	*
+	* @param first the first set of Instances
+	* @param second the second set of Instances
+	* @return the merged set of Instances
+	* @throws IllegalArgumentException if the datasets are not the same size
+	*/
+	public static Instances mergeNamedInstances(Instances first, Instances second) {
+                        
+    // Create the vector of merged attributes
+  	FastVector newAttributes = new FastVector();
+  	for (int i = 0; i < first.numAttributes(); i++) {
+  	  newAttributes.addElement(first.attribute(i));
+  	}
+  	for (int i = 0; i < second.numAttributes(); i++) {
+  		  newAttributes.addElement(second.attribute(i));
+  	}
+  	  	  	
+  	// Create the set of Instances  
+    Map<String,Integer> firstName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(first);   		
+  	Map<String,Integer> secondName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(second); 	                                  		                                  
+  	
+    // Find the set of instances they have in common...
+    Set<String> commonInstanceNames = firstName2InstanceIdxMap.keySet();        
+    Set<String> secondNames = secondName2InstanceIdxMap.keySet();
+    commonInstanceNames.retainAll(secondNames);
+    
+  	int maxInstances = first.numInstances()+second.numInstances();  		                                    
+    Instances merged = new Instances(first.relationName() + '_'
+  		                              + second.relationName(),
+  		                                newAttributes,maxInstances);
+  		                                    
+    for(String name: commonInstanceNames){
+      int firstIdx = firstName2InstanceIdxMap.get(name);
+      int secondIdx = secondName2InstanceIdxMap.get(name);
+      
+      merged.add(first.instance(firstIdx).mergeInstance(second.instance(secondIdx)));
+    }
+    
+    // OK, now we have the problem of duplicate ID's... remove the duplicate...
+    int removeIDIdx = -1;
+    for(int i = 0;i < merged.numAttributes();i++){
+      String attrName = merged.attribute(i).name();
+      if (attrName.matches("ID") && (i != 0)){      
+        removeIDIdx = i;
+        break;
+      }
+    }            
+    merged.deleteAttributeAt(removeIDIdx);
+    return(merged);    
 	}
 }
 
