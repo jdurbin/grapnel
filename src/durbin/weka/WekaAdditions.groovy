@@ -37,12 +37,13 @@ public class WekaAdditions{
     
     /*************************************
     * Set the class based on a name. 
+    * Returns the index of the named class. 
     */     
     Instances.metaClass.setClassName << {attributeName->
       Attribute attr = attribute(attributeName)
       def idx = attr.index()
-      println "setClassIndex: $idx"
-      setClassIndex(idx)
+      setClassIndex(idx) // Zero based ..
+      return(idx)
     }
         
     /***************************************
