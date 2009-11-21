@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy 
 
-package durbin.digma;
+package durbin.digma
 
 import durbin.weka.InstanceUtils as IU
 import durbin.util.*
@@ -11,13 +11,15 @@ import weka.filters.*
 import weka.filters.unsupervised.attribute.Remove
 import weka.filters.unsupervised.instance.RemoveWithValues
 import weka.filters.unsupervised.attribute.RemoveType
+import weka.filters.unsupervised.attribute.RemoveUseless
 
 import weka.classifiers.*
 import weka.classifiers.functions.*
-import weka.classifiers.Evaluation;
+import weka.classifiers.Evaluation
 
 
-/****************************************************************************
+
+/**
 *  Class to implement top-level steps of the Digma classifier pipeline.  The 
 *  goal is to make the pipeline steps more readable and to share a single 
 *  debugged instance of these steps.  Not all of these steps will be used
@@ -28,11 +30,15 @@ class DigmaPipeline{
   def err = System.err
   
   String    className;
+  boolean   negativeClassValuesAreInvalid = true;
 
   def DigmaPipeline(className){
     this.className = className
     WekaAdditions.enable()
   }
+  
+  def setNegativeClassValuesAreInvalid(negAllowed){negativeClassValuesAreInvalid = negAllowed}
+  
 
   /******************************************
   *  Creae a classifier from the command-line classifier specification
@@ -110,6 +116,7 @@ class DigmaPipeline{
   */ 
   Instances removeInstancesWithMissingValues(Instances data,attrName){
     
+    // find the index of the named attribute...
     def attrIdx = -1;
     (0..<data.numAttributes()).each{i->
       Attribute attribute = data.attribute(i);
@@ -128,6 +135,26 @@ class DigmaPipeline{
     err.println "done.  After: ${cleanedData.numInstances()}"
     return(cleanedData)
   }
+
+
+
+  /*****************************************
+  *  Remove attributes that don't vary. 
+  */ 
+  Instances removeUselessAttributes(data){
+    err.print "Removing useless attributes. Before: ${data.numAttributes()}..."
+  
+    def remove = new RemoveUseless(); 
+    def classIdx = data.setClassName(className)
+    remove.setAttributeIndex("${classIdx+1}".toString())
+    remove.setMatchMissingValues(true) 
+    remove.setInputFormat(data)
+    def cleanedData = Filter.useFilter(data,remove)
+    err.println "done.  After: ${cleanedData.numAttributes()}"
+    return(cleanedData)
+  }
+
+
 
   /******************************************
   *  Converts the numeric class attribute into 
@@ -179,6 +206,47 @@ class DigmaPipeline{
   }
 
 
+  /**************************************************
+  * Generate Weka Instances from genomic data and a clinical File. 
+  * 
+  * WARNING: Should take care to set negativeClassValuesAreInvalid. 
+  * Default is true, meaning that negative class values will be treated
+  * as missing class values and be removed. 
+  */ 
+  Instances instancesFromClinicalAndGenomicFiles(dataFile,clinicalFile,selectedClinical){
+    def pipeline = new DigmaPipeline(className)
+    def data = pipeline.readFromTable(dataFile)
+    def clinicalData = pipeline.readFromTable(clinicalFile)
+
+    // Remove all clinical attributes that aren't in selected list...
+    clinicalData = pipeline.removeAttributesNotSelected(clinicalData,selectedAttributes)
+
+    // Merge data and clinical files (i.e. instances contained in both)
+    def merged = IU.mergeNamedInstances(data,clinicalData)
+
+    // Remove any attributes that don't vary at all..
+    merged = pipeline.removeUnvaryingAttributes(merged)
+
+    // Mark all negative class values as missing value
+    // !!!! TODO: This is true for some of the classes, not others... need to 
+    // take in a list of class names we want to do this to rather than just
+    // blindly doing it. 
+    if (negativeClassValuesAreInvalid){
+      merged = pipeline.markNegativeValuesAsMissing(merged,className)
+    }
+
+    // Remove any instances whose class value is missingValue(). This
+    // will include attributes for which -1 is a bogus value and has been marked as such. 
+    merged = pipeline.removeInstancesWithMissingClassValues(merged) 
+    
+    return(merged)
+    
+  }
+
+
+
+
+
   /****************************************************************************
   *                     SPECIAL/INFREQUENTLY USED                             *
   *****************************************************************************/
@@ -202,6 +270,9 @@ class DigmaPipeline{
     err.print "done...."
     return(singleAttributeData)
   }
+  
+  
+  
   
   
 

@@ -6,6 +6,12 @@ import weka.filters.*;
 
 import hep.aida.bin.DynamicBin1D;
 
+/****************************************************************************
+* An attribute filter that converts a numeric attribute into a two-state nominal 
+* attribute split into either upper/lower quartiles or above/below median, or 
+* based on one or two predefined splits.  When there are two split points, the 
+* instances in the middle are omitted. 
+*/ 
 public class NumericToQuartileNominal
 extends SimpleBatchFilter {
 

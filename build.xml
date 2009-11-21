@@ -28,9 +28,8 @@
 	<taskdef 
 		name="groovyc" 
 		classname="org.codehaus.groovy.ant.Groovyc" 
-		classpathref="lib.path"/>
-
-
+		classpathref="lib.path"/>	
+		
     <target name="compile">
         <mkdir dir="target/classes"/>
         <javac srcdir="src" 
@@ -38,6 +37,23 @@
 	       	  classpathref="lib.path"
 	     />
     </target>
+	
+	<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="lib.path"/>
+	
+	<target name="gdoc" description="Builds Java/GroovyDoc" depends="clean">
+		<groovydoc
+	    	destdir="doc"
+	    	sourcepath="src"
+	    	packagenames="**.*"
+	    	use="true"
+	    	private="false">
+	        	<link packages="java.,org.xml.,javax.,org.xml." href="http://java.sun.com/j2se/1.5.0/docs/api"/>
+	        	<link packages="org.apache.ant.,org.apache.tools.ant." href="http://www.dpml.net/api/ant/1.7.0"/>
+	        	<link packages="org.junit.,junit.framework." href="http://junit.sourceforge.net/junit3.8.1/javadoc/"/>
+	        	<link packages="groovy.,org.codehaus.groovy." href="http://groovy.codehaus.org/api/"/>
+		</groovydoc>
+	</target>
+	
 	
 	<target name="doc" description="Builds the JavaDoc" depends="clean">
 	    <javadoc destdir="doc">
