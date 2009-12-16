@@ -176,6 +176,10 @@ public class TableFileLoader {
 	/***************   Merge versions of read methods...  ************************/
 	/*****************************************************************************/
 	
+	/* WARNING WARNING WARNING *********************
+	 WARNING:  I THINK THIS MAY BE BROKEN.  Use InstanceUtils.mergeNamedInstances instead. 
+	 *************/
+	
 	public Instances mergeRead(String fileName,String delimiter,Closure c) throws Exception{
     Instances data = mergeRead(fileName,fileName,delimiter,c);
   	return(data);
@@ -187,8 +191,12 @@ public class TableFileLoader {
 
   public Instances mergeRead(String fileName,String relationName,String delimiter,boolean rowsAreInstances,
   Closure c) throws Exception{
+    System.err.print(" Read table "+fileName+"...");
     Table t = new Table(fileName,delimiter,c);
+    System.err.println("done.");
+    System.err.print("Merge table to instances...");
     Instances data = mergeTableToInstances(t,relationName,rowsAreInstances);
+    System.err.println("done.");
     return(data);
   }
   
@@ -257,7 +265,7 @@ public class TableFileLoader {
     // (Maybe I'm missing where this is part of the API already?)        
     Map<String,Integer> instanceNameMap =  InstanceUtils.createInstanceNameMap(newData);
     
-    //System.err.println("matrix rows: "+t.matrix.rows()+" cols: "+t.matrix.columns());  
+    System.err.println("matrix rows: "+t.matrix.rows()+" cols: "+t.matrix.columns());  
         
 	  // for each instance in the new table... skipping first col that is the row title    
 	  for(int col = 0;col < t.colNames.length;col++){
@@ -265,7 +273,7 @@ public class TableFileLoader {
 	    String instanceName = t.colNames[col]; 
 	    if (instanceNameMap.containsKey(instanceName)){
 	      int instanceIdx = instanceNameMap.get(instanceName);
-  	    //System.err.println("col: "+col+" instanceName: "+instanceName+" instanceIdx: "+instanceIdx);
+  	    System.err.println("col: "+col+" instanceName: "+instanceName+" instanceIdx: "+instanceIdx);
 	      Instance instance = newData.instance(instanceIdx);
 
         // For each new attribute...

@@ -155,10 +155,8 @@ extends SimpleBatchFilter {
         double[]  cutoffs = computeCutoffs(bins,selectedAttributes,0.50);    
 			  result = medianTransformAttributes(inst,cutoffs,selectedAttributes);			
 		  } else {
-			  System.err.println("Sorry, quartile not yet implemented.");
-			  System.exit(1);
-			  double[]  cutoffsHigh = computeCutoffs(bins,selectedAttributes,0.75);    
-			  double[]  cutoffsLow = computeCutoffs(bins,selectedAttributes,0.25);    
+			  double[]  cutoffsHigh = computeCutoffs(bins,selectedAttributes,0.25);    
+			  double[]  cutoffsLow = computeCutoffs(bins,selectedAttributes,0.75);    
 
 			  // Splits into upper and lower quarters, removing instances that fall inbetween. 
 			  result = quartileTransformAttributes(inst,cutoffsHigh,cutoffsLow,selectedAttributes);
@@ -279,6 +277,7 @@ extends SimpleBatchFilter {
 		      values[aIdx] = oldInstance.value(aIdx);
 		    }else{
 		      // Otherwise...
+		      System.err.println("quartile1: "+cutoffs1[aIdx]+" quartile2: "+cutoffs2[aIdx]);
 		      
 		      // Get the attribute from the new result instances (should be nominal)...
 		      Attribute attribute = result.attribute(aIdx);
@@ -286,14 +285,15 @@ extends SimpleBatchFilter {
 		      // determine where it falls on our cutoff...
           //int attIdx = selectedAttributes[sIdx];
     			double cutoff1 = cutoffs1[aIdx];
-    			double cutoff2 = cutoffs2[aIdx];
+    			double cutoff2 = cutoffs2[aIdx];    			
           double numericValue = oldInstance.value(aIdx);
 
     			if (numericValue <= cutoff1) values[aIdx] = 0.0; // index to nominal value
     			else if (numericValue >= cutoff2) values[aIdx] = 1.0; // inde to nominal value.     			
     			else bSkipInstance = true;
 		    }
-	    }
+	    }	    
+	    
 	    if (!bSkipInstance) result.add(new Instance(1,values));
 	    else bSkipInstance = false;
     }

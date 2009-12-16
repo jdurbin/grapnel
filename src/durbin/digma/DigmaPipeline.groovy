@@ -17,6 +17,8 @@ import weka.classifiers.*
 import weka.classifiers.functions.*
 import weka.classifiers.Evaluation
 
+import weka.attributeSelection.*
+
 
 
 /**
@@ -24,10 +26,10 @@ import weka.classifiers.Evaluation
 *  goal is to make the pipeline steps more readable and to share a single 
 *  debugged instance of these steps.  Not all of these steps will be used
 *  in any given pipeline.  This is rather a collection of pipeline steps 
-*  that are often used.  
+*  that are often used. 
 */ 
 class DigmaPipeline{
-  def err = System.err
+  static err = System.err
   
   String    className;
   boolean   negativeClassValuesAreInvalid = true;
@@ -40,9 +42,9 @@ class DigmaPipeline{
   def setNegativeClassValuesAreInvalid(negAllowed){negativeClassValuesAreInvalid = negAllowed}
   
 
-  /******************************************
+  /**
   *  Creae a classifier from the command-line classifier specification
-  *  string.  For example:
+  *  string.  For example:<br><br>
   * 
   *  weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -M
   */
@@ -51,15 +53,31 @@ class DigmaPipeline{
     def options = Utils.splitOptions(classifierSpec)
     def classifierName = options[0]
     options[0] = ""
-    def descString = "$classifierName $options" as String  
     def classifier = Classifier.forName(classifierName,options) 
     return(classifier)
   }
-
-  /*****************************************
+  
+  /**
+  *  Creae a attribute evaluation from the command-line evaluation specification
+  *  string.  For example:<br><br>
+  * 
+  *  weka.attributeSelection.InfoGainAttributeEval
+  */
+  def evalFromSpec(attributeEvalSpec){    
+    // Create a classifier from the name...
+    def options = Utils.splitOptions(attributeEvalSpec)
+    def evalName = options[0]
+    options[0] = ""
+    def classifier = ASEvaluation.forName(evalName,options) 
+    return(classifier)
+  }
+  
+  
+  
+  /**
   * Read instances from a table, filling in missing value tokens as we go. 
   */ 
-  Instances readFromTable(dataFileName){
+  static Instances readFromTable(dataFileName){
     // Read data in from table.  Handle missing values as we go.
     err.print "Loading $dataFileName..."
     TableFileLoader loader = new TableFileLoader()
@@ -71,27 +89,27 @@ class DigmaPipeline{
         return(it as Double)
       }
     }
-    err.println "${data.numInstances()} x ${data.numAttributes()} done."
+    //err.println "${data.numInstances()} x ${data.numAttributes()} done."
     return(data)
   }
 
-  /*****************************************
+  /**
   * Remove the ID attribute.  Note, in general this should be done 
   * via a FilteredClassifier in order to preserve ID mapping to predictions, 
   * but sometimes if we don't need predictions this is OK. 
   */ 
   Instances removeID(Instances data){
     // Remove ID attribute, since classifiers can't handle string...
-    err.print "Removing string attribute..."
+    //err.print "Removing string attribute..."
     def remove = new RemoveType();
     remove.setInputFormat(data);
     def idFreeData = Filter.useFilter(data,remove)
-    err.println "done."
+    //err.println "done."
     def classIdx = idFreeData.setClassName(className)
     return(idFreeData)
   }  
 
-  /******************************************
+  /**
   *  Removes instances whose class value is missing.  Should probably
   *  replace with more generic version below...
   */ 
@@ -111,7 +129,28 @@ class DigmaPipeline{
   }
 
 
-  /******************************************
+   /**
+   *  Removes instances whose class value is negative.  Should probably
+   *  replace with more generic version below...
+   */ 
+   Instances removeInstancesWithNegativeClassValues(Instances data){
+     // Remove any instances whose class value is missingValue(). This
+     // will include attributes for which -1 is a bogus value and has been marked as such.  
+     err.print "Removing instances with negative class value. Before: ${data.numInstances()}..."
+     def classIdx = data.setClassName(className)
+     def remove = new RemoveWithValues()
+     remove.setAttributeIndex("${classIdx+1}".toString())
+     remove.setMatchMissingValues(false)
+     remove.setSplitPoint(0.0 as double) // Values smaller than this will be matched.  
+     remove.setInputFormat(data)
+     def cleanedData = Filter.useFilter(data,remove)
+     err.println "done.  After: ${cleanedData.numInstances()}"
+     classIdx = cleanedData.setClassName(className)
+     return(cleanedData)
+   }
+
+
+  /**
   *  Removes instances whose value of attribute attrIdx is missing. 
   */ 
   Instances removeInstancesWithMissingValues(Instances data,attrName){
@@ -138,7 +177,7 @@ class DigmaPipeline{
 
 
 
-  /*****************************************
+  /**
   *  Remove attributes that don't vary. 
   */ 
   Instances removeUselessAttributes(data){
@@ -146,17 +185,13 @@ class DigmaPipeline{
   
     def remove = new RemoveUseless(); 
     def classIdx = data.setClassName(className)
-    remove.setAttributeIndex("${classIdx+1}".toString())
-    remove.setMatchMissingValues(true) 
     remove.setInputFormat(data)
     def cleanedData = Filter.useFilter(data,remove)
     err.println "done.  After: ${cleanedData.numAttributes()}"
     return(cleanedData)
   }
 
-
-
-  /******************************************
+  /**
   *  Converts the numeric class attribute into 
   */
   Instances classToNominalFromCutoffs(data,cutoffLow,cutoffHigh,lowString,highString){
@@ -175,6 +210,33 @@ class DigmaPipeline{
     return(discretizedData)
   }
 
+  /**
+  *  Converts the numeric class attribute into 
+  */
+  Instances classToNominalTopBottomQuartile(data,lowString,highString){
+    def classIdx = data.setClassName(className) // Necessary to get idx, since idx changes 
+     
+    // Discretize class (select whether to discretize median, quartile, or with chosen value)
+    err.print "Discretizing class attribute..."
+    def quartile = new NumericToQuartileNominal()
+    quartile.setAttributeIndices("${classIdx+1}".toString())
+    quartile.setUseMedian(false)
+    quartile.setInputFormat(data)
+    quartile.setNominalValues(lowString,highString)
+    def discretizedData = Filter.useFilter(data,quartile)
+    classIdx = discretizedData.setClassName(className)
+    err.println "done."  // KJD report how many high/low as a sanity check. 
+    return(discretizedData)
+  }
+
+
+
+
+
+  /**
+  * Remove all the attributes from data except those named in selectedAttributes
+  *
+  */ 
   Instances removeAttributesNotSelected(data,selectedAttributes){
     // Remove all attributes that aren't selected 
     // Must preserve ID, however!!!
@@ -190,10 +252,14 @@ class DigmaPipeline{
     return(selectedAttributeData)
   }
 
-  /************************************************
-  * Marks all negative instances of the given attribute as missing value. 
-  * WARNING: Unlike most of these steps, this does not return a copy. 
-  * Hmmm... perhaps I should...
+  /*
+  * Marks all negative instances of the given attribute as missing value. <br><br>
+  *
+  * WARNING: Unlike most of these steps, this does not return a copy. <br><br>
+  * 
+  * Note: For class attributes, should just go ahead and delete instances.  
+  * For non-class attributes we may want to retain the instance and interpolate
+  * missing values. 
   */ 
   Instances markNegativeValuesAsMissing(data,attributeName){
     Attribute attribute = data.attribute(attributeName)
@@ -206,8 +272,9 @@ class DigmaPipeline{
   }
 
 
-  /**************************************************
+  /**
   * Generate Weka Instances from genomic data and a clinical File. 
+  * This is more or less the default pipeline. <br><br>
   * 
   * WARNING: Should take care to set negativeClassValuesAreInvalid. 
   * Default is true, meaning that negative class values will be treated
@@ -239,12 +306,55 @@ class DigmaPipeline{
     // will include attributes for which -1 is a bogus value and has been marked as such. 
     merged = pipeline.removeInstancesWithMissingClassValues(merged) 
     
-    return(merged)
-    
+    return(merged)    
+  }
+  
+  
+  /**
+  * Apply Fisher linear discriminant 
+  */ 
+  Instances fisherFilter(data,numAttributes){
+    // Apply Fisher criteria filter to data...
+    def fisher = new FisherCriteriaFilter(data)
+    data.setClassName(className)
+    err.print "Filtering ${data.numAttributes()} attributes ..."
+    def filteredData = fisher.filter(numAttributes)
+    err.println "done. ${filteredData.numAttributes()} remaining attributes. "
+    def idx = filteredData.setClassName(className)
+    err.println "New class index: $idx"
+    return(filteredData)
   }
 
-
-
+  /*
+  * Returns a formatted comma separated string of values from an evaluation. 
+  * The format of the returned string is: <br><br>
+  * 
+  * prefix,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc
+  *
+  */ 
+  String getFormattedEvaluationSummary(numInstances,eval){
+    def samples = numInstances
+    def pctCorrect = eval.pctCorrect() 
+    def precision1 = eval.precision(1)
+    def recall1 = eval.recall(1)    
+    def precision0 = eval.precision(0)
+    def recall0 = eval.recall(0)
+    def tp1 = eval.numTruePositives(1) as Integer
+    def fp1 = eval.numFalsePositives(1) as Integer
+    def tn1 = eval.numTrueNegatives(1) as Integer
+    def fn1 = eval.numFalseNegatives(1) as Integer
+    def rms = eval.rootMeanSquaredError()
+    def roc = eval.weightedAreaUnderROC()    
+    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%d,%d,%d,%d,%.4g,%.4g",
+              samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc)
+    
+    return(rval)    
+  }
+  
+  static String getFormattedSummaryHeading(){
+    def rval = "samples,%correct,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
+    return(rval)
+  }
 
 
   /****************************************************************************

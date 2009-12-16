@@ -212,6 +212,7 @@ public class Table extends GroovyObjectSupport{
   */ 
 	public void write(BufferedWriter br,String delimiter) throws Exception{	  	  
 	  // Write first line of column names...
+	  br.write("rowName"+delimiter);
 	  for(int c = 0;c < (numCols-1);c++){
 	    String str = colNames[c]+delimiter;
 	    br.write(str);

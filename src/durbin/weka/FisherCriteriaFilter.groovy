@@ -1,44 +1,183 @@
 
+package durbin.weka;
+
 import hep.aida.bin.DynamicBin1D
 
 import weka.core.*
 import weka.filters.unsupervised.attribute.Remove
 import weka.filters.*
+import weka.core.Capabilities.*;
 
-
-/***************************************************
+/**
 *
-* Given two classes, denote instances in class1 as X1, those in class2 as X2. 
+*             **************** DEPRECATED ******************************
+*             **************** DEPRECATED ******************************
+*             **************** DEPRECATED ******************************
+*             **************** DEPRECATED ******************************
 * 
-* xbar_kj is average of jth attribute in Xk. 
+* Given two classes, denote instances in class1 as X1, those in class2 as X2.<br><br> 
 * 
-* The Fisher score of the jth attribute is given by:
+* xbar_kj is average of jth attribute in Xk. <br><br>
+* 
+* The Fisher score of the jth attribute is given by:<br><br>
 *
-* F(j) = (xbar_1j - xbar_2j)^2 - (s_1j^2 + s_2j^2)
+* F(j) = (xbar_1j - xbar_2j)^2 - (s_1j^2 + s_2j^2)<br><br>
 * 
-* where 
+* where <br><br>
 * 
-* (s_kj)^2 = sum_xinXk (x_j - xbar_kj)^2
+* (s_kj)^2 = sum_xinXk (x_j - xbar_kj)^2<br><br>
 * 
-* That is, the difference in the means squared, over the sum of the variances. 
+* That is, the difference in the means squared, over the sum of the variances. <br><br>
 *
-* By default we use the sample variance in our calculation, but there is a flag
+* By default we use the sample variance in our calculation, but there is a flag <br><br>
 * to use the plain variance instead. 
 *
+* DEPRECATED:  Use FisherLDEval and AttributeSelectedClassifier instead. <br>
+* I mistakenly went down the path of implementing this as a filter rather than as an 
+* ASEvaluation. There is no good way to use this class with Evaluate.crossValidateModel()
+* because that crossValidateModel ultimately calls the provided classifier on each 
+* instance indivually, with no way to transfer train set filtering to test set. 
+* AttributeSelectedClassifier, in contrast, first performs the selection in buildClassifier()
+* and saves the selection for subsequent use on calls to distributionForInstances(), so that
+* it can reduce the dimensionality of each test instance as it's evaluated.  
+*
 */
-public class FisherCriteriaFilter{
+public class FisherCriteriaFilter extends SimpleBatchFilter{
   
   def data
   def useSampleVariance = true // Use sample variance by default.  
+  def maxAttributes = 200
+  
+  def className
+  
+  def FisherCriteriaFilter(){}
   
   def FisherCriteriaFilter(d){data = d}
   def FisherCriteriaFilter(d,useSampleVariance){this.useSampleVariance = useSampleVariance}
     
+  String globalInfo() {
+       return   "A filter that chooses the top n attributes based on Fisher's linear discriminant score"
+  }
+  
+  Capabilities getCapabilities() {
+       Capabilities result = super.getCapabilities();
+       result.enableAllAttributes();
+       result.enableAllClasses();
+       //result.enable(Capability.NO_CLASS);  //// filter doesn't need class to be set//
+       return result;
+  }  
+  
+  /*
+  public static Instances useFilter(Instances data,
+				    Filter filter) throws Exception {
+  
+    for (int i = 0; i < data.numInstances(); i++) {
+      filter.input(data.instance(i));
+    }
+    filter.batchFinished();
+    Instances newData = filter.getOutputFormat();
+    Instance processed;
+    while ((processed = filter.output()) != null) {
+      newData.add(processed);
+    }
+    return newData;
+  }
+  */
+  
+  public boolean input(Instance instance) throws Exception {
+    if (getInputFormat() == null)
+      throw new IllegalStateException("No input instance format defined");
+    
+    if (m_NewBatch) {
+      System.err.println "\tinput: NewBatch!"
+      resetQueue();
+      m_NewBatch = false;
+    }
+
+    bufferInput(instance);
+    
+    // Never happens, because I do everything in one batch...
+    //if (isFirstBatchDone()) {
+    //  Instances inst = new Instances(getInputFormat());
+    //  inst = process(inst);
+    //  for (int i = 0; i < inst.numInstances(); i++)
+	  //    push(inst.instance(i));
+    //  flushInput();
+    //}
+    return m_FirstBatchDone;
+  }
+  
+  /***************************************
+  *  Normally one can simply override process and determineOutputFormat
+  *  but I didn't exactly follow or trust what weka was doing there, so 
+  *  I have overridden batchFinished as well as input. 
+  */   
+  boolean batchFinished() throws Exception {
+     int         i;
+     Instances   inst;
+
+     if (getInputFormat() == null)
+       throw new IllegalStateException("No input instance format defined");
+
+     // get data
+     inst = new Instances(getInputFormat());
+     
+     System.err.println "\tbatchFinished getInputFormat returns ${inst.numInstances()} instances."
+
+     // don't do anything in case there are no instances pending.
+     // in case of second batch, they may have already been processed
+     // directly by the input method and added to the output queue
+     if (inst.numInstances() > 0) {
+       // process data
+       def filteredInst = process(inst);
+
+        // if output format hasn't been set yet, do it now
+        //if (!hasImmediateOutputFormat() && !isFirstBatchDone())
+       setOutputFormat(new Instances(filteredInst, 0));       
+
+       // clear input queue
+       flushInput();
+
+       // move it to the output
+       for (i = 0; i < filteredInst.numInstances(); i++){
+         push(filteredInst.instance(i));
+       }
+     }else{
+       System.err.println "\tbatchFinished no more instances."
+     }
+
+     m_NewBatch       = true;
+     m_FirstBatchDone = true;
+
+     System.err.println "\tbatchFinished numPending: ${numPendingOutput()}"
+
+     return (numPendingOutput() != 0);
+   }
+  
+  Instances determineOutputFormat(Instances inst){
+    return(getOutputFormat())    
+  }
+  
+  
+  
+
+  Instances process(Instances inst){
+    data=inst;
+    System.err.println "\tprocess attrs: ${inst.numAttributes()} inst: ${inst.numInstances()}..."
+    def filteredData = filter(maxAttributes)
+    System.err.println "\tafter filter: ${filteredData.numAttributes()} inst: ${filteredData.numInstances()}"
+    return(filteredData)
+  }
+  
+
   /************************************************
   *  Returns a dataset with the numAttributes attributes 
   *  with highest ranked score by Fisher criteria. 
   */
-  def filter(maxAttributes){
+  def Instances filter(maxAttributes){
+    
+    // Look up class index... can't filter out the class...
+    def classIdx = data.classIndex()
     
     // Create objects to compute the quartiles and median cutoffs for each attribute...
   	def bins0 = new DynamicBin1D[data.numAttributes()];
@@ -53,23 +192,20 @@ public class FisherCriteriaFilter{
     
     // Make a list of instances that fall below the cutoff
     def removeList = new ArrayList()
-    System.err.println("CUTOFF: $scoreCutoff")
+    System.err.println("\tFisher CUTOFF: $scoreCutoff")
     fisherScores.eachWithIndex{score,i->                  
-      def name = data.attribute(i).name()      
+      def name = data.attribute(i).name()         
       
       if (score <= scoreCutoff){
         if (i != (data.numAttributes()-1)){
-          removeList.add(i)
-//          System.err.println("\tREMOVE: $name\t$score")
+          if (i != classIdx) removeList.add(i) // Must preserve class attribute.
         }
-      }else{
-//        System.err.println("\tKEEP: $name\t$score")
       }
     }
     
-    System.err.print("Removing "+removeList.size()+" attributes with fisher score < "+scoreCutoff+"...")
+    System.err.print("\tRemoving "+removeList.size()+" attributes with fisher score < "+scoreCutoff+"...")
     
-    // Now remove the instances we've identified as falling below the cutoff
+    // Now remove the attributes we've identified as falling below the cutoff
     Remove remove = new Remove();
     remove.setAttributeIndicesArray(removeList as int[])   
     remove.setInputFormat(data);
@@ -140,8 +276,8 @@ public class FisherCriteriaFilter{
       def score = (bin0.mean() - bin1.mean()) / (variance0 + variance1)            
       scores[i] = score.abs()  // only interested in magnitude...
       
-      //def name = data.attribute(i).name()  
-      //System.err.println "KJD\t${bin0.mean()}\t${bin1.mean()}\t${variance0}\t${variance1}\t$name\t${score.abs()}"      
+      def name = data.attribute(i).name()  
+      //System.out.println "KJD\t${bin0.mean()}\t${bin1.mean()}\t${variance0}\t${variance1}\t$name\t${score.abs()}"
     }    
     return(scores)
 	}
