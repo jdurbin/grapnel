@@ -1,4 +1,7 @@
 <project name="DurbinLib" default="jar" basedir=".">
+	
+	<property environment="env"/>
+	
     <target name="clean">
         <delete dir="target/classes"/>
         <delete dir="target/classes"/>
@@ -7,11 +10,11 @@
     </target>
 
 
-	<fileset id="groovylib.jars" dir="/usr/local/groovy/lib/">
+	<fileset id="groovylib.jars" dir="${env.GROOVY_HOME}/lib/">
 		<include name="**/*.jar"/>
 	</fileset>
 	
-	<fileset id="mygroovylib.jars" dir="/Users/kdurbin/.groovy/lib/">
+	<fileset id="mygroovylib.jars" dir="${env.HOME}/.groovy/lib/">
 		<include name="**/*.jar"/>
 	</fileset>
 	
@@ -81,7 +84,7 @@
 
 
     <target name="install" depends="groovy">
- 		<copy file="target/jar/durbinlib.jar" tofile="/Users/kdurbin/.groovy/lib/durbinlib.jar"/>
+ 		<copy file="target/jar/durbinlib.jar" tofile="${env.HOME}/.groovy/lib/durbinlib.jar"/>
     </target>
 
 </project>
