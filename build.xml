@@ -31,7 +31,8 @@
 	<taskdef 
 		name="groovyc" 
 		classname="org.codehaus.groovy.ant.Groovyc" 
-		classpathref="lib.path"/>	
+		classpathref="lib.path"
+		/>	
 		
     <target name="compile">
         <mkdir dir="target/classes"/>
@@ -75,11 +76,10 @@
     </target>
 
 	<target name="groovy" depends="jar">
-		<groovyc srcdir="src" destdir="target/classes"/>
+		<groovyc srcdir="src" destdir="target/classes">
+			<javac />
+		</groovyc>
 		<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
-            <manifest>
-                <attribute name="Main-Class" value="Perlism"/>
-            </manifest>
         </jar>
 	</target>
 
