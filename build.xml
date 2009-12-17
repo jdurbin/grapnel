@@ -18,7 +18,7 @@
 		<include name="**/*.jar"/>
 	</fileset>
 	
-	<fileset id="durbinlib.jars" dir="./target/jar/">
+	<fileset id="durbinlib.jars" dir="./lib/">
 		<include name="**/*.jar"/>
 	</fileset>
 
@@ -64,6 +64,7 @@
 	    </javadoc>
 	 </target>
 
+
     <target name="jar" depends="compile">
         <mkdir dir="target/jar"/>
 		<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
@@ -85,6 +86,9 @@
 
     <target name="install" depends="groovy">
  		<copy file="target/jar/durbinlib.jar" tofile="${env.HOME}/.groovy/lib/durbinlib.jar"/>
+ 		<copy todir="${env.HOME}/.groovy/lib/">
+			<fileset dir="lib/"/>
+		</copy>
     </target>
 
 </project>
