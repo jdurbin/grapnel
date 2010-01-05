@@ -87,7 +87,6 @@ class FisherLDEval
     // class
     //result.enable(Capability.NOMINAL_CLASS);
     //result.enable(Capability.MISSING_CLASS_VALUES);
-  
   }
   
   
@@ -186,8 +185,10 @@ class FisherLDEval
        if (variance0 < 0.1) variance0 = 0.1
        if (variance1 < 0.1) variance1 = 0.1             
 
-       def score = (bin0.mean() - bin1.mean()) / (variance0 + variance1)            
-       scores[i] = score.abs()  // only interested in magnitude...
+       def meanDiff = (bin0.mean() - bin1.mean())
+       def score =  (meanDiff*meanDiff)/ (variance0 + variance1)            
+       //scores[i] = score.abs  // only interested in magnitude...
+       scores[i] = score  
 
        //def name = mdata.attribute(i).name()
        //System.err.println "KJD\t${bin0.mean()}\t${bin1.mean()}\t${variance0}\t${variance1}\t$name\t${score.abs()}"

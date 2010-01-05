@@ -48,7 +48,7 @@ class DigmaPipeline{
   * 
   *  weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -M
   */
-  def classifierFromSpec(classifierSpec){
+  static def classifierFromSpec(classifierSpec){
     // Create a classifier from the name...
     def options = Utils.splitOptions(classifierSpec)
     def classifierName = options[0]
@@ -63,7 +63,7 @@ class DigmaPipeline{
   * 
   *  weka.attributeSelection.InfoGainAttributeEval
   */
-  def evalFromSpec(attributeEvalSpec){    
+  static def evalFromSpec(attributeEvalSpec){    
     // Create a classifier from the name...
     def options = Utils.splitOptions(attributeEvalSpec)
     def evalName = options[0]
@@ -175,6 +175,37 @@ class DigmaPipeline{
     return(cleanedData)
   }
 
+  /**
+  * Remove instances with attribute values in given range
+  */ 
+  Instances removeWithValues(Instances data,attrName,rangeStr){
+    
+    err.print "Removing instances with ${attrName} ${rangeStr} Before: ${data.numInstances()}..."    
+    
+    // find the index of the named attribute...
+    def attrIdx = -1;
+    (0..<data.numAttributes()).each{i->
+      Attribute attribute = data.attribute(i);
+      def name = attribute.name()
+      if (name == attrName) attrIdx = i
+    }
+    
+    def value
+    def remove = new RemoveWithValues()
+    remove.setAttributeIndex("${attriIdx+1}".toString())
+    
+    if (rangeStr.contains("<")){
+     value = rangeStr.replaceAll("<","") as int
+    }else{
+     value = rangeStr.replaceAll(">","") as int
+     remove.setInvertSelection(true)          
+    }
+    remove.setSplitPoint(value)
+    remove.setInputFormat(data)
+    def filteredData = Filter.useFilter(data,remove)
+    err.println "done.  After: ${filteredData.numInstances()}"
+    return(filteredData)
+  }
 
 
   /**

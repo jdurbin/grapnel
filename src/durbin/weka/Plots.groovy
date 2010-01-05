@@ -213,7 +213,7 @@ class Plots{
     err.println "done."  
   
     //  OR save to PNG
-    err.print "Saving png..."
+    err.print "Saving png to $outputName ..."
     ChartUtilities.saveChartAsPNG(new File(outputName),chart,width,height)
     err.println "done."  
   }

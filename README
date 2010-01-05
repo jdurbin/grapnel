@@ -23,4 +23,6 @@ be available to any Groovy scripts.
 
 
 03/06/08
-James
+========================
+
+NOTE:  The current install script needs Ant 1.7 or later.  Ant 1.6.5 in particular will not work correctly with this build.xml. 
