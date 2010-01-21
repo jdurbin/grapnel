@@ -14,6 +14,7 @@ import weka.core.Capabilities.*;
 *             **************** DEPRECATED ******************************
 *             **************** DEPRECATED ******************************
 *             **************** DEPRECATED ******************************
+*             **************** DEPRECATED ******************************
 * 
 * Given two classes, denote instances in class1 as X1, those in class2 as X2.<br><br> 
 * 
