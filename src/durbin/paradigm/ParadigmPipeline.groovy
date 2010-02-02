@@ -22,19 +22,19 @@ import weka.attributeSelection.*
 
 
 /**
-*  Class to implement top-level steps of the Digma classifier pipeline.  The 
+*  Class to implement top-level steps of the Paradigm classifier pipeline.  The 
 *  goal is to make the pipeline steps more readable and to share a single 
 *  debugged instance of these steps.  Not all of these steps will be used
 *  in any given pipeline.  This is rather a collection of pipeline steps 
 *  that are often used. 
 */ 
-class DigmaPipeline{
+class ParadigmPipeline{
   static err = System.err
   
   String    className;
   boolean   negativeClassValuesAreInvalid = true;
 
-  def DigmaPipeline(className){
+  def ParadigmPipeline(className){
     this.className = className
     WekaAdditions.enable()
   }
@@ -312,7 +312,7 @@ class DigmaPipeline{
   * as missing class values and be removed. 
   */ 
   Instances instancesFromClinicalAndGenomicFiles(dataFile,clinicalFile,selectedClinical){
-    def pipeline = new DigmaPipeline(className)
+    def pipeline = new ParadigmPipeline(className)
     def data = pipeline.readFromTable(dataFile)
     def clinicalData = pipeline.readFromTable(clinicalFile)
 

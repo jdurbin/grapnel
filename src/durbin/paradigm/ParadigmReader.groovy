@@ -7,11 +7,11 @@ import groovy.lang.Closure;
 
 /************************************************************
 * Some utilities to help process inputs and outputs from/to
-* Digma (a bayesian factor graph for integrating genomic data
+* Paradigm (a bayesian factor graph for integrating genomic data
 * into biological pathway models).
 * 
 */
-class DigmaReader{
+class ParadigmReader{
   
   /**************************************
   * Sometimes I get clinical features as a flat list.  Format:
