@@ -1,10 +1,31 @@
 #!/usr/bin/env groovy 
 
-package durbin.digma;
+package durbin.paradigm;
 
 import com.google.common.collect.*
 
-
+/**
+* Provides a compact way to describe fairly complex Weka classifier experiments. See 
+* cfgExample.txt for an example of the kind of file that this parses.  It extends Groovy's
+* nice ConfigSlurper, which is itself a (big) superset of the standard Java parameter file. 
+* 
+* Info on ConfigSlurper itself can be found here: http://groovy.codehaus.org/ConfigSlurper
+*
+* Use like: <pre>
+* 
+* dcs = new ParadigmConfigSlurper()
+* fullcfg = dcs.parse(new File(args[0]).toURL())
+* params = fullcfg.params
+* 
+* println "cvFolds = "+params.cvFolds
+* 
+* experiments = dcs.getExpansion('experiments')
+* experiments.each{experiment->
+*   println experiment
+* }
+* 
+* </pre>
+*/
 class ParadigmConfigSlurper extends ConfigSlurper{
   
   // Compile a regex to match strings that contain paired braces.
@@ -19,8 +40,8 @@ class ParadigmConfigSlurper extends ConfigSlurper{
   def cfg;
   def substitutionMap = new HashMultimap()
   
-  def get(key){
-    return(substitutionMap[key])
+  def getExpansion(key){
+    return(substitutionMap.get(key))
   }
   
   def keys(){return(substitutionMap.keySet())}
@@ -45,8 +66,8 @@ class ParadigmConfigSlurper extends ConfigSlurper{
     
     // User defined fields...
     //println cfg.algorithms.keySet()
-    cfg.algorithms.keySet().each{sectionKey->
-      def sectionContents = cfg.algorithms."$sectionKey"      
+    cfg.expand.keySet().each{sectionKey->
+      def sectionContents = cfg.expand."$sectionKey"      
       sectionContents.each{item->        
         def hasBeenExpanded = false // flag to note if something has been expanded in any way. 
 

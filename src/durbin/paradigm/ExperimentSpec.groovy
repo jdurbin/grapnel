@@ -1,4 +1,4 @@
-package durbin.digma;
+package durbin.paradigm;
 
 import weka.attributeSelection.*
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy 
 
-package durbin.digma
+package durbin.paradigm
 
 import durbin.weka.InstanceUtils as IU
 import durbin.util.*

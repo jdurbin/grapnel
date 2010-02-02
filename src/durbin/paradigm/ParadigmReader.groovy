@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy 
 
-package durbin.digma;
+package durbin.paradigm;
 
 import durbin.util.*
 import groovy.lang.Closure;
