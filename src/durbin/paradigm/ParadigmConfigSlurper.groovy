@@ -26,7 +26,7 @@ import com.google.common.collect.*
 * 
 * </pre>
 */
-class ParadigmConfigSlurper extends ConfigSlurper{
+class ParadigmcONfigSlurper extends ConfigSlurper{
   
   // Compile a regex to match strings that contain paired braces.
   // (Some people, when confronted with a problem, think “I know, I’ll use regular expressions!”
@@ -49,7 +49,6 @@ class ParadigmConfigSlurper extends ConfigSlurper{
 
   def ParadigmConfigSlurper(){
     super()
-    println "Constructor!"
   }
 
   /***
@@ -58,10 +57,7 @@ class ParadigmConfigSlurper extends ConfigSlurper{
   * 
   **/ 
   ConfigObject parse(java.net.URL url){
-    
-    println "parse!"
-    println "url: $url"
-    
+        
     cfg = super.parse(url)
     
     // User defined fields...

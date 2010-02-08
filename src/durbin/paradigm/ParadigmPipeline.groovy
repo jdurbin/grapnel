@@ -53,6 +53,10 @@ class ParadigmPipeline{
     def options = Utils.splitOptions(classifierSpec)
     def classifierName = options[0]
     options[0] = ""
+    
+    //System.err.println "classifierName: $classifierName"
+    //System.err.println "options: $options"
+    
     def classifier = Classifier.forName(classifierName,options) 
     return(classifier)
   }
