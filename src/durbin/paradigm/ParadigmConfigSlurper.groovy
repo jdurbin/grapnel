@@ -26,7 +26,7 @@ import com.google.common.collect.*
 * 
 * </pre>
 */
-class ParadigmcONfigSlurper extends ConfigSlurper{
+class ParadigmConfigSlurper extends ConfigSlurper{
   
   // Compile a regex to match strings that contain paired braces.
   // (Some people, when confronted with a problem, think “I know, I’ll use regular expressions!”
