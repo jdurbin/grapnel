@@ -16,6 +16,12 @@ import weka.filters.unsupervised.attribute.RemoveUseless
 import weka.classifiers.*
 import weka.classifiers.functions.*
 import weka.classifiers.Evaluation
+import weka.classifiers.trees.*
+import weka.classifiers.misc.*
+import weka.classifiers.rules.*
+import weka.classifiers.mi.*
+import weka.classifiers.lazy.*
+import weka.classifiers.functions.suportVector.*
 
 import weka.attributeSelection.*
 
