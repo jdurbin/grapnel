@@ -387,7 +387,7 @@ class ParadigmPipeline{
   }
   
   static String getFormattedSummaryHeading(){
-    def rval = "samples,%correct,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
+    def rval = "samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
     return(rval)
   }
 

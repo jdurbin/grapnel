@@ -9,9 +9,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.RuntimeException;
 
-/*****************************************************
+/**
 * Make some functionality available to Groovy that is common in Perl
 * but not implemented in Groovy by default.
+*
+* Example using to compute complement of DNA sequence:
+*
+* complement = Perlism.tr("ACTG","TGAC",fwdSeq)
+*
+* Or for repeated use of translation, can precompile as in this example:
+* 
+* pattern = Perlism.compileTRPattern("wsatugcyrkmbdhvnATUGCYRKMBDHVN",
+*       	                            "WSTAACGRYMKVHDBNTAACGRYMKVHDBN")
+*
+* complement = Perlism.tr(pattern,fwdSeq)
+* 
 */
 public class Perlism {
 
