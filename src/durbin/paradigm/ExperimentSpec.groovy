@@ -23,7 +23,14 @@ class ExperimentSpec{
    def ExperimentSpec(line){
     def fields = line.split(",")
     classifierStr = fields[0]
-    classifier = ParadigmPipeline.classifierFromSpec(classifierStr)
+
+    try{
+      classifier = ParadigmPipeline.classifierFromSpec(classifierStr)
+    }catch(Exception e){
+      System.err.println "ParadigmPipeline.classifierFromSpec failed on:"
+      System.err.println classifierStr
+      throw(e)
+    }
     
     attrEvalStr = fields[1] 
     attributeEval = ParadigmPipeline.evalFromSpec(attrEvalStr)  
