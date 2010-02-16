@@ -45,6 +45,11 @@ class ExperimentSpec{
     
     numAttributes = (fields[3] as double) as int
     classAttribute = fields[4]     
+   }   
+   
+   String toString(){
+     def rstr = classifierStr+","+attrEvalStr+","+attrSearchStr
+     return(rstr);
    }    
 }
 
