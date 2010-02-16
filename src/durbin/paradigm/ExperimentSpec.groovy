@@ -34,14 +34,9 @@ class ExperimentSpec{
     
     attrEvalStr = fields[1] 
     attributeEval = ParadigmPipeline.evalFromSpec(attrEvalStr)  
-    
-    
-    // KJD Temporary until I look up how to do this with Class.forName()
+        
     attrSearchStr = fields[2]
-    attributeSearch = new Ranker()
-
-    //attributeSearch = 
-    // Need to convert this to a class...
+    attributeSearch = ParadigmPipeline.searchFromSpec(attrSearchStr)
     
     numAttributes = (fields[3] as double) as int
     classAttribute = fields[4]     

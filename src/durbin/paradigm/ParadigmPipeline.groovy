@@ -83,6 +83,22 @@ class ParadigmPipeline{
   }
   
   
+  /**
+   *  Creae a attribute evaluation from the command-line evaluation specification
+   *  string.  For example:<br><br>
+   * 
+   *  weka.attributeSelection.InfoGainAttributeEval
+   */
+   static def searchFromSpec(attributeSearchSpec){    
+     // Create a classifier from the name...
+     def options = Utils.splitOptions(attributeSearchSpec)
+     def searchName = options[0]
+     options[0] = ""
+     def search = ASSearch.forName(searchName,options) 
+     return(search)
+   }
+  
+  
   
   /**
   * Read instances from a table, filling in missing value tokens as we go. 
