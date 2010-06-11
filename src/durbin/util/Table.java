@@ -50,7 +50,7 @@ class TableMatrix1DIterator implements Iterator{
 * all of this probably should have been handled  from the Table.groovy 
 * wrapper, using some kind of expando magic or some such...
 * 
-* Ugh... even worst, all this hasn't helped performance compared to 
+* Ugh... even worse, all this hasn't helped performance compared to 
 * getting a copy of the array for each row... 
 */
 class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
@@ -114,6 +114,13 @@ public class Table extends GroovyObjectSupport{
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
   public Table(){}
+  
+  public Table(int rows,int cols){
+    numRows = rows;
+    numCols = cols;
+    // Create an empty object matrix...
+	  matrix = new DenseObjectMatrix2D(numRows,numCols);
+  }  
   
   public Table(String fileName,String delimiter) throws Exception{
     readFile(fileName,delimiter);
@@ -318,7 +325,36 @@ public class Table extends GroovyObjectSupport{
 		return(matrix.getQuick(row,col));
 	}
 	
+	public void set(int row,int col,Object data){
+	  matrix.setQuick(row,col,data);
+	}
 	
+	public void set(String rowStr,String colStr,Object data){
+	  int row = getRowIdx(rowStr);
+	  int col = getColIdx(colStr);
+	  matrix.setQuick(row,col,data);
+	}
+	
+	
+	public List<Integer> getRowIndicesContaining(String substring){
+	  ArrayList<Integer> rvals = new ArrayList<Integer>();
+	  for(int r = 0;r < numRows;r++){
+	    if (rowNames[r].contains(substring)){
+	      rvals.add(r);
+	    }
+	  }
+	  return(rvals);
+	}
+	
+	public List<Integer> getColIndicesContaining(String substring){
+	  ArrayList<Integer> rvals = new ArrayList<Integer>();
+	  for(int c = 0;c < numCols;c++){
+	    if (colNames[c].contains(substring)){
+	      rvals.add(c);
+	    }
+	  }
+	  return(rvals);
+	}
 	
 	
 	public int getRowIdx(String row){return(rowName2Idx.get(row));}
@@ -498,8 +534,6 @@ public class Table extends GroovyObjectSupport{
 		createNameMap(rowNames,rowName2Idx);
 		System.err.println("done");
 	}
-	
-  
 }
 
 
