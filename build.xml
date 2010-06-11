@@ -77,7 +77,7 @@
 
 	<target name="groovy" depends="jar">
 		<groovyc srcdir="src" destdir="target/classes">
-			<javac />
+		<javac />
 		</groovyc>
 		<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
         </jar>
