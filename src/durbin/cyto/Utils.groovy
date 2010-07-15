@@ -13,7 +13,7 @@ class Utils{
   
   
   /**
-  * Wasn't any fasther than Groovy native version...
+  * Wasn't any faster than Groovy native version...
   */ 
   public static addIfContains(HashMap h,String name,String svalue){
     
