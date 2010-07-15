@@ -1,0 +1,40 @@
+// An actual working configuration example..
+//
+// This example produces 640 separate experiments. 
+// 
+expand{
+    asSearch=['weka.attributeSelection.Ranker']  
+    eval=['durbin.weka.FisherLDEval']
+      
+    // Try various kernel exponets
+    kernel = [
+      'weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E {1,4,1}'
+    ]
+    
+    // And for each of those, various C values...
+    classifier = [
+      'weka.classifiers.functions.SMO -C {1,16,1} -L 0.0001 -P 1.0E-12 -N 0 -V -1 -W 1 -K $kernel'
+    ]
+    
+    // Sweep over a range of attribute selection cutoffs...
+    experiments = [
+      '$classifier,$eval,$asSearch,{50,500,50},PLATINUM_FREE_INTERVAL_MONTHS'
+    ]  
+}
+
+
+params{
+  allowNegativeClass = false
+
+  cvFolds = 5
+  cvSeedFolds = 5 // This will really need to be bundled into experiments..
+
+  // useMedianDiscretization = true
+  // useUpperLowerQuartile = true
+  
+  // This, too, could be part of experiments above... 
+  discretizeCutoffs = [low:3,high:12]
+  
+  
+  prefilter ="BRAF1,<1"
+}

@@ -1,0 +1,75 @@
+// This is file specifying a range of bulk classifier experiments to perform. 
+// There are two main sections, expand, and parameters.  Things in the expand
+// section will be interpreted according to two expansion rules: 
+// 
+// * Braces {} will be expanded with {start,end,step} values. 
+// * $keyword will be expanded with previously defined keyword expansions. 
+// 
+// Expansions can be nested to obtain a very compact description of a multi-dimensional
+// experiment. 
+// 
+// The parameters section of the configuration file will serve mostly the role
+// of defining global parameters, not unlike traditional java parameters files. 
+// Groovy syntax is interpreted throughout both sections, providing additional ways 
+// to specify complex parameters.  
+//
+// An advantage to including the parameters and the expandable experiment strings in 
+// same config file is that a single file more completely documents the experiment 
+// performed.   Add a verison or something that gets printed with the output and 
+// you can easily link any output you find to the file that created it. 
+//  
+
+expand{
+    // Arbitrary parameter names are allowed here (i.e. things you make up). Subsequent usage 
+    // of $kernel, or $eval, or whatever, will expand to all of these strings.  Within each of 
+    // these strings, range specs {start,end,step} will expand these strings.  So, below, 
+    // the first line will expand to twelve different kernel specs.  So if a classifier
+    // includes $kernel, it will get expanded into twelve different classifier lines each 
+    // with one of the twelve kernels.
+  
+
+    // Note... the attribute evaluations listed must all be compatible with this 
+    // search method.  Currently to do different kinds of search, need separate
+    // config file. Or, yould make it a map to enforce pairing... other ways exist too..
+    asSearch=['weka.attributeSelection.Ranker']
+  
+    eval=['durbin.weka.FisherLDEval']
+      
+    
+    kerneltype = ['poly','rgb']
+    
+    kernel=[
+      'kernel $kerneltype -C {1,3,1} '
+    ]
+
+    classifier = [
+     'SMO -X {0,2,1} -L {0,2,1} -K $kernel'
+    ]
+    
+    // An experiment spec is a string like:
+    //
+    // classifier, attributeSelection, attributeSelectionRanker,numAttributes, classAttribute
+    //
+    // These can be hand generated and put in a file or from a config like this one. 
+    //  
+    experiments = [
+      '$classifier,$eval,$asSearch,{1,200,10},PLATINUM_FREE_INTERVAL_MONTHS'
+    ]  
+}
+
+
+params{
+  allowNegativeClass = false
+
+  cvFolds = 5
+  cvSeedFolds = 5 // This will really need to be bundled into experiments..
+
+  // useMedianDiscretization = true
+  // useUpperLowerQuartile = true
+  
+  // This, too, could be part of experiments above... 
+  discretizeCutoffs = [low:3,high:12]
+  
+  
+  prefilter ="BRAF1,<1"
+}
