@@ -34,13 +34,13 @@ import weka.attributeSelection.*
 *  in any given pipeline.  This is rather a collection of pipeline steps 
 *  that are often used. 
 */ 
-class WekaExperimentPipeline{
+class WekaExplorer{
   static err = System.err
   
   String    className;
   boolean   negativeClassValuesAreInvalid = true;
 
-  def WekaExperimentPipeline(className){
+  def WekaExplorer(className){
     this.className = className
     WekaAdditions.enable()
   }
@@ -336,7 +336,7 @@ class WekaExperimentPipeline{
   * as missing class values and be removed. 
   */ 
   Instances instancesFromClinicalAndGenomicFiles(dataFile,clinicalFile,selectedClinical){
-    def pipeline = new WekaExperimentPipeline(className)
+    def pipeline = new WekaExplorer(className)
     def data = pipeline.readFromTable(dataFile)
     def clinicalData = pipeline.readFromTable(clinicalFile)
 
