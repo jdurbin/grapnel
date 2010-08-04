@@ -50,6 +50,18 @@ class WekaExplorerConfigSlurper extends ConfigSlurper{
   def WekaExplorerConfigSlurper(){
     super()
   }
+  
+  
+  ConfigObject parseDB(db,configID){
+    def sql = "select * from mlexperiments where id = $configID"
+    def rows = db.rows(sql)      
+    if (rows == null) throw new RuntimeException("ML Experiment $id does not appear to be in database.")
+    
+    row = rows[0]
+
+      
+  }
+  
 
   /***
   * Slurp in the configuration with ConfigSlurper, then expand all the expandable things. 
@@ -57,6 +69,11 @@ class WekaExplorerConfigSlurper extends ConfigSlurper{
   * 
   **/ 
   ConfigObject parse(java.net.URL url){
+    cfg = super.parse(url)
+    return(parse(cfg))
+  }
+  
+  ConfigObject parse(cfg){
         
     cfg = super.parse(url)
     

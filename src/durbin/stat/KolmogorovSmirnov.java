@@ -13,7 +13,7 @@ import umontreal.iro.lecuyer.probdist.*;
 * http://root.cern.ch/drupal/
 * 
 */
-class KolmogorovSmirnov{
+public class KolmogorovSmirnov{
 
   /**
   * Calculates the Kolmogorov distribution function, which gives the 
@@ -34,7 +34,7 @@ class KolmogorovSmirnov{
   * http://root.cern.ch/root/html/TMath.html#TMath:KolmogorovProb
   *</pre>
   */ 
-  static double prob(double z){    
+  public static double prob(double z){    
     double[] fj = {-2,-8,-18,-32};
     //double fj[4] = {-2,-8,-18,-32}
     double[] r = new double[4];
@@ -81,8 +81,8 @@ class KolmogorovSmirnov{
   * Rather than have an option for distance/probability, I have two 
   * separate methods, kolmogorovDistance, kolmogorovProbability
   */ 
-  static double distance(double[] a,double[] b){
-    double prob = -1;
+  public static double distance(double[] a,double[] b){
+    double prob = Double.NaN;
 
     if ((a.length <=2) || (b.length <=2)){
       System.err.println("kolmogorovDist: Sets must have more than 2 points");
@@ -116,7 +116,7 @@ class KolmogorovSmirnov{
     //    rdiff is the running difference, and rdmax the max.
     boolean ok = false;
     
-    for (int i=0;i<na+nb;i++) {
+    for (int i=0;i<(na+nb);i++) {
       int iam = ia-1;
       int ibm = ib-1;          
             
@@ -150,8 +150,26 @@ class KolmogorovSmirnov{
       rdmax = Math.max(rdmax,Math.abs(rdiff));
       return(rdmax);
     }else{
-      System.err.println("ERROR: Loop did not return OK");
-      return(-1);
+      System.err.println("Kolmogorov Smirnov ERROR: Loop did not return OK");
+
+      System.err.print("a: ");
+      for(int i = 0;i < a.length;i++){System.err.print(a[i]);System.err.print(" ");}
+      System.err.println("");
+      
+      System.err.print("b: ");
+      for(int i = 0;i < b.length;i++){System.err.print(b[i]);System.err.print(" ");}
+      System.err.println("");
+      
+      System.err.println("ia: "+ia);
+      System.err.println("ib: "+ib);
+      System.err.println("rdiff: "+rdiff);
+      System.err.println("rna: "+rna);
+      System.err.println("rnb: "+rnb);
+      
+      System.err.println("sa: "+sa);
+      System.err.println("sb: "+sb);
+      
+      return(Double.NaN);
     }
   }
   
@@ -171,7 +189,7 @@ class KolmogorovSmirnov{
   * http://root.cern.ch/root/html/TMath.html#TMath:KolmogorovProb
   * </pre>
   */ 
-  static double test(double[] a, double[] b){
+  public static double test(double[] a, double[] b){
     double d = distance(a,b);
     int rna = a.length;
     int rnb = b.length;
@@ -206,8 +224,8 @@ class KolmogorovSmirnov{
   * http://root.cern.ch/root/html/TMath.html#TMath:KolmogorovProb
   * </pre>
   */ 
-  static double signedDistance(double[] a,double[] b){
-    double prob = -1;
+  public static double signedDistance(double[] a,double[] b){
+    double prob = Double.NaN;
 
     if ((a.length <=2) || (b.length <=2)){
       System.err.println("kolmogorovDist: Sets must have more than 2 points");
@@ -284,8 +302,8 @@ class KolmogorovSmirnov{
       //rdmax = Math.max(rdmax,Math.abs(rdiff));
       return(rdiffMax);
     }else{
-      System.err.println("ERROR: Loop did not return OK");
-      return(-1);
+      System.err.println("Kolmogorov Smirnov ERROR: Loop did not return OK");
+      return(Double.NaN);
     }
   }
 }
