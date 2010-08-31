@@ -277,7 +277,7 @@ extends SimpleBatchFilter {
 		      values[aIdx] = oldInstance.value(aIdx);
 		    }else{
 		      // Otherwise...
-		      System.err.println("quartile1: "+cutoffs1[aIdx]+" quartile2: "+cutoffs2[aIdx]);
+		      //System.err.println("quartile1: "+cutoffs1[aIdx]+" quartile2: "+cutoffs2[aIdx]);
 		      
 		      // Get the attribute from the new result instances (should be nominal)...
 		      Attribute attribute = result.attribute(aIdx);

@@ -98,16 +98,49 @@ class WekaExplorer{
      return(search)
    }
   
+  
+   /**
+   * Read instances from a table, filling in missing value tokens as we go. 
+   * KJD: TODO: Currently this doesn't support non-numeric values. But i use this
+   * same function to read in clinical data which, fairly, might have nomianl/string
+   * values.  
+   */ 
+   static Instances readStringFromTable(dataFileName){
+     // Read data in from table.  Handle missing values as we go.
+     err.print "Loading strings from $dataFileName..."
+     TableFileLoader loader = new TableFileLoader()
+     loader.setAddInstanceNamesAsFeatures(true)
+     Instances data = loader.read(dataFileName,"\t"){  
+
+       // Lots of different missing value notations...
+       if ((it == "") || (it == null) || (it == "NA") || (it == "null") || (it == 'NULL') || 
+          (it == "?")){
+         return (Instance.missingValue())
+       }else{
+         return(it)
+       }
+     }
+     //err.println "${data.numInstances()} x ${data.numAttributes()} done."
+     return(data)
+   }
+  
   /**
   * Read instances from a table, filling in missing value tokens as we go. 
+  * KJD: TODO: Currently this doesn't support non-numeric values. But i use this
+  * same function to read in clinical data which, fairly, might have nomianl/string
+  * values.  
   */ 
-  static Instances readFromTable(dataFileName){
+  static Instances readNumericFromTable(dataFileName){
     // Read data in from table.  Handle missing values as we go.
-    err.print "Loading $dataFileName..."
+    err.print "Loading numeric data from $dataFileName..."
     TableFileLoader loader = new TableFileLoader()
     loader.setAddInstanceNamesAsFeatures(true)
-    Instances data = loader.read(dataFileName,"\t"){                  
-      if ((it == "") || (it == null) || (it == "NA")){
+    Instances data = loader.read(dataFileName,"\t"){  
+
+      // Lots of different missing value notations...
+      if ((it == "") || (it == null) || (it == "NA") || 
+         (it == "null") || (it == 'NULL') || 
+         (it == "?")){
         return (Instance.missingValue())
       }else{
         return(it as Double)
@@ -264,6 +297,25 @@ class WekaExplorer{
     err.println "done."  // KJD report how many high/low as a sanity check. 
     return(discretizedData)
   }
+  
+  /**
+  *  Converts the numeric class attribute into 
+  */
+  Instances classToMedian(data,lowString,highString){
+    def classIdx = data.setClassName(className) // Necessary to get idx, since idx changes 
+
+    // Discretize class (select whether to discretize median, quartile, or with chosen value)
+    err.print "Discretizing class attribute..."
+    def quartile = new NumericToQuartileNominal()
+    quartile.setAttributeIndices("${classIdx+1}".toString())
+    quartile.setUseMedian(true)
+    quartile.setInputFormat(data)
+    quartile.setNominalValues(lowString,highString)
+    def discretizedData = Filter.useFilter(data,quartile)
+    classIdx = discretizedData.setClassName(className)
+    err.println "done."  // KJD report how many high/low as a sanity check. 
+    return(discretizedData)
+  }
 
   /**
   *  Converts the numeric class attribute into 
@@ -293,11 +345,14 @@ class WekaExplorer{
   *
   */ 
   Instances removeAttributesNotSelected(data,selectedAttributes){
+    
+    err.println "SelectedAttributes: $selectedAttributes"
+    
     // Remove all attributes that aren't selected 
-    // Must preserve ID, however!!!
+    // Must preserve ID, however!!!  So explicitly add it to selected attributes...
     selectedAttributes.add("ID")
     def attrIndicesStr = IU.attributeNames2Indices(data,selectedAttributes)
-    //err.println "Removing attributes not in set: "+attrIndicesStr
+    err.println "Removing attributes not in set: "+attrIndicesStr
     def remove = new Remove();
     remove.setAttributeIndices(attrIndicesStr);
     remove.setInvertSelection(true); // Remove everything not in this list. 

@@ -24,7 +24,7 @@ public class InstanceUtils {
 	public static int[] getAttributeIndexArray(Instances inst, Collection<String> attributes) {
 		int [] indexArray = new int[attributes.size()];
 		int i = 0;
-for (String name : attributes) {
+    for (String name : attributes) {
 			int attrIdx = inst.attribute(name).index();
 			
 			//System.err.println("attrIdx: "+attrIdx+" i: "+i+" name: "+name);
@@ -41,7 +41,7 @@ for (String name : attributes) {
 	*/
 	public static Set getAttributeIndices(Instances inst, Collection<String> attributes) {
 		Set<Integer> indexSet = new HashSet<Integer>();
-for (String name : attributes) {
+    for (String name : attributes) {
 			int attrIdx = inst.attribute(name).index();
 			indexSet.add(attrIdx);
 		}
@@ -140,10 +140,23 @@ for (String name : attributes) {
 	*  of a list of attribute indices sutible for input to filters and the such. 
 	*/
 	public static String attributeNames2Indices(Instances data,Collection<String> names){
+	  
+	  // DEBUG  List all the attributes...
+    //Enumeration attrs = data.enumerateAttributes();	  
+    //for (Enumeration attrs=data.enumerateAttributes(); attrs.hasMoreElements() ;) {
+    //  Attribute a = (Attribute) attrs.nextElement();
+	  //  System.err.println("arr:"+a.name());
+    //}
+	  	  	  	  
 	  List<Integer> indices = new ArrayList<Integer>();
 	  for(String name: names){
+	    
+	    //System.err.println("name: "+name);
+	   	      
 	    Attribute attribute = data.attribute(name);
 	    int idx = attribute.index();
+	    
+	    //System.err.println("\tidx:"+idx);
 
 	    // +1 because the attribute numbers given externally are 1 based...	    
 	    indices.add(idx+1);

@@ -6,7 +6,9 @@ import weka.core.*
 import weka.filters.unsupervised.attribute.RemoveType
 import weka.classifiers.*
 import weka.classifiers.evaluation.*;
+import weka.classifiers.meta.FilteredClassifier;
 import java.util.Random
+
 
 
 public class EvaluationResult{
@@ -14,19 +16,19 @@ public class EvaluationResult{
   def EvaluationResult(a,p,s,m,pr){
     actual = a
     predicted = p
-    sample = s
+    instanceID = s
     isMatch = m
     probability = pr
   }
   
   String toString(){
-    def rval = actual+"\t"+predicted+"\t"+sample+"\t"+isMatch+"\t"+probability;
+    def rval = instanceID+"\t"+actual+"\t"+predicted+"\t"+isMatch+"\t"+probability;
     return(rval)
   }
   
   def actual;
   def predicted;
-  def sample;
+  def instanceID;
   def probability
   boolean isMatch;
 }
@@ -37,16 +39,29 @@ public class EvaluationResult{
 */ 
 public class CVUtils{
   
+    Evaluation eval;
 
     List<EvaluationResult> crossValidateModel(classifier,data,cvFolds,rng){
-      
+            
+      // Create a classifier from the name...
+      // By using filtered classifer to remove ID, the cross-validation
+      // wrapper will keep the original dataset and keep track of the mapping 
+      // between the original and the folds (minus ID). 
+      def filteredClassifier = new FilteredClassifier()
+      def removeTypeFilter = new RemoveType();  
+          
+      filteredClassifier.setClassifier(classifier)
+      filteredClassifier.setFilter(removeTypeFilter)
+
       def results = new ArrayList<EvaluationResult>()
 
       // Perform cross-validation of the model..
-      def eval = new Evaluation(data)
+      eval = new Evaluation(data)
       def predictions = new StringBuffer()
-      eval.crossValidateModel(classifier,data,cvFolds,rng,predictions,
+      eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions,
         new Range("first,last"),false)
+        
+//      System.err.println "DEBUG PREDICTIONS:"+predictions
 
       def lines = predictions.toString().split("\n")
 
@@ -57,7 +72,8 @@ public class CVUtils{
       //     1      1:low      1:low       1 (P1)
       //     2     2:high      1:low   +   0.5 (P6)
       //     3     2:high     2:high       1 (P0)
-      lines[1..-1].each{line->
+      lines[1..-1].each{line->              
+                
         // Parse out fields we're interested in..
         //def m = line =~ /\d:(\w+).*\d:(\w+).*\((.+)\)/    
         //def m = line =~ /\d:(.+).*\d:(\w+).*\((.+)\)/         
@@ -66,10 +82,10 @@ public class CVUtils{
         def predicted = m[0][2]
         //def spaces = m[0][3] // or + 
         def probability = m[0][4]
-        def sample = m[0][5]
+        def instanceID = m[0][5]
         //println "$actual $predicted [$spaces] [$probability] $sample"
                 
-        def result = new EvaluationResult(actual,predicted,sample,
+        def result = new EvaluationResult(actual,predicted,instanceID,
                                           !line.contains("+"),probability)
         results.add(result);
       }

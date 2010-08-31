@@ -25,18 +25,18 @@ class ExperimentSpec{
     classifierStr = fields[0]
 
     try{
-      classifier = WekaExperimentPipeline.classifierFromSpec(classifierStr)
+      classifier = WekaExplorer.classifierFromSpec(classifierStr)
     }catch(Exception e){
-      System.err.println "WekaExperimentPipeline.classifierFromSpec failed on:"
+      System.err.println "WekaExplorer.classifierFromSpec failed on:"
       System.err.println classifierStr
       throw(e)
     }
     
     attrEvalStr = fields[1] 
-    attributeEval = WekaExperimentPipeline.evalFromSpec(attrEvalStr)  
+    attributeEval = WekaExplorer.evalFromSpec(attrEvalStr)  
         
     attrSearchStr = fields[2]
-    attributeSearch = WekaExperimentPipeline.searchFromSpec(attrSearchStr)
+    attributeSearch = WekaExplorer.searchFromSpec(attrSearchStr)
     
     numAttributes = (fields[3] as double) as int
     classAttribute = fields[4]     

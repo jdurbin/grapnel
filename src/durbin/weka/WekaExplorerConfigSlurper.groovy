@@ -69,13 +69,7 @@ class WekaExplorerConfigSlurper extends ConfigSlurper{
   * 
   **/ 
   ConfigObject parse(java.net.URL url){
-    cfg = super.parse(url)
-    return(parse(cfg))
-  }
-  
-  ConfigObject parse(cfg){
-        
-    cfg = super.parse(url)
+    cfg = super.parse(url)        
     
     // User defined fields...
     //println cfg.algorithms.keySet()
