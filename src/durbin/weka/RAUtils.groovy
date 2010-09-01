@@ -46,17 +46,22 @@ public class RAUtils{
     if (!bFirstTime) return;
     bFirstTime = false;
     
-    classifiersOut<<"name\tfeatureSelection1\n"
-    classifiersOut<<"type\tfeatureSelection\n"
-    classifiersOut<<"label\tNone\n"
-    classifiersOut<<"parameters\tNA\n"
-    classifiersOut<<"\n"
+    def outStr = """
+      name\tfeatureSelection1\n
+      type\tfeatureSelection\n
+      label\tNone\n
+      parameters\tNA\n\n
+    """
+    
+    classifiersOut<<outStr
   }
   
   /***
   *
   */ 
   def writeSubgroup(instances,params){
+    
+    def outStr;
     
     def IDAttr = instances.attribute("ID")
   
@@ -94,25 +99,30 @@ public class RAUtils{
     
     // Currently, I'll have one task per subgrouping... I think...
     def task = "${className}" as String
-    tasksOut <<"name\t$task\n"
-    tasksOut <<"label\t${className} gi50 response\n"
-    tasksOut <<"type\ttask\n"
-    tasksOut <<"\n"
-    
+    outStr = """
+    name\t$task\n
+    label\t${className} gi50 response\n
+    type\ttask\n\n"""
+    tasksOut <<outStr
+        
     def subgroup = "${className}subgroup" as String
-    subgroupsOut << "name\t$subgroup\n"
-    subgroupsOut << "type\tsubgrouping\n"
-    subgroupsOut << "label\t${className}\n"
-    subgroupsOut << "parameters\t$paramStr\n"
-    subgroupsOut << "subgroup1label\tlow\n"
-    subgroupsOut << "subgroup1\t"    
-    subgroupsOut << lowSamples.join(",")
-    subgroupsOut << "\n"
-    subgroupsOut << "subgroup2label\thigh\n"
-    subgroupsOut << "subgroup2\t"
-    subgroupsOut << highSamples.join(",")
-    subgroupsOut << "\n"
-    subgroupsOut << "\n"
+    
+    def lowSampOut = lowSamples.join(",")
+    def highSampOut = highSamples.join(",")
+    
+    outStr = """
+      name\t$subgroup\n
+      type\tsubgrouping\n
+      label\t${className}\n
+      parameters\t$paramStr\n
+      subgroup1label\tlow\n
+      subgroup1\t    
+      lowSampOut\n
+      subgroup2label\thigh\n
+      subgroup2\t
+      highSampOut\n\n"""
+    
+    subgroupsOut << outStr
     
     return([task,subgroup])    
   }
@@ -133,11 +143,13 @@ public class RAUtils{
     opt = opt.replaceAll("\"","") // Remove pesky quotes...    
 
     def classifierID = "${classifierName}${idx}".toString()
-    classifiersOut << "name\t$classifierID\n"
-    classifiersOut << "type\t$classifierName\n"
-    classifiersOut << "label\t$classifierID\n"
-    classifiersOut << "parameters\t$opt\n"
-    classifiersOut<<"\n"
+    def outSrt = """
+      name\t$classifierID\n
+      type\t$classifierName\n
+      label\t$classifierID\n
+      parameters\t$opt\n\n"""
+      
+    classifiersOut<<outStr;    
     return(classifierID);
   }
   
@@ -146,14 +158,7 @@ public class RAUtils{
   */
   def writeResults(results,classID,task,subgroup,idx){
     
-    resultsOut << "name\t${task}Job${idx}\n"
-    resultsOut << "type\tjob\n"
-    resultsOut << "task\t${task} gi50 response\n"    
-    resultsOut << "dataset\tgrayCellLine\n"    
-    resultsOut << "subgrouping\t$subgroup\n"
-    resultsOut << "classifier\t$classID\n"
-    resultsOut << "featureSelection\tNone\n"
-    resultsOut << "accuracyType\tleave one out\n"
+    def resultsStr;
     
     def samplesOut = []
     def trainAcc = []
@@ -167,12 +172,21 @@ public class RAUtils{
     def samples = samplesOut.join(",")
     def training = trainAcc.join(",")
     def testing = testingAcc.join(",")
-    
-    resultsOut << "samples\t$samples\n"
-    resultsOut << "trainingAccuracies\t$training\n"
-    resultsOut << "testingAccuracies\t$testing\n" 
-    resultsOut << "\n"       
-    resultsOut << "\n"           
+        
+    resultsStr = """
+      name\t${task}Job${idx}\n
+      type\tjob\n
+      task\t${task} gi50 response\n
+      dataset\tgrayCellLine\n
+      subgrouping\t$subgroup\n
+      classifier\t$classID\n
+      featureSelection\tNone\n
+      accuracyType\tleave one out\n
+      samples\t$samples\n
+      trainingAccuracies\t$training\n
+      testingAccuracies\t$testing\n\n\n"""
+
+    resultsOut << resultsStr
   }
 }
 
