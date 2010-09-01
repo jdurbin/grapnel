@@ -19,6 +19,7 @@ public class EvaluationResult{
     instanceID = s
     isMatch = m
     probability = pr
+    
   }
   
   String toString(){

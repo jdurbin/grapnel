@@ -14,8 +14,6 @@ import weka.filters.unsupervised.attribute.RemoveType
 import weka.classifiers.*
 import weka.classifiers.meta.FilteredClassifier
 
-
-
 public class RAUtils{
   
   def raRoot;
@@ -124,8 +122,8 @@ public class RAUtils{
   */ 
   def writeClassifier(classifierDescription,idx){
     // If we've already seen it, don't write it out...
-    //if (recordedClassifiers.contains(classifierDescription)) return(null);
-    //else recordedClassifiers.add(classifierDescription);
+    if (recordedClassifiers.contains(classifierDescription)) return(null);
+    else recordedClassifiers.add(classifierDescription);
     
     def options = Utils.splitOptions(classifierDescription)
     def classifierName = options[0]
@@ -137,7 +135,7 @@ public class RAUtils{
     def classifierID = "${classifierName}${idx}".toString()
     classifiersOut << "name\t$classifierID\n"
     classifiersOut << "type\t$classifierName\n"
-    classifiersOut << "label\t$classifierName\n"
+    classifiersOut << "label\t$classifierID\n"
     classifiersOut << "parameters\t$opt\n"
     classifiersOut<<"\n"
     return(classifierID);
