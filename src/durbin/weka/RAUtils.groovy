@@ -60,8 +60,7 @@ public class RAUtils{
   *
   */ 
   def writeSubgroup(instances,params){
-    
-    def outStr;
+  
     
     def IDAttr = instances.attribute("ID")
   
@@ -99,7 +98,7 @@ public class RAUtils{
     
     // Currently, I'll have one task per subgrouping... I think...
     def task = "${className}" as String
-    outStr = """
+    def outStr = """
     name\t$task\n
     label\t${className} gi50 response\n
     type\ttask\n\n"""
@@ -143,7 +142,7 @@ public class RAUtils{
     opt = opt.replaceAll("\"","") // Remove pesky quotes...    
 
     def classifierID = "${classifierName}${idx}".toString()
-    def outSrt = """
+    def outStr = """
       name\t$classifierID\n
       type\t$classifierName\n
       label\t$classifierID\n
@@ -157,8 +156,7 @@ public class RAUtils{
   *
   */
   def writeResults(results,classID,task,subgroup,idx){
-    
-    def resultsStr;
+  
     
     def samplesOut = []
     def trainAcc = []
@@ -173,7 +171,7 @@ public class RAUtils{
     def training = trainAcc.join(",")
     def testing = testingAcc.join(",")
         
-    resultsStr = """
+    def resultsStr = """
       name\t${task}Job${idx}\n
       type\tjob\n
       task\t${task} gi50 response\n
