@@ -47,10 +47,10 @@ public class RAUtils{
     bFirstTime = false;
     
     def outStr = """
-      name\tfeatureSelection1\n
-      type\tfeatureSelection\n
-      label\tNone\n
-      parameters\tNA\n\n
+      name\tfeatureSelection1
+      type\tfeatureSelection
+      label\tNone
+      parameters\tNA\n
     """
     
     classifiersOut<<outStr
@@ -95,7 +95,6 @@ public class RAUtils{
       }
     }
     
-    
     // Currently, I'll have one task per subgrouping... I think...
     def task = "${className}" as String
     def outStr = """
@@ -110,16 +109,14 @@ public class RAUtils{
     def highSampOut = highSamples.join(",")
     
     outStr = """
-      name\t$subgroup\n
-      type\tsubgrouping\n
-      label\t${className}\n
-      parameters\t$paramStr\n
-      subgroup1label\tlow\n
-      subgroup1\t    
-      lowSampOut\n
-      subgroup2label\thigh\n
-      subgroup2\t
-      highSampOut\n\n"""
+      name\t$subgroup
+      type\tsubgrouping
+      label\t${className}
+      parameters\t$paramStr
+      subgroup1label\tlow
+      subgroup1\t$lowSampOut
+      subgroup2label\thigh
+      subgroup2\t$highSampOut\n\n"""
     
     subgroupsOut << outStr
     
@@ -143,10 +140,10 @@ public class RAUtils{
 
     def classifierID = "${classifierName}${idx}".toString()
     def outStr = """
-      name\t$classifierID\n
-      type\t$classifierName\n
-      label\t$classifierID\n
-      parameters\t$opt\n\n"""
+      name\t$classifierID
+      type\t$classifierName
+      label\t$classifierID
+      parameters\t$opt\n"""
       
     classifiersOut<<outStr;    
     return(classifierID);
