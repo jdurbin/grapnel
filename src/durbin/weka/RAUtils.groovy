@@ -41,25 +41,31 @@ public class RAUtils{
   /***
   *
   */
-  def writeFeatureSelection(){
+  def writeFeatureSelection(jobidx){
     
     if (!bFirstTime) return;
     bFirstTime = false;
     
     def outStr = """
-      name\tfeatureSelection1
-      type\tfeatureSelection
-      label\tNone
-      parameters\tNA\n
-    """
+name\tfeatureSelection$jobidx
+type\tfeatureSelection
+label\tNone
+parameters\tNA\n"""
     
     classifiersOut<<outStr
   }
   
   /***
-  *
+  * name	gemcitabineSubgrouping1
+  * type	subgrouping
+  * label	Gemcitabine response natural split
+  * parameters	Split around -logIC50*100 ~ 512
+  * subgroup1label	Sensitive
+  * subgroup1	Tu8988T,SW1990,Suit2,Panc1,10.05,3.27,2.13,Miapaca2,HupT3,Dan_G,Colo357,CFPac1,
+  * subgroup2label	Resistant
+  * subgroup2	Tu8988S,Tu8902,6.03,Mpanc96,HPAF_II,HPAC,Capan2,
   */ 
-  def writeSubgroup(instances,params){
+  def writeSubgroup(instances,params,jobidx){
   
     
     def IDAttr = instances.attribute("ID")
@@ -95,38 +101,42 @@ public class RAUtils{
       }
     }
     
+    def taskID = "$className$jobidx" as String
+    
     // Currently, I'll have one task per subgrouping... I think...
-    def task = "${className}" as String
     def outStr = """
-    name\t$task\n
-    label\t${className} gi50 response\n
-    type\ttask\n\n"""
+name\t$taskID
+label\t${className}_gi50_response
+type\ttask\n"""
+
     tasksOut <<outStr
         
-    def subgroup = "${className}subgroup" as String
+    //def subgroup = "${className}" as String
+    def subgroupID = "${className}_$jobidx" as String
+    
     
     def lowSampOut = lowSamples.join(",")
     def highSampOut = highSamples.join(",")
     
     outStr = """
-      name\t$subgroup
-      type\tsubgrouping
-      label\t${className}
-      parameters\t$paramStr
-      subgroup1label\tlow
-      subgroup1\t$lowSampOut
-      subgroup2label\thigh
-      subgroup2\t$highSampOut\n\n"""
+name\t$subgroupID
+type\tsubgrouping
+label\t$subgroupID
+parameters\t$paramStr
+subgroup1label\tlow
+subgroup1\t$lowSampOut
+subgroup2label\thigh
+subgroup2\t$highSampOut\n\n"""    
+subgroupsOut << outStr
     
-    subgroupsOut << outStr
     
-    return([task,subgroup])    
+    return([taskID,subgroupID])    
   }
   
   /***
   *
   */ 
-  def writeClassifier(classifierDescription,idx){
+  def writeClassifier(classifierDescription,jobidx){
     // If we've already seen it, don't write it out...
     if (recordedClassifiers.contains(classifierDescription)) return(null);
     else recordedClassifiers.add(classifierDescription);
@@ -138,23 +148,34 @@ public class RAUtils{
     def opt = options.join(" ")
     opt = opt.replaceAll("\"","") // Remove pesky quotes...    
 
-    def classifierID = "${classifierName}${idx}".toString()
+    def classifierID = "${classifierName}${jobidx}".toString()
+    //def classifierID = classifierName
+    
     def outStr = """
-      name\t$classifierID
-      type\t$classifierName
-      label\t$classifierID
-      parameters\t$opt\n"""
+name\t$classifierID
+type\t$classifierName
+label\t$classifierID
+parameters\t$opt\n"""
       
     classifiersOut<<outStr;    
     return(classifierID);
   }
   
   /***
-  *
+  * name	gemcitabineJob1
+  * type	job
+  * task	Gemcitabine Response
+  * dataset	collisson2010paradigm_cl
+  * subgrouping	Gemcitabine response natural split
+  * classifier	Standard UCSC cNMF
+  * featureSelection	None
+  * accuracyType	Leave one out
+  * samples	YAPC,Tu8988T,Tu8988S,Tu8902,T3M4,SW1990,Suit2,Panc1,10.05,8.13,6.03,5.04,3.27,2.13,2.03,Mpanc96,Miapaca2,HupT4,HupT3,Hs766T,HPAF_II,HPAC,HCG25,Dan_G,CFPac1,Capan2,Capan1,BxPC3,ASPC1,Colo357,
+  * trainingAccuracies	NULL,1,1,0.448275862068966,NULL,1,1,1,1,NULL,1,NULL,1,1,NULL,1,1,NULL,1,NULL,1,1,NULL,1,1,1,NULL,NULL,NULL,0.896551724137931,
+  * testingAccuracies	NULL,1,1,0,NULL,1,1,1,1,NULL,1,NULL,1,1,NULL,0,1,NULL,1,NULL,1,1,NULL,0,0,1,NULL,NULL,NULL,1,  
   */
   def writeResults(results,classID,task,subgroup,idx){
   
-    
     def samplesOut = []
     def trainAcc = []
     def testingAcc = []
@@ -168,18 +189,20 @@ public class RAUtils{
     def training = trainAcc.join(",")
     def testing = testingAcc.join(",")
         
-    def resultsStr = """
-      name\t${task}Job${idx}\n
-      type\tjob\n
-      task\t${task} gi50 response\n
-      dataset\tgrayCellLine\n
-      subgrouping\t$subgroup\n
-      classifier\t$classID\n
-      featureSelection\tNone\n
-      accuracyType\tleave one out\n
-      samples\t$samples\n
-      trainingAccuracies\t$training\n
-      testingAccuracies\t$testing\n\n\n"""
+    def resultsStr = 
+
+"""
+name\t${task}Job${idx}
+type\tjob
+task\t${task}_gi50_response
+dataset\tgrayCellLine
+subgrouping\t$subgroup
+classifier\t$classID
+featureSelection\tNone
+accuracyType\t10x crossvalidation
+samples\t$samples
+trainingAccuracies\t$training
+testingAccuracies\t$testing\n"""
 
     resultsOut << resultsStr
   }

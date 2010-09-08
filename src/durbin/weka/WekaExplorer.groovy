@@ -346,7 +346,7 @@ class WekaExplorer{
   */ 
   Instances removeAttributesNotSelected(data,selectedAttributes){
     
-    err.println "SelectedAttributes: $selectedAttributes"
+    //err.println "SelectedAttributes: $selectedAttributes"
     
     // Remove all attributes that aren't selected 
     // Must preserve ID, however!!!  So explicitly add it to selected attributes...

@@ -139,7 +139,7 @@ class BioIntLoader{
       vals.each{if (it == null) err.println "ERROR: val is null. "}
     }
 
-
+    WekaAdditions.enable()
     data.setClassName(className)
 
     // Remove samples with missing or negative values...
