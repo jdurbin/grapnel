@@ -442,6 +442,7 @@ class WekaExplorer{
   /**
   * Apply Fisher linear discriminant 
   */ 
+  /* 
   Instances fisherFilter(data,numAttributes){
     // Apply Fisher criteria filter to data...
     def fisher = new FisherCriteriaFilter(data)
@@ -453,6 +454,7 @@ class WekaExplorer{
     err.println "New class index: $idx"
     return(filteredData)
   }
+  */
 
   /*
   * Returns a formatted comma separated string of values from an evaluation. 
