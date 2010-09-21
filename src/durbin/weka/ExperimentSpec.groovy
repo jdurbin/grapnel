@@ -25,7 +25,11 @@ class ExperimentSpec{
     classifierStr = fields[0]
 
     try{
-      classifier = WekaExplorer.classifierFromSpec(classifierStr)
+      if (classifierStr != "None"){      
+        classifier = WekaExplorer.classifierFromSpec(classifierStr)
+      }else{
+        classifier = null;
+      }
     }catch(Exception e){
       System.err.println "WekaExplorer.classifierFromSpec failed on:"
       System.err.println classifierStr

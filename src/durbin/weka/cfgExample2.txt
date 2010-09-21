@@ -24,6 +24,10 @@ expand{
 
 
 params{
+  
+  // Unique idenifier for this experiment.  
+  experimentID = "Test1"
+  
   allowNegativeClass = false
 
   cvFolds = 5
@@ -35,6 +39,8 @@ params{
   // This, too, could be part of experiments above... 
   discretizeCutoffs = [low:3,high:12]
   
+  // Root directory to save ROC .arff files for plotting or whatever. 
+  //rocDir = "/results/roc/"
   
   prefilter ="BRAF1,<1"
 }

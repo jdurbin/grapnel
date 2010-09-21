@@ -40,7 +40,10 @@ public class EvaluationResult{
 */ 
 public class CVUtils{
   
-    Evaluation eval;
+    // Evaluation2 is a modified version of weka Evaluation that saves
+    // the classifiers created in a cross-validation experiment for 
+    // later access. 
+    Evaluation2 eval;
 
     List<EvaluationResult> crossValidateModel(classifier,data,cvFolds,rng){
             
@@ -57,7 +60,7 @@ public class CVUtils{
       def results = new ArrayList<EvaluationResult>()
 
       // Perform cross-validation of the model..
-      eval = new Evaluation(data)
+      eval = new Evaluation2(data)
       def predictions = new StringBuffer()
       eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions,
         new Range("first,last"),false)
@@ -68,6 +71,9 @@ public class CVUtils{
 
       //System.err.println predictions
 
+      // KJD TODO: Now that I've broken down and made a fork, Evaluation2, I 
+      // could just add a more direct API into Evaluation2 for this...
+      
       // Output of predictions looks like:  
       // inst#     actual  predicted error prediction (ID)
       //     1      1:low      1:low       1 (P1)

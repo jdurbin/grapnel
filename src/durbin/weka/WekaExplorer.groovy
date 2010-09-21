@@ -456,38 +456,6 @@ class WekaExplorer{
   }
   */
 
-  /*
-  * Returns a formatted comma separated string of values from an evaluation. 
-  * The format of the returned string is: <br><br>
-  * 
-  * prefix,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc
-  *
-  */ 
-  String getFormattedEvaluationSummary(numInstances,eval){
-    def samples = numInstances
-    def pctCorrect = eval.pctCorrect() 
-    def precision1 = eval.precision(1)
-    def recall1 = eval.recall(1)    
-    def precision0 = eval.precision(0)
-    def recall0 = eval.recall(0)
-    def tp1 = eval.numTruePositives(1) as Integer
-    def fp1 = eval.numFalsePositives(1) as Integer
-    def tn1 = eval.numTrueNegatives(1) as Integer
-    def fn1 = eval.numFalseNegatives(1) as Integer
-    def rms = eval.rootMeanSquaredError()
-    def roc = eval.weightedAreaUnderROC()    
-    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%d,%d,%d,%d,%.4g,%.4g",
-              samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc)
-    
-    return(rval)    
-  }
-  
-  static String getFormattedSummaryHeading(){
-    def rval = "samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
-    return(rval)
-  }
-
-
   /****************************************************************************
   *                     SPECIAL/INFREQUENTLY USED                             *
   *****************************************************************************/
