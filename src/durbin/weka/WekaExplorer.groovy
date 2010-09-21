@@ -89,11 +89,14 @@ class WekaExplorer{
    * 
    *  weka.attributeSelection.InfoGainAttributeEval
    */
-   static def searchFromSpec(attributeSearchSpec){    
+   static def searchFromSpec(attributeSearchSpec){   
+     System.err.println("attributeSearchSpec: $attributeSearchSpec") 
      // Create a classifier from the name...
      def options = Utils.splitOptions(attributeSearchSpec)
      def searchName = options[0]
      options[0] = ""
+     System.err.println("searchName: $searchName")
+     System.err.println("options: $options")
      def search = ASSearch.forName(searchName,options) 
      return(search)
    }
