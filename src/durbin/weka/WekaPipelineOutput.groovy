@@ -17,19 +17,23 @@ class WekaPipelineOutput{
   * Returns a heading for the csv file.  MUST match exactly what is output by 
   * getFormattedEvaluationSummary. 
   */ 
-  static String getFormattedSummaryHeading(numFeatures){
+  static String getFormattedSummaryHeading(){
     def rval = "samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
     
+    return(rval)
+  }
+  
+  static String getAttributesHeading(numFeatures){
     def list = []
     if (numFeatures > 0){
       (0..<numFeatures).each{i->
         list << "Attribute$i" as String
       }
     }
-    rval = rval + ","+list.join(",")
-    
-    return(rval)
+    def rval = list.join(",")
+    return(rval)    
   }
+
 
 
   /****
