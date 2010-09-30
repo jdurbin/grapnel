@@ -27,6 +27,11 @@
 * m.numCells.blank[2] = 1.2
 * m.numCells.blank[1] = 5
 * 
+* WARNING:  The map bracket syntax **CREATES** an entry if one doesn't 
+* exist.  Care must be taken when checking for existence of a value for 
+* a particular cell that you do not inadvertently create a new entry. 
+*
+* 
 */
 class MultidimensionalMap extends LinkedHashMap {
     @Override
@@ -35,7 +40,18 @@ class MultidimensionalMap extends LinkedHashMap {
             put(key, new MultidimensionalMap())
         }
         return super.get(key)
-    }
+    }    
+}
+
+
+/****************
+*  Special case of MultidimensionalMap for the common 2D case...
+* 
+*  Differs from Table mainly in that it's completely dynamic, whereas 
+*  Table requires explicit dimensions up front. 
+* 
+*/ 
+class TwoDMap extends MultidimensionalMap{
     
     /**
     * Test to see if 2D map (the most common case) already contais
@@ -48,5 +64,36 @@ class MultidimensionalMap extends LinkedHashMap {
         if (!secondMap.keySet().contains(key2)) return(false);
         else return(true);
       }      
+    }
+    
+    
+    /**
+    * Print out a 2D table that has max keys in each direction...
+    */ 
+    def printTable(delimiter,nullVal){
+
+      def rowKeys = this.keySet()
+
+      // Find the union of all column keys...
+      def colKeys = [] as Set
+      rowKeys.each{rowKey->
+        colKeys = colKeys + this[rowKey].keySet()
+      }
+
+      // Print the heading...
+      print "Features$delimiter"
+      println colKeys.join(delimiter)
+
+      // Print the table proper...
+
+      rowKeys.each{rowKey->
+        def rowVals = []
+        colKeys.each{colKey->
+          def val = this[rowKey][colKey]
+          if (val == [:]) rowVals << nullVal
+          else rowVals << val
+        }
+        println rowVals.join(delimiter)        
+      }
     }
 }

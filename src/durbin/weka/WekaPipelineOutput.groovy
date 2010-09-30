@@ -222,6 +222,7 @@ class WekaPipelineOutput{
       out << "$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}"
     
       if (maxFeaturesToReport != 0){  
+        out << ","
         out << cvFeatureSelections(data,eval.getCVClassifiers(),maxFeaturesToReport)
       }      
       out<<"\n"      
