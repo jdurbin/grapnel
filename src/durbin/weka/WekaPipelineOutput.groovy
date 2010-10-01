@@ -181,7 +181,7 @@ class WekaPipelineOutput{
        
      // Append a summary line to a file. 
      def summaryLine = getFeatureOnlyEvaluationSummary(numInstances) // Basically a dummy record.
-     out << "$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}"
+     def lineOut = "$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}" as String
      
      if (maxFeaturesToReport != 0){                       
        def rankedAttrs = attributeSelection.rankedAttributes()
@@ -204,10 +204,12 @@ class WekaPipelineOutput{
          score = score.round(4)             
          attrList << "$attName~$score" as String
        }
-       out << ","
-       out << attrList.join(",")      
+       lineOut = lineOut + ","
+       lineOut = lineOut + attrList.join(",")
       }
-      out<<"\n"
+      lineOut = lineOut +"\n"      
+      out<<lineOut            // Build the entire string so that write is atomic...
+      out.flush()
     }
 
 
