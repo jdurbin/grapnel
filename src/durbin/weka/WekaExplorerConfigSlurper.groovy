@@ -46,7 +46,6 @@ class WekaExplorerConfigSlurper extends ConfigSlurper{
   
   def keys(){return(substitutionMap.keySet())}
   
-
   def WekaExplorerConfigSlurper(){
     super()
   }

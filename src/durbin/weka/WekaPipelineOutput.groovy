@@ -162,7 +162,7 @@ class WekaPipelineOutput{
     def pairs = []
     valueSortedKeys.eachWithIndex{attr,i -> 
       if (i < maxToReport){
-        pairs << "$attr:${attribute2Score[attr]}" 
+        pairs << "$attr~${attribute2Score[attr]}" 
       }
     }
     
@@ -183,7 +183,7 @@ class WekaPipelineOutput{
      def summaryLine = getFeatureOnlyEvaluationSummary(numInstances) // Basically a dummy record.
      out << "$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}"
      
-     if (maxFeaturesToReport != 0){  
+     if (maxFeaturesToReport != 0){                       
        def rankedAttrs = attributeSelection.rankedAttributes()
        def reportCount = 0;
        
@@ -202,8 +202,9 @@ class WekaPipelineOutput{
          def attName = data.attribute(attIdx).name()
          def score = attrRank[1] as Double
          score = score.round(4)             
-         attrList << "$attName:$score" as String
+         attrList << "$attName~$score" as String
        }
+       out << ","
        out << attrList.join(",")      
       }
       out<<"\n"

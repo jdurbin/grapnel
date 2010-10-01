@@ -93,6 +93,7 @@ class TwoDMap extends MultidimensionalMap{
           if (val == [:]) rowVals << nullVal
           else rowVals << val
         }
+        print  "$rowKey$delimiter"
         println rowVals.join(delimiter)        
       }
     }
