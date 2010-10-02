@@ -207,8 +207,8 @@ class WekaPipelineOutput{
        lineOut = lineOut + ","
        lineOut = lineOut + attrList.join(",")
       }
-      lineOut = lineOut +"\n"      
-      out<<lineOut            // Build the entire string so that write is atomic...
+      lineOut = lineOut +"**LINEFEED**\n" as String    
+      out << lineOut            // Build the entire string so that write is atomic...
       out.flush()
     }
 
