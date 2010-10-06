@@ -83,12 +83,18 @@
         </jar>
 	</target>
 
-
     <target name="install" depends="groovy">
  		<copy file="target/jar/durbinlib.jar" tofile="${env.HOME}/.groovy/lib/durbinlib.jar"/>
  		<copy todir="${env.HOME}/.groovy/lib/">
 			<fileset dir="lib/"/>
 		</copy>
     </target>
+
+		<target name="globalinstall" depends="groovy">
+	 		<copy file="target/jar/durbinlib.jar" tofile="${env.GROOVY_HOME}/lib/durbinlib.jar"/>
+	 		<copy todir="${env.GROOVY_HOME}/lib/">
+				<fileset dir="lib/"/>
+			</copy>
+	  </target>
 
 </project>
