@@ -103,33 +103,33 @@ class TwoDMap extends MultidimensionalMap{
     */ 
     def writeTable(fileName,delimiter,nullVal){
 
-      out = new File(fileName).newWriter()
+      new File(fileName).withWriter(){w->
 
-      def rowKeys = this.keySet()
+        def rowKeys = this.keySet()
 
-      // Find the union of all column keys...
-      def colKeys = [] as Set
-      rowKeys.each{rowKey->
-        colKeys = colKeys + this[rowKey].keySet()
-      }
-
-      // Print the heading...
-      out << "Features$delimiter"
-      out << colKeys.join(delimiter)
-      out << "\n"
-
-      // Print the table proper...
-
-      rowKeys.each{rowKey->
-        def rowVals = []
-        colKeys.each{colKey->
-          def val = this[rowKey][colKey]
-          if (val == [:]) rowVals << nullVal
-          else rowVals << val
+        // Find the union of all column keys...
+        def colKeys = [] as Set
+                  
+        rowKeys.each{rowKey->
+          colKeys = colKeys + this[rowKey].keySet()
         }
-        out << "$rowKey$delimiter"
-        out << rowVals.join(delimiter)        
-        out << "\n"
-      }
-    }        
+
+        // Print the heading...
+        w.write("Features$delimiter")
+        w.writeLine(colKeys.join(delimiter))
+
+        // Print the table proper...
+
+        rowKeys.each{rowKey->
+          def rowVals = []
+          colKeys.each{colKey->
+            def val = this[rowKey][colKey]
+            if (val == [:]) rowVals << nullVal
+            else rowVals << val
+          }
+          w.write("$rowKey$delimiter")
+          w.writeLine(rowVals.join(delimiter))
+        }
+      }        
+    }
 }
