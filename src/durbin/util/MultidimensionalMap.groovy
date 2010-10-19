@@ -97,4 +97,39 @@ class TwoDMap extends MultidimensionalMap{
         println rowVals.join(delimiter)        
       }
     }
+    
+    /**
+    * Write out a 2D table that has max keys in each direction...
+    */ 
+    def writeTable(fileName,delimiter,nullVal){
+
+      out = new File(fileName).newWriter()
+
+      def rowKeys = this.keySet()
+
+      // Find the union of all column keys...
+      def colKeys = [] as Set
+      rowKeys.each{rowKey->
+        colKeys = colKeys + this[rowKey].keySet()
+      }
+
+      // Print the heading...
+      out << "Features$delimiter"
+      out << colKeys.join(delimiter)
+      out << "\n"
+
+      // Print the table proper...
+
+      rowKeys.each{rowKey->
+        def rowVals = []
+        colKeys.each{colKey->
+          def val = this[rowKey][colKey]
+          if (val == [:]) rowVals << nullVal
+          else rowVals << val
+        }
+        out << "$rowKey$delimiter"
+        out << rowVals.join(delimiter)        
+        out << "\n"
+      }
+    }        
 }
