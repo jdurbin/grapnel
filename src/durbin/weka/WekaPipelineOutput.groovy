@@ -18,7 +18,7 @@ class WekaPipelineOutput{
   * getFormattedEvaluationSummary. 
   */ 
   static String getFormattedSummaryHeading(){
-    def rval = "samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
+    def rval = "jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
     
     return(rval)
   }
@@ -91,7 +91,7 @@ class WekaPipelineOutput{
   * Returns a string containing the ordered and selected features and their 
   * feature selection scores.  The output will be like: 
   * 
-  * 68_IHH N/PTCH1:0.6930,105_BMP2-4/CHRDL1:0.64456,132_CELL_MIGRATION:0.4630,...
+  * 68_IHH N/PTCH1~0.6930,105_BMP2-4/CHRDL1~0.64456,132_CELL_MIGRATION~0.4630,...
   * 
   * 
   */ 
@@ -122,7 +122,10 @@ class WekaPipelineOutput{
       rankedAttrs.each{attrRank->
         
         // Only record maxToReport then skip over rest...
-        if (reportCount >= maxToReport) return;
+        // Negative maxToReport disables this test...
+        if (maxToReport >= 0){
+          if (reportCount >= maxToReport) return;
+        }
         reportCount++
         
         // +1 because the CV was done on Filtered instances that have removed 
@@ -170,18 +173,18 @@ class WekaPipelineOutput{
   }
 
   /****
-   * Appends a results summary line for AttributeSelection only experiments 
+   * Appends a results summary line for AttributeSelection ONLY experiments 
    * to the output stream out. 
    *
    * KJD TODO: Need to add jobID... both job# and cfgID
    */ 
-   static void appendAttributeSelectionSummaryLine(data,out,
+   static void appendAttributeSelectionSummaryLine(jobIdx,data,out,
      numInstances,experiment,
      attributeSelection,maxFeaturesToReport){
        
      // Append a summary line to a file. 
      def summaryLine = getFeatureOnlyEvaluationSummary(numInstances) // Basically a dummy record.
-     def lineOut = "$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}" as String
+     def lineOut = "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}" as String
      
      if (maxFeaturesToReport != 0){                       
        def rankedAttrs = attributeSelection.rankedAttributes()
@@ -190,8 +193,11 @@ class WekaPipelineOutput{
        def attrList = []
        def keySet = [] as Set
        rankedAttrs.each{attrRank->
-         // Only record maxToReport then skip over rest...
-         if (reportCount >= maxFeaturesToReport) return;
+        // Only record maxToReport then skip over rest...
+        // Negative maxFeaturesToReport disables this test.  
+        if (maxFeaturesToReport >= 0){
+          if (reportCount >= maxFeaturesToReport) return;
+        }
          reportCount++
 
          // +1 because the CV was done on Filtered instances that have removed 
@@ -207,7 +213,7 @@ class WekaPipelineOutput{
        lineOut = lineOut + ","
        lineOut = lineOut + attrList.join(",")
       }
-      lineOut = lineOut +"12345678987654321\n" as String    
+      lineOut = lineOut +"\n" as String    
       out << lineOut            // Build the entire string so that write is atomic...
     }
 
@@ -218,11 +224,12 @@ class WekaPipelineOutput{
   *
   * KJD TODO: Need to add jobID... both job# and cfgID
   */ 
-  static void appendSummaryLine(data,out,numInstances,experiment,eval,maxFeaturesToReport){
+  static void appendSummaryLine(jobIdx,data,out,numInstances,experiment,eval,maxFeaturesToReport){
       // Append a summary line to a file. 
       def summaryLine = getFormattedEvaluationSummary(numInstances,eval)
-      out << "$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}"
+      out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}"
     
+      // Figure out the feature selections across cross validation folds...
       if (maxFeaturesToReport != 0){  
         out << ","
         out << cvFeatureSelections(data,eval.getCVClassifiers(),maxFeaturesToReport)
