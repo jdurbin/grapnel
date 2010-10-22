@@ -99,7 +99,7 @@ class WekaPipelineOutput{
     
     def attList = [] 
     
-     
+
     // The classifiers that reach the cross validation code will be 
     // twice wrapped.   Once as an attribute selected classifier, and 
     // again as a filtered classifier (to remove String ID)
@@ -122,10 +122,8 @@ class WekaPipelineOutput{
       rankedAttrs.each{attrRank->
         
         // Only record maxToReport then skip over rest...
-        // Negative maxToReport disables this test...
-        if (maxToReport >= 0){
-          if (reportCount >= maxToReport) return;
-        }
+				//System.err.println "maxToReport: $maxToReport\treportCount: $reportCount"
+        if (reportCount >= maxToReport) return;
         reportCount++
         
         // +1 because the CV was done on Filtered instances that have removed 
@@ -159,16 +157,17 @@ class WekaPipelineOutput{
         intersection = intersection.intersect(keySet)
       }      
     }
-    
+
+
     // Scores 
     def valueSortedKeys = attribute2Score.keySet().sort{-attribute2Score[it]}
+
     def pairs = []
     valueSortedKeys.eachWithIndex{attr,i -> 
       if (i < maxToReport){
         pairs << "$attr~${attribute2Score[attr]}" 
       }
-    }
-    
+    }    
     return(pairs.join(","))  
   }
 
@@ -194,11 +193,8 @@ class WekaPipelineOutput{
        def keySet = [] as Set
        rankedAttrs.each{attrRank->
         // Only record maxToReport then skip over rest...
-        // Negative maxFeaturesToReport disables this test.  
-        if (maxFeaturesToReport >= 0){
-          if (reportCount >= maxFeaturesToReport) return;
-        }
-         reportCount++
+        if (reportCount >= maxFeaturesToReport) return;
+        reportCount++
 
          // +1 because the CV was done on Filtered instances that have removed 
          // the 0th (ID) attribute.  KJD: While in practice I have always been 
