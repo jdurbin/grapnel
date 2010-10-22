@@ -6,6 +6,8 @@ import weka.core.converters.*
 import weka.core.*
 import weka.attributeSelection.*;
 
+import durbin.util.*;
+
 
 
 /***************************
@@ -23,9 +25,13 @@ class WekaPipelineOutput{
     return(rval)
   }
   
-  static String getAttributesHeading(numFeatures){
+  static String getAttributesHeading(dataFile,maxFeatures){
+	
+		// KJD TODO:  actually fill in real headings, eh? 
+		def numFeatures =  FileUtils.fastCountLines(dataFile) -1; // Minus 1 for heading...
+	
     def list = []
-    if (numFeatures > 0){
+    if (maxFeatures > 0){
       (0..<numFeatures).each{i->
         list << "Attribute$i" as String
       }
