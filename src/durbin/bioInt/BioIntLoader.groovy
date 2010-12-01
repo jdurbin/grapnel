@@ -219,6 +219,17 @@ class BioIntLoader{
   }
 
 
+	/****
+	* Get a list of the data tables in bioInt... these are essentially the raw datasets. 
+	*/ 
+	def getDataTables(){
+		def sql = "select data_table from datasets"
+		def dataTables = query(db,sql)
+		return(dataTables)
+	}
+
+
+
   /**
   * Based on the feature index and name maps, create attributes for the Instances.  
   */ 

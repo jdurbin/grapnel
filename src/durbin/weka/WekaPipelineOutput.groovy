@@ -30,7 +30,7 @@ class WekaPipelineOutput{
 		// KJD TODO:  actually fill in real headings, eh? 
 		def numFeatures =  FileUtils.fastCountLines(dataFile) -1; // Minus 1 for heading...
 	
-		System.err.println "$numFeatures in data.  reporting a maximum of $maxFeatures"
+		System.err.println "$numFeatures attributes in data.  reporting a maximum of $maxFeatures"
 	
     def list = []
     if (maxFeatures > 0){
