@@ -158,7 +158,7 @@ subgroupsOut << outStr
     if (recordedClassifiers.contains(classifierDescription)) return(null);
     else recordedClassifiers.add(classifierDescription);
     
-		opt = getClassifierOptions(classifierDescription)
+		def opt = getClassifierOptions(classifierDescription)
 
     def classifierID = "${classifierName}${jobidx}".toString()
     //def classifierID = classifierName
