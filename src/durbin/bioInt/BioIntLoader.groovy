@@ -21,6 +21,9 @@ class BioIntLoader{
  
   def db;
   def err = System.err // sugar
+
+
+	// Probably will be deprecated in light of better queries...
   def featureId2NameMap;
   def featureId2IdxMap;
   def sampleID2ClassVal;
@@ -51,64 +54,6 @@ class BioIntLoader{
     def rvalDB = Sql.newInstance(server,user,pass,dbdriver)
     return(rvalDB)
   }
-
-
-/***
-* Returns the clinical data for a given dataset as a 2D map of clinical features x samples
-*/ 
-def getClinicalAsTwoDMap(datasetName){
-	def sql = """                                                                                                             
-	select s.name,f.name,c.val                                                                                            
-	from samples as s, features as f, clinicalData as c, ${datasetNames} as d                                                  
-	where c.sample_id = d.sample_id and                                                                                   
-	      s.id = d.sample_id and                                                                                          
-	      c.feature_id = f.id                                                                                             
-	""" as String
-
-	def table = new TwoDMap()
-	bioint.db.eachRow(sql){
-	     def val = it.val
-	     def sname = it[0]
-	     def fname = it[1]
-	     table[fname][sname] = val
-	}
-	return(table)
-}
-
-
-
-/**
-* Returns the data table as a 2D Map of features(genes) x samples
-*/ 
-def getDataAsTwoDMap(datasetName){
-
-	// Here's some code that works, does the join, then stuffs things into a TwoDMap
-	// Takes only 33sec and returns 96 samples x 11702 features.  
-	def sql = """
-	select s.name,f.feature_name,d.val
-	from samples as s,${datasetName} as d,analysisFeatures as f
-	where  d.sample_id = s.id and f.id = d.feature_id
-	""" as String
-
-	def table = new TwoDMap()
-	db.eachRow(sql){
-	    def sname = it[0]
-	    def fname = it[1]
-	    table[fname][sname] = it[2]
-	}
-	return(table)
-
-	// A decent way to write table out to a file
-	//table.writeTable("lin2.txt","\t","NA")
-}
-
-
-/*************************************************************************
-* Below is sort of pre-1.0 version of code.  I think most of it can be 
-* accomplished better with better queries. 
-* 
-**************************************************************************/
-
     
   /***
   * Queries the bioInt database and builds a set of instances based on a given 
