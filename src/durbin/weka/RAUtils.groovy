@@ -158,6 +158,7 @@ subgroupsOut << outStr
     if (recordedClassifiers.contains(classifierDescription)) return(null);
     else recordedClassifiers.add(classifierDescription);
     
+		def classifierName = getClassifierName(classifierDescription)
 		def opt = getClassifierOptions(classifierDescription)
 
     def classifierID = "${classifierName}${jobidx}".toString()
@@ -173,6 +174,12 @@ parameters\t$opt\n"""
     return(classifierID);
   }
   
+def getClassifierName(description){
+	def options = Utils.splitOptions(description)
+  def classifierName = options[0]
+	return(classifierName)
+}
+
 
 def getClassifierOptions(description){
 	def options = Utils.splitOptions(description)
