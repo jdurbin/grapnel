@@ -218,7 +218,7 @@ def getClassifierOptions(description){
     def training = trainAcc.join(",")
     def testing = testingAcc.join(",")
 
-		opt = getClassifierOptions(classifierDescription)
+		def opt = getClassifierOptions(classifierDescription)
         
     def resultsStr = 
 
