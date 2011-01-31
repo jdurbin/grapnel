@@ -24,6 +24,10 @@ class BioIntDB{
 	def db;
   def err = System.err // sugar
 
+	def BioIntDB(confFile,port,dbName){
+		db = newConnection(confFile,port,dbName);
+	}
+
 	/**
   * Make a connection to the database using user and password found in confFile, 
   * (e.g. .hg.conf)
