@@ -24,6 +24,27 @@ class BioIntDB{
 	def db;
   def err = System.err // sugar
 
+	/**
+  * Make a connection to the database using user and password found in confFile, 
+  * (e.g. .hg.conf)
+  */ 
+  def newConnection(confFile,port,dbName){
+        
+    // Look up user and pass from .hg.conf
+    def env = System.getenv()
+    def home = env['HOME']
+    def props = new Properties()
+    props.load(new FileInputStream("$home/$confFile")); 
+    def user = props['central.user']
+    def pass = props['central.password']
+
+    //def server = "jdbc:mysql://127.0.0.1:3306/bioInt"
+    def server = "jdbc:mysql://127.0.0.1:$port/$dbName"
+    def dbdriver = "com.mysql.jdbc.Driver"
+    def rvalDB = Sql.newInstance(server,user,pass,dbdriver)
+    return(rvalDB)
+  }
+
 
 	/***
 	* Returns the clinical data for a given dataset as a 2D map of clinical features x samples
