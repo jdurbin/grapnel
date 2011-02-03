@@ -60,6 +60,7 @@ class TwoDMap extends MultidimensionalMap{
 		def colKeySet(){
 			// Find the union of all column keys...
       def colKeys = [] as Set
+			def rowKeys = rowKeySet()
       rowKeys.each{rowKey->
         colKeys = colKeys + this[rowKey].keySet()
       }
