@@ -53,6 +53,27 @@ class MultidimensionalMap extends LinkedHashMap {
 */ 
 class TwoDMap extends MultidimensionalMap{
     
+		def rowKeySet(){
+			return(this.keySet())
+		}
+		
+		def colKeySet(){
+			// Find the union of all column keys...
+      def colKeys = [] as Set
+      rowKeys.each{rowKey->
+        colKeys = colKeys + this[rowKey].keySet()
+      }
+			return(colKeys)
+		}
+
+		def rows(){
+			return(rowKeySet.size())
+		}
+		
+		def cols(){			
+			return(colKeys().size())
+		}
+
     /**
     * Test to see if 2D map (the most common case) already contais
     * the given keys.  Need to generalize to n keys...
@@ -75,10 +96,12 @@ class TwoDMap extends MultidimensionalMap{
       def rowKeys = this.keySet()
 
       // Find the union of all column keys...
-      def colKeys = [] as Set
-      rowKeys.each{rowKey->
-        colKeys = colKeys + this[rowKey].keySet()
-      }
+//      def colKeys = [] as Set
+ //     rowKeys.each{rowKey->
+  //      colKeys = colKeys + this[rowKey].keySet()
+   //   }
+
+			colKeys = colKeySet()
 
       // Print the heading...
       print "Features$delimiter"

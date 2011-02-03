@@ -54,6 +54,8 @@ class BioIntDB{
 	* Returns the clinical data for a given dataset as a 2D map of clinical features x samples
 	*/ 
 	def getClinicalAsTwoDMap(datasetName){
+		
+		// This SQL statement is fucked... runs out of memory.
 		def sql = """                                                                                                             
 		select s.name,f.name,c.val                                                                                            
 		from samples as s, features as f, clinicalData as c, ${datasetName} as d                                                  
