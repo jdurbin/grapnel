@@ -67,11 +67,11 @@ class TwoDMap extends MultidimensionalMap{
 		}
 
 		def rows(){
-			return(rowKeySet.size())
+			return(rowKeySet().size())
 		}
 		
 		def cols(){			
-			return(colKeys().size())
+			return(colKeySet().size())
 		}
 
     /**
@@ -101,7 +101,7 @@ class TwoDMap extends MultidimensionalMap{
   //      colKeys = colKeys + this[rowKey].keySet()
    //   }
 
-			colKeys = colKeySet()
+			colKeys = this.colKeySet()
 
       // Print the heading...
       print "Features$delimiter"
