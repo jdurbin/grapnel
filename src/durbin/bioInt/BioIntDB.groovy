@@ -146,6 +146,17 @@ class BioIntDB{
 		return(dataTables)
 	}
  
+ /**
+  * Perform the sql query and return the results as a list. 
+  */ 
+  def query(db,sql){
+    def rlist = []
+    db.eachRow(sql as String){
+      if ((it[0] == null) || (it[0] == 'null')) return(null)
+      rlist << it[0]
+    }
+    return(rlist)
+  }
 	
 }
 
