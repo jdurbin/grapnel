@@ -49,30 +49,78 @@ class BioIntDB{
     return(rvalDB)
   }
 
-
 	/***
 	* Returns the clinical data for a given dataset as a 2D map of clinical features x samples
 	*/ 
-	def getClinicalAsTwoDMap(datasetName){
+	def getAllFeaturesVsSamples2DMap(){
 		
-		// This SQL statement is fucked... runs out of memory.
-		def sql = """                                                                                                             
-		select s.name,f.name,c.val                                                                                            
-		from samples as s, features as f, clinicalData as c, ${datasetName} as d                                                  
-		where c.sample_id = d.sample_id and                                                                                   
-	      	s.id = d.sample_id and                                                                                          
-	      	c.feature_id = f.id                                                                                             
-					""" as String
+		// 11.7 seconds to read 511529 rows... all samples vs all clinical features
+		sql = """
+		select s.name,f.name,c.val 
+		from samples as s, features as f, clinicalData as c
+		where s.id =c.sample_id and c.feature_id = f.id;
+		""" as String
 
 		def table = new TwoDMap()
-		this.db.eachRow(sql){
-	     	def val = it.val
-	     	def sname = it[0]
-	     	def fname = it[1]
-	     	table[fname][sname] = val
+		err.println "Reading clinical data..."
+		def count = 0
+
+		db.eachRow(sql){
+	     def val = it.val
+	     def sname = it[0]
+	     def fname = it[1]
+	     table[fname][sname] = val
 		}
-		return(table)
+		return(table);
 	}
+
+
+	/***
+	* Returns the clinical data just for a given dataset as a 2D map of 
+	* clinical features x samples.  2.6 seconds for 34x118 data.
+	*/ 
+	def getFeaturesVsSamples2DMap(int datasetId){
+		// Now restrict the query to just the samples in the given dataset...
+		// 2.68 seconds... 34 features, 118 samples!!! yea!
+		sql = """
+		select s.name,f.name,c.val 
+		from samples as s, features as f, clinicalData as c
+		where s.id =c.sample_id and c.feature_id = f.id and s.dataset_id = ${datasetId};
+		""" as String
+
+		def table = new TwoDMap()
+		err.println "Reading clinical data..."
+		def count = 0
+
+		db.eachRow(sql){
+	     def val = it.val
+	     def sname = it[0]
+	     def fname = it[1]
+	     table[fname][sname] = val
+		}
+		return(table);
+	}	
+	
+	/**
+	* Get features vs samples by dataset NAME.
+	*/ 
+	def getFeaturesVsSamples2DMap(String datasetName){
+		getFeaturesVsSamples2DMap(getDatasetID(datasetName) as int)
+	}
+	
+
+	/**
+	* Look up the dataset id for the named dataset. 
+	*/ 
+	def getDatasetID(datasetName){
+		sql = "select id from datasets where datasets.data_table  = '${datasetName}'" as String
+		def id
+		db.eachRow(sql){
+			id = it[0] 
+		}
+		return(id as int)
+	}
+	
 }
 
 /**
