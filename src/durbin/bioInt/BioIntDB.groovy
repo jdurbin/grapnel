@@ -121,6 +121,32 @@ class BioIntDB{
 		return(id as int)
 	}
 	
+	
+	/** 
+  *  Check to see if the given tablename is in datasets.data_table
+  */ 
+  def isTableInDatasets(db,table){
+
+    err.println "isTableInDatasets: $table"
+
+    def sql = "select data_table from datasets where data_table='$table'" as String
+    def rows = db.rows(sql)
+    if (rows == null) err.println "rows is null??"        
+    if (rows.size() > 0) return(true)
+    else return(false)
+  }
+
+
+	/****
+	* Get a list of the data tables in bioInt... these are essentially the raw datasets. 
+	*/ 
+	def getDataTables(){
+		def sql = "select data_table from datasets"
+		def dataTables = query(db,sql)
+		return(dataTables)
+	}
+ 
+	
 }
 
 /**
