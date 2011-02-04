@@ -113,7 +113,7 @@ class BioIntDB{
 	* Look up the dataset id for the named dataset. 
 	*/ 
 	def getDatasetID(datasetName){
-		sql = "select id from datasets where datasets.data_table  = '${datasetName}'" as String
+		def sql = "select id from datasets where datasets.data_table  = '${datasetName}'" as String
 		def id
 		db.eachRow(sql){
 			id = it[0] 
