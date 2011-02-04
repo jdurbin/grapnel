@@ -52,10 +52,10 @@ class BioIntDB{
 	/***
 	* Returns the clinical data for a given dataset as a 2D map of clinical features x samples
 	*/ 
-	def getAllFeaturesVsSamples2DMap(){
+	def getAllFeaturesVsSamplesTwoDMap(){
 		
 		// 11.7 seconds to read 511529 rows... all samples vs all clinical features
-		sql = """
+		def sql = """
 		select s.name,f.name,c.val 
 		from samples as s, features as f, clinicalData as c
 		where s.id =c.sample_id and c.feature_id = f.id;
@@ -79,10 +79,10 @@ class BioIntDB{
 	* Returns the clinical data just for a given dataset as a 2D map of 
 	* clinical features x samples.  2.6 seconds for 34x118 data.
 	*/ 
-	def getFeaturesVsSamples2DMap(int datasetId){
+	def getFeaturesVsSamplesTwoDMap(int datasetId){
 		// Now restrict the query to just the samples in the given dataset...
 		// 2.68 seconds... 34 features, 118 samples!!! yea!
-		sql = """
+		def sql = """
 		select s.name,f.name,c.val 
 		from samples as s, features as f, clinicalData as c
 		where s.id =c.sample_id and c.feature_id = f.id and s.dataset_id = ${datasetId};
@@ -104,8 +104,8 @@ class BioIntDB{
 	/**
 	* Get features vs samples by dataset NAME.
 	*/ 
-	def getFeaturesVsSamples2DMap(String datasetName){
-		getFeaturesVsSamples2DMap(getDatasetID(datasetName) as int)
+	def getFeaturesVsSamplesTwoDMap(String datasetName){
+		getFeaturesVsSamplesTwoDMap(getDatasetID(datasetName) as int)
 	}
 	
 
