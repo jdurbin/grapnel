@@ -86,6 +86,7 @@ public class CVUtils{
         //def m = line =~ /\d:(.+).*\d:(\w+).*\((.+)\)/         
         def m = line =~ /\d:(.+).*\d:(\w+)(\s+.*\s+)(\d.*)\s.*\((.+)\)/   
         def actual = m[0][1]
+				actual = actual.trim() // remove leading/trailing whitespace
         def predicted = m[0][2]
         //def spaces = m[0][3] // or + 
         def probability = m[0][4]

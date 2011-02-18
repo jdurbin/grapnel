@@ -45,6 +45,8 @@ expand{
     classifier = [
      'SMO -X {0,2,1} -L {0,2,1} -K $kernel'
     ]
+
+		discretization = ['median','quartile',"3,12"]
     
     // An experiment spec is a string like:
     //
@@ -53,7 +55,7 @@ expand{
     // These can be hand generated and put in a file or from a config like this one. 
     //  
     experiments = [
-      '$classifier,$eval,$asSearch,{1,200,10},PLATINUM_FREE_INTERVAL_MONTHS'
+      '$classifier,$eval,$asSearch,{1,200,10},PLATINUM_FREE_INTERVAL_MONTHS,$discretization'
     ]  
 }
 

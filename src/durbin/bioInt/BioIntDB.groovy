@@ -17,6 +17,9 @@ import durbin.weka.*
 * Class to interact with BioInt database.  
 * 
 * For class that creates weka Instances directly, see BioIntLoader
+* 
+* I will try to localize all database queries in one of the classes under durbin.bioint 
+* to help a tiny bit with maintainability.  
 *
 */
 class BioIntDB{
@@ -50,7 +53,7 @@ class BioIntDB{
   }
 
 	/***
-	* Returns the clinical data for a given dataset as a 2D map of clinical features x samples
+	* Returns the clinical data for all datasets as a 2D map of clinical features x samples
 	*/ 
 	def getAllFeaturesVsSamplesTwoDMap(){
 		
@@ -74,6 +77,35 @@ class BioIntDB{
 		return(table);
 	}
 
+	/****
+	* Returns the genomic data for a given dataset as a 2D map of genes x samples
+	*/ 
+	def getGenesVsSamplesTwoDMap(dbTable){
+		def sql = """                                                                                                             
+		select s.name,f.feature_name,d.val                                                                                    
+		from samples as s,${dbTable} as d,analysisFeatures as f                                                               
+		where  d.sample_id = s.id and f.id = d.feature_id                                                                     
+		""" as String
+
+		def table = new TwoDMap()
+		db.eachRow(sql){
+		    def sname = it[0]
+		    def fname = it[1]
+		    table[fname][sname] = it[2]
+		}
+		return(table);
+	}
+
+	/***
+	* Get wekaMineResults for a particular dataset...
+	*/ 
+	def getWekaMineResults(int datasetId){
+		def sql = """
+			select * from wekaMineResults where dataset_id = $datasetId
+		""" as String
+		def rows = db.rows(sql);		
+		return(rows);
+	}
 
 	/***
 	* Returns the clinical data just for a given dataset as a 2D map of 
@@ -135,6 +167,36 @@ class BioIntDB{
     if (rows.size() > 0) return(true)
     else return(false)
   }
+
+	/***
+	* Returns the datasets data as a TwoDMap datasets by 
+	* dataset attributes (name, type, id, etc.)
+	*/ 
+	def getDataSetInfoTwoDMap(){
+		def sql = """
+		select d.name,d.data_table,d.num_samples,t.name,dt.name
+		from datasets as d, dataTypes as dt, tissues as t		
+		where d.type_id = dt.id and d.tissue_id = t.id
+		""" as String
+
+		def table = new TwoDMap()
+		err.println "Reading clinical data..."
+		def count = 0
+
+		db.eachRow(sql){
+			def dataname = it[0]
+			def datatable = it[1]
+			def numsamples = it[2]
+			def tissuetype = it[3]
+			def datatype = it[4]
+						 
+			table['Name'][datatable] = dataname						
+	    table['Tissue'][datatable] = tissuetype
+		  table['DataType'][datatable] = datatype
+			table['NumSamples'][datatable] = numsamples
+		}
+		return(table);
+	}
 
 
 	/****

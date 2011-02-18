@@ -346,7 +346,6 @@ class WekaExplorer{
 
   /**
   * Remove all the attributes from data except those named in selectedAttributes
-  *
   */ 
   Instances removeAttributesNotSelected(data,selectedAttributes){
     
@@ -356,7 +355,7 @@ class WekaExplorer{
     // Must preserve ID, however!!!  So explicitly add it to selected attributes...
     selectedAttributes.add("ID")
     def attrIndicesStr = IU.attributeNames2Indices(data,selectedAttributes)
-    err.println "Removing attributes not in set: "+attrIndicesStr
+    err.println "Removing attributes except current class: "+attrIndicesStr
     def remove = new Remove();
     remove.setAttributeIndices(attrIndicesStr);
     remove.setInvertSelection(true); // Remove everything not in this list. 

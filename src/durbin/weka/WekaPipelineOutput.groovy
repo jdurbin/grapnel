@@ -221,27 +221,78 @@ class WekaPipelineOutput{
       out << lineOut            // Build the entire string so that write is atomic...
     }
 
-
-
   /****
   * Appends a results summary line to the output stream out
   *
-  * KJD TODO: Need to add jobID... both job# and cfgID
   */ 
-  static void appendSummaryLine(jobIdx,data,out,numInstances,experiment,eval,maxFeaturesToReport){
+  static void appendSummaryLine(jobIdx,data,out,numInstances,experiment,eval){
       // Append a summary line to a file. 
       def summaryLine = getFormattedEvaluationSummary(numInstances,eval)
-      out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}"
-    
+      out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute},${experiment.discretization}"    
+      out<<"\n"      
+  } 
+
+ 	/****
+  * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
+  */ 
+  static void appendFeaturesLine(jobIdx,data,out,numInstances,experiment,eval,maxFeaturesToReport){
+      // Append a summary line to a file. 
+      def summaryLine = getFormattedEvaluationSummary(numInstances,eval)
+      out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute},${experiment.discretization}"
+
       // Figure out the feature selections across cross validation folds...
       if (maxFeaturesToReport != 0){  
         out << ","
         out << cvFeatureSelections(data,eval.getCVClassifiers(),maxFeaturesToReport)
       }      
       out<<"\n"      
-  } 
+  }
+  	
+ 	/****
+  * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
+
+  */ 
+  static void appendSamplesLine(jobIdx,data,out,numInstances,experiment,eval,results){
+      // Append a summary line to a file. 
+      def summaryLine = getFormattedEvaluationSummary(numInstances,eval)
+      out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute},${experiment.discretization}"
+			
+			if (results.size() >0){						
+				results.each{r->
+					out<<","
+					def sampleID = r.instanceID
+					def actual = r.actual
+					def predicted = r.predicted
+					//err.println "ACTUAL{$actual} PREDICTED{$predicted}"
+					def probability = r.probability
+					def resultStr = "$sampleID~$actual;$predicted;$probability"
+					out<<resultStr
+				}
+			}			
+      out<<"\n"      
+  }
+
+	/*
+	* samples	YAPC,Tu8988T,Tu8988S,Tu8902,T3M4,SW1990,Suit2,Panc1,10.05,8.13,6.03,5.04,3.27,2.13,2.03,Mpanc96,Miapaca2,HupT4,HupT3,Hs766T,HPAF_II,HPAC,HCG25,Dan_G,CFPac1,Capan2,Capan1,BxPC3,ASPC1,Colo357,
+  * trainingAccuracies	NULL,1,1,0.448275862068966,NULL,1,1,1,1,NULL,1,NULL,1,1,NULL,1,1,NULL,1,NULL,1,1,NULL,1,1,1,NULL,NULL,NULL,0.896551724137931,
+  * testingAccuracies	NULL,1,1,0,NULL,1,1,1,1,NULL,1,NULL,1,1,NULL,0,1,NULL,1,NULL,1,1,NULL,0,0,1,NULL,NULL,NULL,1,  
   
+  def writeResults(classifierDescription,results,classID,task,subgroup,idx){
   
+    def samplesOut = []
+    def trainAcc = []
+    def testingAcc = []
+    results.each{r->
+      samplesOut<<r.instanceID
+      trainAcc << "0"
+      if (r.isMatch) testingAcc << "1"
+      else testingAcc << "0"
+    }
+    def samples = samplesOut.join(",")
+    def training = trainAcc.join(",")
+    def testing = testingAcc.join(",")
+	*/
+
   static void saveROC(eval,rocDir,className,numFeatures){
    // Save the ROC values for later plotting. 
     ThresholdCurve tc = new ThresholdCurve();

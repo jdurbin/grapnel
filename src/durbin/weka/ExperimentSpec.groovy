@@ -5,6 +5,9 @@ import weka.attributeSelection.*
 
 /**
 * Class to hold a single experiment specification. 
+* 
+* Currently each line is hard coded with classifier, attributeEval, etc. 
+* Should replace with a map from these feature names to their values. 
 */ 
 class ExperimentSpec{
    def classifier
@@ -13,6 +16,8 @@ class ExperimentSpec{
    def numAttributes
    def classAttribute
    
+	 def discretization
+
    // Just to have something handy to print
    def classifierStr
    def attrEvalStr
@@ -44,6 +49,7 @@ class ExperimentSpec{
     
     numAttributes = (fields[3] as double) as int
     classAttribute = fields[4]     
+		discretization = fields[5]
    }   
    
    String toString(){
