@@ -15,7 +15,7 @@ class ExperimentSpec{
    def attributeSearch
    def numAttributes
    def classAttribute
-   
+
 	 def discretization
 
    // Just to have something handy to print
