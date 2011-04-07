@@ -23,6 +23,7 @@ import weka.classifiers.rules.*
 import weka.classifiers.mi.*
 import weka.classifiers.lazy.*
 import weka.classifiers.functions.suportVector.*
+import weka.classifiers.meta.FilteredClassifier;
 
 import weka.attributeSelection.*
 
@@ -67,6 +68,19 @@ class WekaExplorer{
     def classifier = Classifier.forName(classifierName,options) 
     return(classifier)
   }
+
+	static def filteredClassifierFromClassifier(classifier){
+	 // Create a classifier from the name...
+    // By using filtered classifer to remove ID, the cross-validation
+    // wrapper will keep the original dataset and keep track of the mapping 
+    // between the original and the folds (minus ID). 
+    def filteredClassifier = new FilteredClassifier()
+    def removeTypeFilter = new RemoveType();  
+        
+    filteredClassifier.setClassifier(classifier)
+    filteredClassifier.setFilter(removeTypeFilter)
+		return(filteredClassifier)
+	}
   
   /**
   *  Creae a attribute evaluation from the command-line evaluation specification
@@ -393,7 +407,7 @@ class WekaExplorer{
   * Default is true, meaning that negative class values will be treated
   * as missing class values and be removed. 
   */ 
-  Instances instancesFromClinicalAndGenomicFiles(dataFile,clinicalFile,selectedClinical){
+  Instances instancesFromClinicalAndGenomicFiles(dataFile,clinicalFile,selectedAttributes){
     def pipeline = new WekaExplorer(className)
     def data = pipeline.readFromTable(dataFile)
     def clinicalData = pipeline.readFromTable(clinicalFile)

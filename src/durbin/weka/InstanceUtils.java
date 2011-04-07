@@ -139,7 +139,8 @@ public class InstanceUtils {
 	*  Takes a list of attribute names and converts them into a string representation
 	*  of a list of attribute indices sutible for input to filters and the such. 
 	*/
-	public static String attributeNames2Indices(Instances data,Collection<String> names){
+	public static String attributeNames2Indices(Instances data,Collection<String> names) 
+		throws Exception{
 	  
 	  // DEBUG  List all the attributes...
     //Enumeration attrs = data.enumerateAttributes();	  
@@ -147,6 +148,8 @@ public class InstanceUtils {
     //  Attribute a = (Attribute) attrs.nextElement();
 	  //  System.err.println("arr:"+a.name());
     //}
+
+		//System.err.println("KJD DEBUG: names: "+names);
 	  	  	  	  
 	  List<Integer> indices = new ArrayList<Integer>();
 	  for(String name: names){
@@ -154,6 +157,9 @@ public class InstanceUtils {
 	    //System.err.println("name: "+name);
 	   	      
 	    Attribute attribute = data.attribute(name);
+	
+		  if (attribute == null) throw new Exception("No attribute with name: "+name);
+	
 	    int idx = attribute.index();
 	    
 	    //System.err.println("\tidx:"+idx);
@@ -161,6 +167,9 @@ public class InstanceUtils {
 	    // +1 because the attribute numbers given externally are 1 based...	    
 	    indices.add(idx+1);
 	  }
+	
+		//System.err.println("KJD DEBUG: indices.size(): "+indices.size());
+	
 	  Collections.sort(indices);
 
 	  StringBuilder rval = new StringBuilder();	

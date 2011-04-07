@@ -308,7 +308,7 @@ extends SimpleBatchFilter {
 		for (int i = 0;i < selectedAttributes.length;i++) {
 		  int attIdx = selectedAttributes[i];
 			double cutoff = bins[attIdx].quantile(whichQuartile);
-			System.err.println("AttributeIdx: "+attIdx+" Cutoff: "+cutoff);
+			System.err.print(" AttributeIdx: "+attIdx+" Cutoff: "+cutoff+" ..");
 			cutoffs[attIdx] = cutoff;
 		}
 		return(cutoffs);

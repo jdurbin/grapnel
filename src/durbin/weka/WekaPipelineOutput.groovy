@@ -225,9 +225,9 @@ class WekaPipelineOutput{
   * Appends a results summary line to the output stream out
   *
   */ 
-  static void appendSummaryLine(jobIdx,data,out,numInstances,experiment,eval){
+  static void appendSummaryLine(jobIdx,data,out,experiment,eval){
       // Append a summary line to a file. 
-      def summaryLine = getFormattedEvaluationSummary(numInstances,eval)
+      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
       out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute},${experiment.discretization}"    
       out<<"\n"      
   } 
@@ -235,9 +235,9 @@ class WekaPipelineOutput{
  	/****
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
   */ 
-  static void appendFeaturesLine(jobIdx,data,out,numInstances,experiment,eval,maxFeaturesToReport){
+  static void appendFeaturesLine(jobIdx,data,out,experiment,eval,maxFeaturesToReport){
       // Append a summary line to a file. 
-      def summaryLine = getFormattedEvaluationSummary(numInstances,eval)
+      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
       out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute},${experiment.discretization}"
 
       // Figure out the feature selections across cross validation folds...
@@ -252,9 +252,9 @@ class WekaPipelineOutput{
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
 
   */ 
-  static void appendSamplesLine(jobIdx,data,out,numInstances,experiment,eval,results){
+  static void appendSamplesLine(jobIdx,data,out,experiment,eval,results){
       // Append a summary line to a file. 
-      def summaryLine = getFormattedEvaluationSummary(numInstances,eval)
+      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
       out << "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute},${experiment.discretization}"
 			
 			if (results.size() >0){						

@@ -26,7 +26,7 @@ import com.google.common.collect.*
 * 
 * </pre>
 */
-class WekaExplorerConfigSlurper extends ConfigSlurper{
+class WekaMineConfigSlurper extends ConfigSlurper{
   
   // Compile a regex to match strings that contain paired braces.
   // (Some people, when confronted with a problem, think “I know, I’ll use regular expressions!”
@@ -46,7 +46,7 @@ class WekaExplorerConfigSlurper extends ConfigSlurper{
   
   def keys(){return(substitutionMap.keySet())}
   
-  def WekaExplorerConfigSlurper(){
+  def WekaMineConfigSlurper(){
     super()
   }
   
