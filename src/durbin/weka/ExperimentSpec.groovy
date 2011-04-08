@@ -4,7 +4,7 @@ import weka.attributeSelection.*
 
 
 /**
-* Class to hold a single experiment specification. 
+* Class to hold a single experiment specification. <br><br>
 * 
 * Currently each line is hard coded with classifier, attributeEval, etc. 
 * Should replace with a map from these feature names to their values. 
@@ -31,21 +31,21 @@ class ExperimentSpec{
 
     try{
       if (classifierStr != "None"){      
-        classifier = WekaExplorer.classifierFromSpec(classifierStr)
+        classifier = WekaMine.classifierFromSpec(classifierStr)
       }else{
         classifier = null;
       }
     }catch(Exception e){
-      System.err.println "WekaExplorer.classifierFromSpec failed on:"
+      System.err.println "WekaMine.classifierFromSpec failed on:"
       System.err.println classifierStr
       throw(e)
     }
     
     attrEvalStr = fields[1] 
-    attributeEval = WekaExplorer.evalFromSpec(attrEvalStr)  
+    attributeEval = WekaMine.evalFromSpec(attrEvalStr)  
         
     attrSearchStr = fields[2]
-    attributeSearch = WekaExplorer.searchFromSpec(attrSearchStr)
+    attributeSearch = WekaMine.searchFromSpec(attrSearchStr)
     
     numAttributes = (fields[3] as double) as int
     classAttribute = fields[4]     

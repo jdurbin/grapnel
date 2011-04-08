@@ -7,7 +7,11 @@ import weka.core.*;
 import java.util.*;
 
 
-
+/***
+*  Extention to weka Evaluation to output more verbose evaluation information. 
+*  KJD: What, exactly, I can't recall at the moment... I don't think this is 
+*  currently used anywhere.  An experiment started but not finished?
+*/ 
 class VerboseEvaluation extends Evaluation{
   
   public VerboseEvaluation(data){

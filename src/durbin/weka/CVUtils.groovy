@@ -10,7 +10,9 @@ import weka.classifiers.meta.FilteredClassifier;
 import java.util.Random
 
 
-
+/***
+* A single evaluation returned from a cross-validation experiment. (i.e. the output of CVUtils)
+*/ 
 public class EvaluationResult{
   
   def EvaluationResult(a,p,s,m,pr){
@@ -34,9 +36,9 @@ public class EvaluationResult{
   boolean isMatch;
 }
 
-/*********************************************************
+/***
 * A class to encapsulate the basics of running a cross validation
-* experiment. 
+* experiment and make the interface and code simpler. 
 */ 
 public class CVUtils{
   

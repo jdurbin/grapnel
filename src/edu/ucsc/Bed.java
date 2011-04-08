@@ -7,7 +7,7 @@ import java.util.zip.*;
 
 import groovy.lang.Closure;
 
-/****************************************************************************************
+/***
 * A collection of bed entries and algorithms to operate on them...
 *
 */
@@ -19,7 +19,7 @@ public class Bed extends ArrayList<BedItem> {
 	}
 	
 	
-	/********************************
+	/***
 	* Writes a coords file corresponding to this bed file. 
 	*
 	* Convenience uses default options. 
@@ -32,11 +32,11 @@ public class Bed extends ArrayList<BedItem> {
 	  writeCoords(fileName,bedOptions); 
 	}
 	
-	/********************************
+	/***
 	* Writes a bed graph file corresponding to this bed file. 
 	* 
-	* Bed graph options include:
-	* 
+	* Bed graph options include:<br>
+	* <pre>
 	* track type=coords name=track_label description=center_label
   *        visibility=display_mode color=r,g,b altColor=r,g,b
   *        priority=priority autoScale=on|off
@@ -44,6 +44,7 @@ public class Bed extends ArrayList<BedItem> {
   *        graphType=bar|points viewLimits=lower:upper
   *        yLineMark=real-value yLineOnOff=on|off
   *        windowingFunction=maximum|mean|minimum smoothingWindow=off|2-16
+	* </pre>
 	*/
 	public void writeCoords(String fileName,String bedOptions) throws Exception{
 	  BufferedWriter out = new BufferedWriter(new FileWriter(fileName));	  
@@ -55,8 +56,8 @@ public class Bed extends ArrayList<BedItem> {
 	}
 	
 	
-	/********************************
-	* Writes a bed graph file corresponding to this bed file. 
+	/***
+	* Writes a bed graph file corresponding to this bed file. <br><br>
 	*
 	* Convenience uses default options. 
 	*/
@@ -68,11 +69,11 @@ public class Bed extends ArrayList<BedItem> {
 	  writeBedGraph(fileName,bedOptions); 
 	}
 	
-	/********************************
-	* Writes a bed graph file corresponding to this bed file. 
+	/***
+	* Writes a bed graph file corresponding to this bed file. <br>
 	* 
-	* Bed graph options include:
-	* 
+	* Bed graph options include:<br>
+	* <pre>
 	* track type=bedGraph name=track_label description=center_label
   *        visibility=display_mode color=r,g,b altColor=r,g,b
   *        priority=priority autoScale=on|off
@@ -80,6 +81,7 @@ public class Bed extends ArrayList<BedItem> {
   *        graphType=bar|points viewLimits=lower:upper
   *        yLineMark=real-value yLineOnOff=on|off
   *        windowingFunction=maximum|mean|minimum smoothingWindow=off|2-16
+	* </pre>
 	*/
 	public void writeBedGraph(String fileName,String bedOptions) throws Exception{
 	  BufferedWriter out = new BufferedWriter(new FileWriter(fileName));	  
@@ -91,7 +93,7 @@ public class Bed extends ArrayList<BedItem> {
 	}
 
 
-	/*****************************
+	/***
 	* Read a bed graph from a file...
 	*/
 	public void readFile(String fileName) throws Exception {
@@ -111,7 +113,7 @@ public class Bed extends ArrayList<BedItem> {
 		}
 	}
 
-  /************************************
+  /***
   * Groovy closure iterator restricted to a particular
   * chromosome.
   */ 

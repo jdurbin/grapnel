@@ -5,13 +5,13 @@ import java.util.*;
 import java.io.*;
 import java.lang.*;
 
-/**************************************************************************************
+/***
 *  Utility methods to help with common file related things.
 *
 */
 public class FileUtils {
   
-  /**************************************
+  /***
   *  Gets the first line of a file. 
   *  Sort of silly, but I do this so often I wanted to have a shortcut. 
   */ 
@@ -23,7 +23,7 @@ public class FileUtils {
   }
 
 
-	/***************************************
+	/***
 	* Determines the number of lines in a file... like wc
 	*/
 	public static int fastCountLines(String fileName) throws Exception {
@@ -33,7 +33,7 @@ public class FileUtils {
 		return(numRows);
 	}
 
-	/*****************************************
+	/***
 	* An optimized function to quickly count the number of lines remaining
 	* in the given input stream
 	*/

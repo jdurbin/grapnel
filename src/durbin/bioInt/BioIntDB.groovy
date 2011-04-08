@@ -1,7 +1,3 @@
-/*********************************************************************
-* Copyright 2007-2010 -- The Regents of the University of California 
-**********************************************************************/
-
 package durbin.bioInt
 
 import groovy.sql.Sql
@@ -16,7 +12,7 @@ import durbin.weka.*
 /**
 * Class to interact with BioInt database.  
 * 
-* For class that creates weka Instances directly, see BioIntLoader
+* For a class that creates weka Instances directly from DB, see BioIntLoader<br>
 * 
 * I will try to localize all database queries in one of the classes under durbin.bioint 
 * to help a tiny bit with maintainability.  

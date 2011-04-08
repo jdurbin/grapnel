@@ -3,15 +3,15 @@
 package durbin.weka;
 
 
-/*****************************************
+/***
 * Some methods to extract information out of weka classifier
 * descriptions (e.g. the base classifier type... SMO, etc.)
 */
 public class WekaNames{
 	
 	
-	/****************************
-	* Given: weka.classifiers.trees.J48 -C 0.25 -M 2
+	/***
+	* Given: weka.classifiers.trees.J48 -C 0.25 -M 2 <br><br>
 	* return: J48
 	*/ 
 	static def getBaseClassifierType(spec){

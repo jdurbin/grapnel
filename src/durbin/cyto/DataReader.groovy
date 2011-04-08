@@ -7,6 +7,8 @@ import durbin.util.*;
 public class DataReader{
   
   /**
+  * Lokey Lab Cytological profiling.<br><br>
+	* 
   * Merge the platemap.csv file with the data.tab file and return a 
   * 3D map of data[feature][compound][titration]
   * 

@@ -2,15 +2,36 @@ import weka.core.*
 import weka.core.converters.ConverterUtils.DataSource
 
 
-/**********************************************************
-* Expando meta-class additions to weka classes.  This is mostly 
-* sugar for functionality that is found in InstanceUtils.java, etc. 
+/***
+* Sugar for weka classes.  Mainly to allow one to access attributes and instances by name 
+* rather than by index.  <br>
+* <br>
+* Technically, this is accomplished via Groovy's expando meta-class functionality, 
+* which lets you add methods to classes without extending those classes.  In order to add these
+* methods to weka classes, you will have to call enable() somewhere in your code, like: 
+* <pre>
+* WekaAdditions.enable()
+* </pre>
+* 
+* Some extensions to Instances this will add include: <br>
+* <ul>
+* <li>Instances.attributeValues(attributeName)</li>
+* <li>Instances.setClassName(attributeName)</li>
+* <li>Instances.instanceValues(instanceName)</li>
+* <li>Instances.attributeNames()</li>
+* </ul>
+* Each of these methods does the same as the corresponding method in Instances except using
+* name instead of index keys. 
 * 
 */
 public class WekaAdditions{
+	
+	/***
+	* Enables all of the additions to weka in WekaAdditions.  
+	*/ 
   static enable(){  
     
-    /********************************************
+    /***
     *  Return an array of the values for a named attribute. 
     */ 
     Instances.metaClass.attributeValues << {attributeName-> 
@@ -35,7 +56,7 @@ public class WekaAdditions{
     }
     
     
-    /*************************************
+    /***
     * Set the class based on a name. 
     * Returns the index of the named class. 
     */     
@@ -46,7 +67,7 @@ public class WekaAdditions{
       return(idx)
     }
         
-    /***************************************
+    /***
     * Returns all the attribute values for a named instance
     */ 
     Instances.metaClass.instanceValues << {instanceName->
@@ -77,7 +98,7 @@ public class WekaAdditions{
       return(rvals)
     }    
     
-    /*********************************
+    /***
     * Returns all of the attribute names...
     */
     Instances.metaClass.attributeNames << {

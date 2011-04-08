@@ -16,25 +16,20 @@ class MyUserInfo implements UserInfo {
     public String getPassphrase () { return null; }
 }
 
-/***********************************************************
-* Class to encapsulate port forwarding using public key. 
+/***
+* Class to encapsulate port forwarding using public key. <br><br>
 * Client must have public/private keypair in .ssh/id_rsa[.pub]
-* and server must have public key in .ssh/authorized_keys
+* and server must have public key in .ssh/authorized_keys. <br>
 * 
-* Of course, problem with this approach is that it opens up the port for 
+* Very handy class in general. 
+* <br><br>
+* Note:  Of course, a problem with this approach is that it opens up the port for 
 * the duration of the task.... yeah, but only for one user, right? So other 
 * people running on the cluster can't take advantage of my mapped port unless
-* they are logged in as me, right? 
-* Easy enough to test with multiple-user accounts on my mac... just remove
-* disconnect, go to second user and see if that person can log in, if so, 
-* I'm vunerable to people on the same machine.   If that's the case, might
-* have to step it up a notch with:
-* http://markmail.org/message/22mh3hqm2chlondo
-* 
-* But only after someone says that it needs to be done. 
+* they are logged in as me.  Better than nothing. <br>
 *
-* Details found here: 
-* http://forums.sun.com/thread.jspa?threadID=5232276
+* Additionsl info found here: <br>
+* http://forums.sun.com/thread.jspa?threadID=5232276 <br>
 * http://benkstein.net/java/SSHSocketFactory/javadoc/
 *
 */  
@@ -44,14 +39,15 @@ class SSHPortForwarder{
   def jsch; 
   def session;
   
-  /***************************************
-  * 
+  /***
+	* Establish an ssh connection.  For example: 
+  * <pre>
   * user = "james"
   * host = "tcga1.cse.ucsc.edu"
   * lport = 3307
   * rhost = "127.0.0.1"
   * rport = 3306
-  * 
+  * </pre>
   */ 
   def connect(user,host,rhost,lport,rport){
    

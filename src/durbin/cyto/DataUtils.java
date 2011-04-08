@@ -1,3 +1,7 @@
+/***
+* Lokey lab cytological profiling utilities.
+*/ 
+
 
 package durbin.cyto;
 

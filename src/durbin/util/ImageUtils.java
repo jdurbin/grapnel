@@ -13,9 +13,9 @@ import java.io.*;
 
 /**
 * Various utilities for handling images.  OK, right now just one utility, 
-* save component as JPEG.  Easy enough to do GIF or PNG also.  
+* save component as JPEG.  Easy enough to do GIF or PNG also.  <br><br>
 * 
-* Supported Image types (Java 1.6 OS X): 
+* Supported Image types (Java 1.6 OS X): <br>
 * [jpg, BMP, bmp, JPG, jpeg, wbmp, png, JPEG, PNG, WBMP, GIF, gif]
 * 
 *

@@ -2,7 +2,15 @@ package durbin.util
 
 import java.io.InputStream;
 
-
+/**
+* Run a bash command line from groovy.  You can already run commands with syntax like:<br>
+* <pre>
+* "ls -l".execute()
+* </pre>
+* That is about as simple as it gets and works great most of the time.  However, execute() runs 
+* the given command passing it the list of options, the options are NOT passed through bash for 
+* expansion and so on.  This class is an attempt to get around some of the rough edges of execute().  
+*/ 
 class RunBash{
   
   // Is there another way to do this?

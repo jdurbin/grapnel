@@ -26,7 +26,7 @@ import java.awt.*
 *  most of the details for some routine plots we want to make and provide 
 *  default settings that are suitable for the data we use. 
 */
-class Plots{
+class WekaPlots{
   
   def err = System.err
   

@@ -1,13 +1,13 @@
 #!/usr/bin/env groovy 
 
 /**
-* A multi-dimensional map.  Commandeered from this post:
+* A multi-dimensional map.  Commandeered from this post: <br>
 * 
-* http://old.nabble.com/Multidimensional-maps-td19615874.html
+* http://old.nabble.com/Multidimensional-maps-td19615874.html <br><br>
 * 
 * Through Groovy magic you can access elements of map with 
 * dot notation or with [] notation.  
-* 
+* <pre>
 * m = new MultiDimensionalMap()
 * m.a = 1
 * m.b.c = 2
@@ -26,8 +26,9 @@
 * m.numCells.blank[5] = 0
 * m.numCells.blank[2] = 1.2
 * m.numCells.blank[1] = 5
+* </pre>
 * 
-* WARNING:  The map bracket syntax **CREATES** an entry if one doesn't 
+* <b>WARNING:</b>  The map bracket syntax <b>**CREATES**</b> an entry if one doesn't 
 * exist.  Care must be taken when checking for existence of a value for 
 * a particular cell that you do not inadvertently create a new entry. 
 *
@@ -44,7 +45,7 @@ class MultidimensionalMap extends LinkedHashMap {
 }
 
 
-/****************
+/***
 *  Special case of MultidimensionalMap for the common 2D case...
 * 
 *  Differs from Table mainly in that it's completely dynamic, whereas 

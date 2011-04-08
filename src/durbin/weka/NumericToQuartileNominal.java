@@ -6,7 +6,7 @@ import weka.filters.*;
 
 import hep.aida.bin.DynamicBin1D;
 
-/****************************************************************************
+/***
 * An attribute filter that converts a numeric attribute into a two-state nominal 
 * attribute split into either upper/lower quartiles or above/below median, or 
 * based on one or two predefined splits.  When there are two split points, the 
@@ -28,7 +28,7 @@ extends SimpleBatchFilter {
   String nominalValue1 = "low";
   String nominalValue2 = "high";
   
-  /******************************************
+  /***
   * Set the string names to use for nominal values. 
   */ 
   public void setNominalValues(String value1,String value2){
@@ -49,27 +49,27 @@ extends SimpleBatchFilter {
   }
   
   
-  /*******************************************
+  /***
   *  If true, split features into high/low based on 
   *  the median.  If false, 
   */ 
   public void setUseMedian(boolean u){useMedian = u;}
   
-  /*******************************************
+  /***
   *  If true, predefined cutoff values are used. 
   * 
   */ 
   public void setUseCutoffs(boolean u){useCutoffs = u;}
   
 
-  /*******************************************
+  /***
   * Describe the set of attributes for this filter to work on. 
   */ 
 	public void setAttributeIndices(String rangeList) {
 		attributesToDiscretize.setRanges(rangeList);
 	}
   
-  /*********************************************
+  /***
   *  String describing this filter. Shows up in command line help and
   *  in GUI (class must be in GUI classpath to be picked up)
   */ 
@@ -81,7 +81,7 @@ extends SimpleBatchFilter {
   }
 
 
-  /*********************************************
+  /***
   * Returns the capabilities of this filter, which are the kinds of data it can 
   * handle. 
   */
@@ -95,7 +95,7 @@ extends SimpleBatchFilter {
   }
 
 
-  /**********************************************
+  /***
   * Creates an empty set of instances in the proper output format. For some 
   * filters this will be the same as the input format, for some it will
   * involve changing the type of some attributes, or adding or removing 
@@ -131,7 +131,7 @@ extends SimpleBatchFilter {
    return(result);
  } 
 
-  /**********************************************
+  /***
   * Processes all of the instances. 
   */
   protected Instances process(Instances inst) {
@@ -166,7 +166,7 @@ extends SimpleBatchFilter {
   }
 
 
-  /*******************************************
+  /***
 	* Performs work of transforming numeric attributes into 1/0 values depending
 	* on whether the value is above or below a fixed cutoff value or values. 
 	**/
@@ -212,7 +212,7 @@ extends SimpleBatchFilter {
   }
 
 
-  /*******************************************
+  /***
 	* Performs work of transforming numeric attributes into 1/0 values depending
 	* on whether the value is above or below median.
 	**/
@@ -252,7 +252,7 @@ extends SimpleBatchFilter {
   }
   
   
-  /*******************************************
+  /***
 	* Performs work of transforming numeric attributes into 1/0 values depending
 	* on whether the value is above 75% quartile or below 25% quartile. Instances  
 	* with values in between are deleted. 
@@ -300,7 +300,7 @@ extends SimpleBatchFilter {
     return(result);
   }
 
-	/*******************************************
+	/***
 	*  For each selected attribute, compute the cutoff given the selected attributes
 	*/
 	public double[] computeCutoffs(DynamicBin1D[] bins,int[] selectedAttributes,double whichQuartile) {
@@ -314,7 +314,7 @@ extends SimpleBatchFilter {
 		return(cutoffs);
 	}
 
-	/******************************************
+	/***
 	*  Creates a DynamicBin1D object for each selected attribute in the instances.
 	*  From these DynamicBin1D objects, we can compute a variety of attribute
 	*  statistics including quantile.

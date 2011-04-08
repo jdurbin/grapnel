@@ -12,10 +12,10 @@ import weka.filters.unsupervised.attribute.*;
 import groovy.lang.Closure;
 
 
-/***************************************************************
+/***
 *  My own version of CSVLoader.  It loads a delimiter separated file
 *  into a Table object than converts that to a set of instances. CSV 
-*  loader is OK, but balks at transposed tables, and I also have 
+*  loader is OK, but balks at transposed tables, and I sometimes have 
 *  table cells that need pre-processing (via Closures) before being
 *  saved into the table.  
 *

@@ -14,10 +14,10 @@ import weka.filters.unsupervised.attribute.RemoveType
 import weka.classifiers.*
 import weka.classifiers.meta.FilteredClassifier
 
-/**************************************************
+/***
 * Some utilities to help with writing .ra files used by hgClassifiers
 * to import classifier results into bioInt.   
-* 
+* <pre>
 * Notes:
 * 
 * 'type' is a keyword used by loader to determine type of each entry, including:
@@ -28,6 +28,7 @@ import weka.classifiers.meta.FilteredClassifier
 *			task
 * label is the actual database key for each entry 
 * name is just descriptive
+* </pre>
 */ 
 public class RAUtils{
   

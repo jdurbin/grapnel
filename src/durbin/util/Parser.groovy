@@ -1,11 +1,11 @@
 //package org.computoring.gop
 package durbin.util
 
-/*********************************************************
-* Durbin fork!!
+/***
+* Durbin fork (!!) of Groovy Option Parser <br><br> 
 * 
 * GOP is nice, but I didn't like the fact that it didn't handle a help option 
-* (that is, it'd always print out the required missing list, which was distracting)
+* (that is, it'd always print out the required missing list, which was distracting)<br>
 * 
 * I also messed with the formatting a little here and there.  
 * 

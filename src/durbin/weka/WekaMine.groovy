@@ -28,7 +28,46 @@ import weka.classifiers.meta.FilteredClassifier;
 import weka.attributeSelection.*
 
 /**
-*  
+* wekaMine is a collection of scripts, java library functions, and modifications to weka to 
+* enable large scale exploration of machine learning algorithms and their parameters.   While 
+* written for working with cancer genomics datasets, wekaMine is not specific to cancer or genomics.    
+* 
+* Most of the methods in the WekaMine class are just sugar for weka methods.  The major goal of the class is to 
+* standardize basic processing steps in a machine learning pipeline. 
+* 
+* Here is a simplified example of a basic pipeline implemented with WekaMine:
+* 
+* <pre>
+* experiments = new WekaMineConfig(configName)
+*
+* experiments.each{exp-> 
+*	// Creates a wekaMine pipeline...
+*	pipeline = new WekaMine(data,clinical,exp,experiments.params)		
+*	
+*	// Combines data and single class attribute from clinical into one set of instances...
+*	instances = pipeline.createInstancesFromDataAndClinical(data,clinical,exp.classAttribute)	
+*	
+*	// Clean up instances:
+*	// * remove useless attributes
+*	// * if not allowed, remove instances with negative class values
+*	// * remove instances with missing class values	
+*	instances = pipeline.cleanUpInstances(instances)
+*
+*	// Discretize the class attribute...
+*	instances = pipeline.discretizeClassAttribute(instances)	
+*
+*	// Create an attribute selected classifier from the given experiment description..
+*	asClassifier = pipeline.createAttributeSelectedClassifier()
+*	
+*	// Perform the cross validation
+*	def eval = pipeline.crossValidateModel(asClassifier,instances,experiments.params.cvFolds,new Random(experiments.params.cvSeed))
+*	
+*	pipeline.appendSummary(out,jobIdx,instances)
+*	pipeline.appendFeatures(fout,jobIdx,instances,options.maxFeaturesOut as Integer)
+*	pipeline.appendSamples(sout, jobIdx,instances)
+*	
+*}
+*</pre>
 */ 
 class WekaMine{
 	
@@ -54,7 +93,12 @@ class WekaMine{
 		WekaAdditions.enable()
 	}	
 	
-	/********************************
+	//=================================================================================
+	// *********                  Pipeline Steps.                          ***********
+	//=================================================================================
+
+	
+	/***
 	* Merges data and single clinical class attribute into a single set of 
 	* instances. 
 	*/ 
@@ -73,7 +117,7 @@ class WekaMine{
 	}
 	
 	
-	/*********************************
+	/***
 	* Cleans up the attributes and instances by removing degenerate cases
 	*/ 
 	def cleanUpInstances(instances){	
@@ -94,7 +138,7 @@ class WekaMine{
 		return(instances)
 	}
 	
-	/**********************************
+	/***
 	* discretizes the class attribute according to the discretization given in 
 	* the experiment specification.
 	*/ 
@@ -118,7 +162,7 @@ class WekaMine{
 		return(instances)
 	}
 	
-	/**************************
+	/***
 	* Create an attribute selected classifier. 
 	*/ 
 	def createAttributeSelectedClassifier(){
@@ -171,7 +215,7 @@ class WekaMine{
 		return(eval)
 	}
 
-  /**
+  /***
   *  Converts the numeric class attribute into 
   */
   Instances classToNominalTopBottomQuartile(data,lowString,highString){
@@ -307,5 +351,71 @@ class WekaMine{
     //err.println "${data.numInstances()} x ${data.numAttributes()} done."
     return(data)
   }
+
+	/**
+  *  Creae a classifier from the command-line classifier specification
+  *  string.  For example:<br><br>
+  * 
+  *  weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -M
+  */
+  static def classifierFromSpec(classifierSpec){
+    // Create a classifier from the name...
+    def options = Utils.splitOptions(classifierSpec)
+    def classifierName = options[0]
+    options[0] = ""
+
+    //System.err.println "classifierName: $classifierName"
+    //System.err.println "options: $options"
+
+    def classifier = Classifier.forName(classifierName,options) 
+    return(classifier)
+  }
+
+	static def filteredClassifierFromClassifier(classifier){
+	 // Create a classifier from the name...
+    // By using filtered classifer to remove ID, the cross-validation
+    // wrapper will keep the original dataset and keep track of the mapping 
+    // between the original and the folds (minus ID). 
+    def filteredClassifier = new FilteredClassifier()
+    def removeTypeFilter = new RemoveType();  
+
+    filteredClassifier.setClassifier(classifier)
+    filteredClassifier.setFilter(removeTypeFilter)
+		return(filteredClassifier)
+	}
+
+  /**
+  *  Creae a attribute evaluation from the command-line evaluation specification
+  *  string.  For example:<br><br>
+  * 
+  *  weka.attributeSelection.InfoGainAttributeEval
+  */
+  static def evalFromSpec(attributeEvalSpec){    
+    // Create a classifier from the name...
+    def options = Utils.splitOptions(attributeEvalSpec)
+    def evalName = options[0]
+    options[0] = ""
+    def classifier = ASEvaluation.forName(evalName,options) 
+    return(classifier)
+  }
+ 
+	/**
+   *  Creae a attribute evaluation from the command-line evaluation specification
+   *  string.  For example:<br><br>
+   * 
+   *  weka.attributeSelection.InfoGainAttributeEval
+   */
+   static def searchFromSpec(attributeSearchSpec){   
+     //System.err.println("attributeSearchSpec: $attributeSearchSpec") 
+     // Create a classifier from the name...
+     def options = Utils.splitOptions(attributeSearchSpec)
+     def searchName = options[0]
+     options[0] = ""
+     //System.err.println("searchName: $searchName")
+     //System.err.println("options: $options")
+     def search = ASSearch.forName(searchName,options) 
+     return(search)
+   }
+
 			
 }

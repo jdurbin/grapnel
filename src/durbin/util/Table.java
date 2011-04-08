@@ -15,7 +15,7 @@ import org.codehaus.groovy.runtime.*;
 
 //import org.codehaus.groovy.runtime.DefaultGroovyMethodsSupport.RangeInfo;
 
-/**************************************************
+/***
 * An iterator for a row or a column of a table
 */
 class TableMatrix1DIterator implements Iterator{
@@ -39,16 +39,16 @@ class TableMatrix1DIterator implements Iterator{
   public void remove(){}
 }
 
-/****************************************************
+/***
 * A row or a column in the table.   Specifically wrapper to make the 
 * ObjectMatrix1D returned by matrix.viewColumn/Row 
 * into something that is iterable, since ObjectMatrix1D doesn't
-* implement iterable (probably because colt is old as dirt). 
+* implement iterable (probably because colt is old as dirt). <br>
 * 
 * KJD: I've gone off the deep end here... I'm sure this is not
 * the Right Way to do this, although it works...
 * all of this probably should have been handled  from the Table.groovy 
-* wrapper, using some kind of expando magic or some such...
+* wrapper, using some kind of expando magic or some such...<br>
 * 
 * Ugh... even worse, all this hasn't helped performance compared to 
 * getting a copy of the array for each row... 
@@ -94,13 +94,17 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
   }  
 }
 
-/********************************************************************
+/***
 * A 2D table of objects with methods to read from file, iterate over
 * rows or columns, and support for Groovy closures.  A Table is a 
 * 2D collection of cells.  Table cells can be accessed by index or by 
-* name. 
-*
-********************************************************************/
+* name.<br><br>
+* 
+* Note:  I intended for this to be a high performance 2D table that could
+* be accessed by row/column index or by row/column name.  However, in practice
+* I am using Multidimensional map for most things now, with adequate performance. 
+* This is still used in a few places, though. 
+*/
 public class Table extends GroovyObjectSupport{
 
 	// An somewhat efficient place to store the data...
@@ -136,7 +140,7 @@ public class Table extends GroovyObjectSupport{
   }
   
   
-  /**********************************
+  /***
   * Create and read a table from a file, applying the closure to each cell 
   * in the table as it is read and before it is saved to the table (e.g. to 
   * parse out a substring of each cell, or convert to Double). 
@@ -152,7 +156,7 @@ public class Table extends GroovyObjectSupport{
 		return(numCols);
 	}
 	
-	/***************************************************************
+	/***
   * Parse the column names from a line. 
   */ 
   public String[] parseColNames(String line,String regex){
@@ -170,7 +174,7 @@ public class Table extends GroovyObjectSupport{
 	}
 	
 	
-	/***************************************************************
+	/***
   * Convenience method to initialize a name2Idx map from an array of Strings
   * 
   */ 
@@ -180,7 +184,7 @@ public class Table extends GroovyObjectSupport{
 	  }
 	}
 
-  /***************************************************************
+  /***
   * Write table to a file
   */ 
 	public void write(String fileName,String delimiter) throws Exception {
@@ -214,7 +218,7 @@ public class Table extends GroovyObjectSupport{
    }
 
 
-  /***************************************************************
+  /***
   * Write table to a file
   */ 
 	public void write(BufferedWriter br,String delimiter) throws Exception{	  	  
@@ -239,7 +243,7 @@ public class Table extends GroovyObjectSupport{
 	}
 	
 
-	/**************************************
+	/***
 	*  Read a delimited table from a file.
 	*
 	*  Some attention has been paid to performance, since this is meant to be
@@ -282,7 +286,7 @@ public class Table extends GroovyObjectSupport{
 	  readFile(fileName,"\t",c);
 	}
 	
-  /***************************************************************
+  /***
 	*  Read a delimited table from a file.
 	*  Same as other readFile, except this one accepts a closure 
 	*  to apply to each value before storing it in the matrix.
@@ -360,7 +364,7 @@ public class Table extends GroovyObjectSupport{
 	public int getRowIdx(String row){return(rowName2Idx.get(row));}
 	public int getColIdx(String col){return(colName2Idx.get(col));}
 	
-	/**********************************
+	/***
 	*
 	*/
   public DoubleArrayList getRowAsDoubleArrayList(int row){
@@ -372,7 +376,7 @@ public class Table extends GroovyObjectSupport{
     return(dal);
   }
   
-  /**********************************
+  /***
 	*
 	*/
   public DoubleArrayList getColAsDoubleArrayList(int col){
@@ -410,7 +414,7 @@ public class Table extends GroovyObjectSupport{
 	   return(new TableMatrix1D(matrix.viewRow(col)));
 	}
 
-	/***********************************
+	/***
 	* Provide support for iterating over table by rows...
 	*/
 	public Table each(Closure closure) {
@@ -423,7 +427,7 @@ public class Table extends GroovyObjectSupport{
 		return this;
 	}
 
-	/***********************************
+	/***
 	* Provide support for iterating over table by rows...
 	*/
 	public Table eachByRows(Closure closure) {
@@ -437,7 +441,7 @@ public class Table extends GroovyObjectSupport{
 	}
 
 
-	/***********************************
+	/***
 	* Provide support for iterating over table by columns...
 	*/
 	public Table eachByCols(Closure closure) {
@@ -450,7 +454,7 @@ public class Table extends GroovyObjectSupport{
 		return this;
 	}
 
-	/***********************************
+	/***
 	* Provide support for iterating over columns
 	*
 	* Note: I should be able to provide my own
@@ -467,7 +471,7 @@ public class Table extends GroovyObjectSupport{
 		return this;
 	}
 
-	/***********************************
+	/***
 	* Provide support for iterating over rows
 	*/
 	public Table eachRow(Closure closure) {
@@ -479,7 +483,7 @@ public class Table extends GroovyObjectSupport{
 		return this;
 	}
 	
-	/***************************************
+	/***
 	* Crude tests. 
 	*/ 
 	public static void main(String args[]) throws Exception {
@@ -492,7 +496,7 @@ public class Table extends GroovyObjectSupport{
   }
   
   	
-	/**************************************
+	/***
 	*  DEPRECATED SLOW (MAY TRY TO SPEED UP)
 	*  Read a delimited table from a file.
 	*

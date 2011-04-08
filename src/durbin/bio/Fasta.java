@@ -1,16 +1,3 @@
-/****************************************************************************************
- * Fasta
- * 
- * $Id: $
- * $Change:  $  $LastChangedBy: $
- *
- * Original author:
- *
- *
- *        1         2         3         4         5         6         7
- *2345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
- */
-
 package durbin.bio;
 
 import java.io.*;
@@ -22,7 +9,7 @@ import java.util.ArrayList;
 import java.lang.Iterable;
 import java.util.Iterator;
 
-/**********************************************************************************
+/***
 * Implements reading and writing of Fasta files.  Many bioinformatics applications are
 * actually I/O bound in terms of performance, so it is important to pay attention to
 * performance in a class like this.
@@ -36,7 +23,7 @@ public class Fasta implements Iterable<Sequence> {
 	String lastDescription = "";
 	boolean iseof = false;
 
-	/********************************************************************************
+	/***
 	*
 	*/
 	static class FastaIterator implements Iterator<Sequence> {
@@ -88,14 +75,14 @@ public class Fasta implements Iterable<Sequence> {
 		return(!iseof);
 	}
 
-	/******************************
+	/***
 	*
 	*/
 	public Iterator<Sequence> iterator() {
 		return new FastaIterator(this);
 	}
 
-	/******************************
+	/***
 	* Disable line buffering.
 	* By default, System.out flushes the buffer every time a newline is encountered.
 	* Here we disable this and use a nice big buffer instead, which improves
@@ -108,7 +95,7 @@ public class Fasta implements Iterable<Sequence> {
 		System.setOut(ps);
 	}
 
-	/*******************************
+	/***
 	* Prints the sequence to STDOUT
 	*/
 	public static void print(Sequence seq) {
@@ -144,7 +131,7 @@ public class Fasta implements Iterable<Sequence> {
 	}
 
 
-	/*******************************
+	/***
 	* Gets the next sequence from the reader
 	* Returns null when there are no more sequences in the FASTA stream.
 	*/
@@ -192,7 +179,7 @@ public class Fasta implements Iterable<Sequence> {
 	}
 
 
-	/*******************************
+	/***
 	*
 	*
 	*/

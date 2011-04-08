@@ -1,9 +1,18 @@
 
 package durbin.weka;
 
-/********************************
+/**
 * Really just a bit of sugar for WekaMineConfigSlurper, so that you can just create one
-* of these and start iterating over experiments.
+* of these and start iterating over experiments.  For example:
+* 
+* <pre>
+* 
+* experiments = new WekaMineConfig(configFileName)
+* 
+* experiments.each{exp->
+*    doSomethingWithExperiment(exp)
+* } 
+* </pre>
 */ 
 class WekaMineConfig extends ArrayList{
 

@@ -1,7 +1,3 @@
-/*********************************************************************
-* Copyright 2007-2010 -- The Regents of the University of California 
-**********************************************************************/
-
 package durbin.hg
 
 import groovy.sql.Sql
@@ -14,12 +10,7 @@ import durbin.paradigm.*
 import durbin.weka.*
 
 /**
-* Class to interact with BioInt database.  
-* 
-* For class that creates weka Instances directly, see BioIntLoader
-* 
-* I will try to localize all database queries in one of the classes under durbin.bioint 
-* to help a tiny bit with maintainability.  
+* Class to interact with UCSC hg database.  
 *
 */
 class hgDB{
@@ -52,7 +43,7 @@ class hgDB{
     return(rvalDB)
   }
 
-/****
+/**
 * Lookup the gene description from geneSymbol
 */ 
 def getGeneDescriptionFromName(geneSymbol){

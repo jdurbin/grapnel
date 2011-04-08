@@ -10,7 +10,7 @@ import durbin.util.*;
 
 
 
-/***************************
+/***
 *  Utilities to help with writing summary results from Weka pipeline.
 */
 class WekaPipelineOutput{
@@ -180,11 +180,11 @@ class WekaPipelineOutput{
   }
 
   /****
-   * Appends a results summary line for AttributeSelection ONLY experiments 
-   * to the output stream out. 
-   *
-   * KJD TODO: Need to add jobID... both job# and cfgID
-   */ 
+  * Appends a results summary line for AttributeSelection ONLY experiments 
+  * to the output stream out. 
+  *
+  * KJD TODO: Need to add jobID... both job# and cfgID
+  */ 
    static void appendAttributeSelectionSummaryLine(jobIdx,data,out,
      numInstances,experiment,
      attributeSelection,maxFeaturesToReport){
@@ -250,7 +250,6 @@ class WekaPipelineOutput{
   	
  	/****
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
-
   */ 
   static void appendSamplesLine(jobIdx,data,out,experiment,eval,results){
       // Append a summary line to a file. 
@@ -270,6 +269,21 @@ class WekaPipelineOutput{
 				}
 			}			
       out<<"\n"      
+  }
+
+	/**
+	* Saves the ROC curve from a cross validation experiment. 
+	*/
+  static void saveROC(eval,rocDir,className,numFeatures){
+   // Save the ROC values for later plotting. 
+    ThresholdCurve tc = new ThresholdCurve();
+    Instances curve = tc.getCurve(eval.predictions());
+    
+    ArffSaver saver = new ArffSaver();
+    saver.setInstances(curve);
+    def curveFile = new File("${rocDir}${className}.${numFeatures}.arff".toString())
+    saver.setFile(curveFile);
+    saver.writeBatch();
   }
 
 	/*
@@ -293,16 +307,5 @@ class WekaPipelineOutput{
     def testing = testingAcc.join(",")
 	*/
 
-  static void saveROC(eval,rocDir,className,numFeatures){
-   // Save the ROC values for later plotting. 
-    ThresholdCurve tc = new ThresholdCurve();
-    Instances curve = tc.getCurve(eval.predictions());
-    
-    ArffSaver saver = new ArffSaver();
-    saver.setInstances(curve);
-    def curveFile = new File("${rocDir}${className}.${numFeatures}.arff".toString())
-    saver.setFile(curveFile);
-    saver.writeBatch();
-  }
   
 }

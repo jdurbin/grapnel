@@ -20,17 +20,17 @@
 *
 */
 
-/********************************************************************
+/***
 * IMPORTANT:  This is a modified version of weka.classifiers.Evaluation, 
 * from weka-3-6-1.  
 *  
 * The main purpose of this modified version is to save, and provide an 
 * interface to access, the classifiers created during cross validation. 
 * There are a couple of motivations for this:  
-* 
-* 1. To capture the attributes selected by an AttributeSelectedClassifier
-* 2. To capture details about the classifiers, such as support vectors used, etc.
-* 
+* <ul>
+* <li> To capture the attributes selected by an AttributeSelectedClassifier</li>
+* <li> To capture details about the classifiers, such as support vectors used, etc.</li>
+* </ul>
 * In order to highlight what parts of this code are changed I will attempt
 * to remember to comment each such change with the keyword "Evaluation2", 
 * but one should really do a diff with weka.classifiers.Evaluation in 

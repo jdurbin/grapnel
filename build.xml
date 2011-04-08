@@ -39,6 +39,7 @@
         <javac srcdir="src" 
 			   destdir="target/classes"
 	       	  classpathref="lib.path"
+						includeantruntime="false"  	
 	     />
     </target>
 	

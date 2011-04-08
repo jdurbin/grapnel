@@ -1,16 +1,3 @@
-/****************************************************************************************
- * Sequence
- *
- * $Id: $
- * $Change:  $  $LastChangedBy: $
- *
- * Original author:
- *
- *
- *        1         2         3         4         5         6         7
- *2345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
- */
-
 package durbin.bio;
 
 import java.io.*;
@@ -18,7 +5,7 @@ import java.lang.Iterable;
 import java.util.Iterator;
 import groovy.lang.IntRange;
 
-/****************************************************************************************
+/***
  * A basic class to represent a DNA sequence.
  *
  * The sequences we work with usually have a name and a description and the actual sequence.
@@ -40,7 +27,7 @@ import groovy.lang.IntRange;
 public class Sequence implements Serializable {
 
 
-	/********************************************************************************
+	/***
 	*
 	*/
 	static class SequenceIterator implements Iterator<Character> {
@@ -169,14 +156,14 @@ public class Sequence implements Serializable {
 	}
 	*/
 
-	/******************************
+	/***
 	*
 	*/
 	public Iterator<Character> iterator() {
 		return new SequenceIterator(this);
 	}
 
-	/*******************************
+	/***
 	* Reverse complements this sequence.
 	*/
 	public Sequence reverseComplement() {
@@ -189,7 +176,7 @@ public class Sequence implements Serializable {
 	}
 
 
-	/*******************************
+	/***
 	* Reverse complements this sequence.
 	*/
 	public Sequence reverseComplementCopy() {

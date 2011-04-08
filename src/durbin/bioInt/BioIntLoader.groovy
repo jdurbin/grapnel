@@ -1,7 +1,3 @@
-/*********************************************************************
-* Copyright 2007-2010 -- The Regents of the University of California 
-**********************************************************************/
-
 package durbin.bioInt
 
 import groovy.sql.Sql

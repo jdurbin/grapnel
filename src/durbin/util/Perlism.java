@@ -11,23 +11,23 @@ import java.lang.RuntimeException;
 
 /**
 * Make some functionality available to Groovy that is common in Perl
-* but not implemented in Groovy by default.
+* but not implemented in Groovy by default.<br><br>
 *
-* Example using to compute complement of DNA sequence:
-*
+* Example using to compute complement of DNA sequence:<br>
+* <pre>
 * complement = Perlism.tr("ACTG","TGAC",fwdSeq)
-*
+* </pre>
 * Or for repeated use of translation, can precompile as in this example:
-* 
+* <pre>
 * pattern = Perlism.compileTRPattern("wsatugcyrkmbdhvnATUGCYRKMBDHVN",
 *       	                            "WSTAACGRYMKVHDBNTAACGRYMKVHDBN")
 *
 * complement = Perlism.tr(pattern,fwdSeq)
-* 
+* </pre>
 */
 public class Perlism {
 
-	/********************************************
+	/***
 	* Translate characters, like Perl tr().  Most Groovy-only implementations of TR are slow.
 	* This, however, is fast.
 	*/
@@ -40,7 +40,7 @@ public class Perlism {
 	}
 
 
-	/********************************************
+	/***
 	* Translate characters, like Perl tr().  Most Groovy-only implementations of TR are slow.
 	* This, however, is fast.
 	*/
@@ -57,7 +57,7 @@ public class Perlism {
 		return(source);
 	}
 
-  /**************************************************************************************
+  /***
   *  A bunch of utility methods to help with common file related things.
   *
   */
@@ -79,7 +79,7 @@ public class Perlism {
 		return(source);
 	}
 
-  /**************************************************************************************
+  /***
   *  A bunch of utility methods to help with common file related things.
   *
   */
@@ -96,7 +96,7 @@ public class Perlism {
 		return(source);
 	}
 
-  /**************************************************************************************
+  /***
   *  A bunch of utility methods to help with common file related things.
   *
   */

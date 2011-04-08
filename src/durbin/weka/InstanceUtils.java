@@ -10,14 +10,14 @@ import weka.filters.unsupervised.attribute.Remove;
 // Of course, when I get Instances back from some weka function, it won't come with this...
 
 
-/**************************************************************
+/***
 * Utilities to help with manipulation of Instances, especially going 
 * back and forth between instance/attribute names and indices. 
 */
 public class InstanceUtils {
 
   
-  /***********************************
+  /***
 	 *  Takes a collection of attribute names and returns an array of the corresponding
 	 *  attribute indices for those names.
 	 */
@@ -35,7 +35,7 @@ public class InstanceUtils {
 		return(indexArray);
 	}
 
-	/***********************************
+	/***
 	*  Takes a collection of attribute names and returns a Set of the corresponding attribute
 	*  indices for those names.
 	*/
@@ -51,7 +51,7 @@ public class InstanceUtils {
 	
 
 
-	/***********************************************
+	/***
 	* Merges the attributes from first with the attributes in second
 	*
 	* @param first Instances to be merged
@@ -62,7 +62,7 @@ public class InstanceUtils {
 		return(Instances.mergeInstances(first,second));
 	}
 	
-	/***********************************************
+	/***
 	*  Return the attributes as a set of strings. 
 	*
 	*/	
@@ -76,7 +76,7 @@ public class InstanceUtils {
     return(rval);
   }
   
-  /*****************************************
+  /***
   * Return a list of instance names. 
   */ 
   public static List<String> getInstanceNames(Instances data){
@@ -90,7 +90,7 @@ public class InstanceUtils {
     return(rList);    
   }
 	
-	/************************************************************
+	/***
 	*  Make a map between instance names and instance indices...
   * (Maybe I'm missing where this is part of the API already?)
   * 
@@ -110,7 +110,7 @@ public class InstanceUtils {
   }
 	
 	
-	/**********************************************
+	/***
 	* Removes instances whose nominal/string attribute, specified by attributeName, 
 	* equals a specific attributeValue. 
 	* 
@@ -135,7 +135,7 @@ public class InstanceUtils {
 	}
 	
 	
-	/***********************************************************
+	/***
 	*  Takes a list of attribute names and converts them into a string representation
 	*  of a list of attribute indices sutible for input to filters and the such. 
 	*/
@@ -180,7 +180,7 @@ public class InstanceUtils {
     return(rval.toString());
 	}
 		
-	/************************************************************
+	/***
 	* Creates a string representation of the indices of the instances given by names. <br>
 	* 
 	* <b>REQUIRED: </b> Instances MUST have an attribute named "ID" that 
@@ -205,7 +205,7 @@ public class InstanceUtils {
 	}
 	
 
-	/**********************************************
+	/***
 	* Merges the attributes from first with the attributes in second that appear in the 
 	* collection of attribute names to include. 
 	*
@@ -243,7 +243,7 @@ public class InstanceUtils {
 		return(Instances.mergeInstances(first,secondNew));
 	}
 		
-	/********************************************************
+	/***
 	* Like Instances.mergeInstances, but uses named ID's to merge two sets of 
 	* Instances that may not have the same number of elements or the elements in 
 	* the same order. 

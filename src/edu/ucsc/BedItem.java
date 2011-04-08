@@ -2,14 +2,14 @@ package edu.ucsc;
 
 import java.util.*;
 
-/*******************************************************************************************
+/***
 * BED format provides a flexible way to define the data lines that are displayed in an annotation track.
 * BED lines have three required fields and nine additional optional fields. The number of fields per line
 * must be consistent throughout any single set of data in an annotation track. The order of the optional
 * fields is binding: lower-numbered fields must always be populated if higher-numbered fields are used.
 *
 * The first three required BED fields are:
-*
+* <pre>
 * chrom - The name of the chromosome (e.g. chr3, chrY, chr2_random) or scaffold (e.g. scaffold10671).
 * chromStart - The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0.
 * chromEnd - The ending position of the feature in the chromosome or scaffold. The chromEnd base is not
@@ -29,19 +29,21 @@ import java.util.*;
 * blockSizes - A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.
 * blockStarts - A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart.
 *               The number of items in this list should correspond to blockCount.
-* Example:
-* Here's an example of an annotation track that uses a complete BED definition:
-*
+* </pre>
+* Example: <br>
+* Here's an example of an annotation track that uses a complete BED definition:<br>
+* <pre>
 * track name=pairedReads description="Clone Paired Reads" useScore=1
 * chr22 1000 5000 cloneA 960 + 1000 5000 0 2 567,488, 0,3512
 * chr22 2000 6000 cloneB 900 - 2000 6000 0 2 433,399, 0,3601
+* </pre>
 *
-******************************************************************************************/
+*/
 
 
-/******************************************************************************************
+/***
 * Example from Epigenomics dataset.. 8,605,199 lines.
-*
+* <pre>
 * chr1    470     505     03_6:4:53:1761:816      1       +       0       0       255,0,0
 * chr1    532     567     03_6:4:1:1544:1961      1       +       0       0       255,0,0
 * chr1    2919    2954    03_6:4:95:1219:564      1       -       0       0       0,0,255
@@ -49,20 +51,21 @@ import java.util.*;
 * chr1    4782    4817    03_6:4:49:190:1071      1       -       0       0       0,0,255
 * chr1    5222    5257    03_6:4:12:494:1872      1       -       0       0       0,0,255
 * chr1    6037    6072    03_6:4:60:810:1740      1       -       0       0       0,0,255
-*****************************************************************************************/
+* </pre>
+*/
 
-/****************************************************************************************
+/***
 *  A single item in a bed graph.  This is called simply Bed in the kent codebase
 *  since it's a linked list and there is no separation between a single bed item and
-*  a whole list of them.
+*  a whole list of them.<br>
 *
-*  Space is an issue, and someday I may want to do something more space efficient.
+*  Space is an issue, and someday I may want to do something more space efficient.<br>
 *
 *  As it is, I am only implementing the fields I use.  If/when I add the other fields,
 *  then I'll have to pay more attention to space.  Currently, this should take about
 *  14+8 = 22 bytes/Item.   So, a typical 10 million entry ChIP-seq bed graph might take
 *  220MB. So on a reasonable laptop, one could load two of these graphs and intersect
-*  them, say.
+*  them, say.<br>
 *
 */
 
@@ -112,7 +115,7 @@ public class BedItem {
 		return(val);
 	}
 
-	/*****************************************************
+	/***
 	* Create a BitVector containing the information from one bed entry.
 	*/
 	public BedItem(String chrom,int chromStart,int chromEnd, int score,char strand) {
@@ -123,7 +126,7 @@ public class BedItem {
 		this.strand = (byte)strand;
 	}
 	
-	/**************************************************
+	/***
 	* Sets the chromosome ID by looking up the chrom in the map. 
 	* This trades some speed for space efficiency. 
 	*/
@@ -143,7 +146,7 @@ public class BedItem {
 	  return(chrom2ID.get(chrom));
 	}
 	
-	/**********************************************
+	/***
 	* parses a single line from a bed file, returning a single BedItem
 	*/
 	public void parseLine(String line) {
