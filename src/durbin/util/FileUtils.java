@@ -10,7 +10,8 @@ import java.lang.*;
 *
 */
 public class FileUtils {
-  
+	
+	
   /***
   *  Gets the first line of a file. 
   *  Sort of silly, but I do this so often I wanted to have a shortcut. 

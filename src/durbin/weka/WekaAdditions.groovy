@@ -53,8 +53,7 @@ public class WekaAdditions{
         }
       }
       return(rvals)      
-    }
-    
+    }    
     
     /***
     * Set the class based on a name. 

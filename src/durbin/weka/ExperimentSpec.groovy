@@ -24,8 +24,34 @@ class ExperimentSpec{
    def attrSearchStr
    
     //time estimate:   {so batching can divide it up reasonably}
+
+	 def ExperimentSpec(WekaMineResult wmr){
+		classifierStr = wmr.classifier
+		try{
+			if (classifierStr != "None"){
+				classifier = WekaMine.classifierFromSpec(classifierStr)
+		  }else{
+				classifier = null;
+			}
+			
+			attrEvalStr = wmr.attrEval 
+		  attributeEval = WekaMine.evalFromSpec(attrEvalStr)  
+
+		  attrSearchStr = wmr.attrSearch
+		  attributeSearch = WekaMine.searchFromSpec(attrSearchStr)
+
+		  numAttributes = wmr.numAttrs
+		  classAttribute = wmr.classAttr   
+			discretization = wmr.discretization
+			
+		}catch(Exception e){
+			System.err.println e
+			throw(e)
+		}						
+	}
+
     
-   def ExperimentSpec(line){
+   def ExperimentSpec(String line){
     def fields = line.split(",")
     classifierStr = fields[0]
 

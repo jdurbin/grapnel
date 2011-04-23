@@ -8,20 +8,96 @@ import weka.attributeSelection.*;
 
 import durbin.util.*;
 
+class WekaMineResult{
+	int jobID
+	int	samples
+	float pctCorrect
+	float precision0
+	float recall0
+	float precision1
+	float recall1
+	int tp1
+	int fp1
+	int tn1
+	int fn1
+	float rms
+	float roc
+	String classifier
+	String attrEval
+	String attrSearch
+	int numAttrs
+	String classAttr
+	String discretization
+	
+	def WekaMineResult(String line){
+		def fields = line.split(",")
+		jobID = fields[0] as int
+		samples = fields[1] as int
+		pctCorrect = fields[2] as float
+		precision0 = fields[3] as float
+		recall0	= fields[4] as float
+		precision1 = fields[5] as float
+		recall1 = fields[6] as float
+		tp1 = fields[7] as int
+		fp1 = fields[8] as int
+		tn1 = fields[9] as int
+		fn1 = fields[10] as int
+		rms = fields[11] as float
+		roc = fields[12] as float
+		classifier = fields[13] as String 
+		attrEval = fields[14] as String
+		attrSearch = fields[15] as String
+		numAttrs = fields[16] as int
+		classAttr = fields[17] as String
+		discretization = fields[18] as String
+	}
+	
+	def toExperiment(){
+		return(new ExperimentSpec(this))
+	}	
+}
 
 
 /***
 *  Utilities to help with writing summary results from Weka pipeline.
 */
-class WekaPipelineOutput{
+class WekaMineResults extends ArrayList<WekaMineResult>{
+
+	/***
+	* Read results from a results summary file...
+	*/ 
+	def WekaMineResults(resultsFile){
+		new File(resultsFile).withReader{r->
+			def headings = r.readLine()  // KJD need to use headings instead of fixed columns...
+			
+			r.eachLine{line->
+				def wmr = new WekaMineResult(line)
+				add(wmr)
+			}			
+		}		
+	}
+	
+	
+	/***
+	* Convert results into a list of experiments
+	*/ 
+	def toExperiments(){
+		def rlist = []
+		this.each{result->			
+			def experiment = result.toExperiment()
+			rlist.add(experiment)
+		}
+		return(rlist)
+	}
+	
+
 
   /***
   * Returns a heading for the csv file.  MUST match exactly what is output by 
   * getFormattedEvaluationSummary. 
   */ 
   static String getFormattedSummaryHeading(){
-    def rval = "jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"
-    
+    def rval = "jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc,clsssifier,attrEval,attrSearch,numAttrs,classAttr,discretization"    
     return(rval)
   }
   

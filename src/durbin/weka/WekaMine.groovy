@@ -12,7 +12,7 @@ import weka.filters.unsupervised.attribute.Remove
 import weka.filters.unsupervised.instance.RemoveWithValues
 import weka.filters.unsupervised.attribute.RemoveType
 import weka.filters.unsupervised.attribute.RemoveUseless
-
+import weka.filters.supervised.attribute.*
 
 import weka.classifiers.*
 import weka.classifiers.functions.*
@@ -78,10 +78,15 @@ class WekaMine{
 	
 	def results
 	def eval
+	
+	static{
+		WekaAdditions.enable()
+	}
+	
 		
 	//def instances
 	static def err = System.err // sugar
-	
+					
 		
 	def WekaMine(data,clinical,exp,params){
 		this.data = data // The CNV,EXP, or whatever data
@@ -102,18 +107,64 @@ class WekaMine{
 	* Merges data and single clinical class attribute into a single set of 
 	* instances. 
 	*/ 
-	def createInstancesFromDataAndClinical(data,clinical,classAttribute){
+	static def createInstancesFromDataAndClinical(data,clinical,classAttribute){
 				
  		// Remove all clinical attributes except for the current class...
   	def selectedAttribute = []
   	selectedAttribute.add(classAttribute)
 
-  	def singleClinicalInstances = removeAttributesNotSelected(clinical,selectedAttribute)  
-
+  	def singleClinicalInstances = subsetAttributes(clinical,selectedAttribute)  
+		singleClinicalInstances.setClassName(classAttribute)
+		
   	// Merge data and clinical files (i.e. instances contained in both, omitting rest)		
   	def merged = IU.mergeNamedInstances(data,singleClinicalInstances)		
 
 		return(merged)
+	}
+	
+	/***
+	* Removes and/or adds attributes to make the resulting set of instances
+	* match those specified in the attribute list (e.g. the attributes retrieved
+	* from a trained model).  
+	*/ 
+	static def createInstancesToMatchAttributeList(rawdata,modelAttributes){
+
+		def rawAttributeNames = rawdata.attributeNames()
+		def rawAttributeNamesSet = rawAttributeNames as Set
+		def rawName2Idx = [:]
+		rawAttributeNames.eachWithIndex{n,i->rawName2Idx[n] = i}
+
+
+		// Create a set of instances reflecting the model data...
+		def atts = new FastVector()
+		modelAttributes.each{attrName-> 
+			atts.addElement(new Attribute(attrName))
+		}
+		def data = new Instances("NewInstances",atts,0)
+
+
+		def numInstances = rawdata.numInstances()
+		for(int i = 0;i < numInstances;i++){
+
+				// Get the values from the new data...
+				def instance = rawdata.instance(i)
+				double[] rawVals = instance.toDoubleArray()
+
+				// Create space for the new values...
+				double[] vals = new double[data.numAttributes()];
+
+				// For each attribute...
+				modelAttributes.eachWithIndex{modelAttrName,aIdx->
+					if (rawAttributeNamesSet.contains(modelAttrName)){
+						def rawIdx = rawName2Idx[modelAttrName]
+						vals[aIdx] = rawVals[rawIdx]
+					}else{
+						vals[aIdx] = Instance.missingValue();
+					}
+				}
+				data.add(new Instance(1.0,vals));
+		}
+		return(data)
 	}
 	
 	
@@ -184,21 +235,21 @@ class WekaMine{
 
 	    asClassifier.setClassifier(exp.classifier);
 	    asClassifier.setEvaluator(exp.attributeEval);
-	    asClassifier.setSearch(exp.attributeSearch);                
+	    asClassifier.setSearch(search);                
 	  }
 		return(asClassifier)
 	}
 	
 	def appendSummary(out,idx,instances){		
-	  WekaPipelineOutput.appendSummaryLine(idx,instances,out,exp,eval)
+	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval)
 	}
 	
 	def appendFeatures(out,idx,instances,maxFeaturesOut){
-  	WekaPipelineOutput.appendFeaturesLine(idx,instances,out,exp,eval,maxFeaturesOut)
+  	WekaMineResults.appendFeaturesLine(idx,instances,out,exp,eval,maxFeaturesOut)
 	}
 	
 	def appendSamples(out,idx,instances){
-  	WekaPipelineOutput.appendSamplesLine(idx,instances,out,exp,eval,results)			                                      
+  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,results)			                                      
 	}
 	
 		
@@ -272,6 +323,43 @@ class WekaMine{
     return(discretizedData)
   }
 
+	/**
+	* Remove string attributes.  Specifically the string attribute that contains 
+	* the instance ID.  This is done because most attribute evaluators and classifiers
+	* can not handle string attributes. 
+	*/ 
+	Instances removeInstanceID(instances){
+		def filter = new RemoveType()
+		filter.setInputFormat(instances);
+		def instances_notype = Filter.useFilter(instances,filter)
+		return(instances_notype)
+	}
+
+	/**
+	* Apply an attribute selection algorithm (attributeEvaluator + attributeSearch) to the
+	* instances and return the reduced set of attributes. 
+	*/ 
+	Instances selectAttributes(instances){
+		err.print("Select attributes with ${exp.attrEvalStr}.  Before: ${instances.numAttributes()} ...")
+		AttributeSelection atSel = new weka.filters.supervised.attribute.AttributeSelection(); 
+		atSel.setEvaluator(exp.attributeEval);
+		def search = exp.attributeSearch
+		// Only Ranker (? right??) allows an overt numAttributes cutoff. 
+		// At least, BestFirst search does not. 
+		if (search.class == Ranker){
+			search.setNumToSelect(exp.numAttributes);
+		}				
+		atSel.setSearch(search);
+		atSel.setInputFormat(instances);
+		
+		// generate new data
+	 	def instances_atsel = Filter.useFilter(instances, atSel);
+		err.println("done. After: ${instances_atsel.numAttributes()}")
+
+		return(instances_atsel)
+	}
+	
+	
 
 	/**
   *  Remove attributes that don't vary. 
@@ -310,7 +398,7 @@ class WekaMine{
 	/**
   * Remove all the attributes from data except those named in selectedAttributes
   */ 
-  Instances removeAttributesNotSelected(data,selectedAttributes){
+ 	static Instances subsetAttributes(Instances data,ArrayList selectedAttributes){
 
     //err.println "SelectedAttributes: $selectedAttributes"
 
@@ -318,13 +406,11 @@ class WekaMine{
     // Must preserve ID, however!!!  So explicitly add it to selected attributes...
     selectedAttributes.add("ID")
     def attrIndicesStr = IU.attributeNames2Indices(data,selectedAttributes)
-    err.println "Removing attributes except current class: "+attrIndicesStr
     def remove = new Remove();
     remove.setAttributeIndices(attrIndicesStr);
     remove.setInvertSelection(true); // Remove everything not in this list. 
     remove.setInputFormat(data);
     def selectedAttributeData = Filter.useFilter(data, remove);
-    selectedAttributeData.setClassName(exp.classAttribute)
     return(selectedAttributeData)
   }
 	
@@ -385,7 +471,7 @@ class WekaMine{
 	}
 
   /**
-  *  Creae a attribute evaluation from the command-line evaluation specification
+  *  Create a attribute evaluation from the command-line evaluation specification
   *  string.  For example:<br><br>
   * 
   *  weka.attributeSelection.InfoGainAttributeEval

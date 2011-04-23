@@ -38,6 +38,11 @@ class WekaPlots{
   
   ArrayList<Shape> shapeList; // List of shapes to use for multiple plots...
   
+	public static String printVersionTest(){
+		println "Version the Second!"
+	}
+
+
   /**
   * Make a range renderer plot with multiple plots. 
   *
