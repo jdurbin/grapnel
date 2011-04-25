@@ -13,9 +13,11 @@ class WekaMineModel implements Serializable{
 	static final long serialVersionUID = 1L;
 	
 	def atrSelMethod  // Just for records sake
-		
+
+	def	discretization
 	def classifier
 	def attributes
+	
 	
 	// KJD: should save the names of the classes this classifier predicts...
 	// high/low... ERPOS, ERNEG, etc.   This will mean,probably, specifying the name of 
@@ -27,8 +29,18 @@ class WekaMineModel implements Serializable{
 		WekaAdditions.enable()
 		
 		this.classifier = classifier		
+		this.discretization = "none"
 		attributes = instances.attributeNames()		
 	}
+	
+	def WekaMineModel(instances,classifier,discretization){		
+		WekaAdditions.enable()		
+		this.classifier = classifier		
+		this.discretization = discretization
+		attributes = instances.attributeNames()		
+	}
+
+	
 	
 	def classAttribute(){
 		return(attributes[-1])

@@ -189,25 +189,31 @@ class WekaMine{
 		return(instances)
 	}
 	
+
+	def discretizeClassAttribute(instances){
+		discretizeClassAttribute(instances,exp.discretization,exp.classAttribute)
+	}
+
+	
 	/***
 	* discretizes the class attribute according to the discretization given in 
 	* the experiment specification.
 	*/ 
-	def discretizeClassAttribute(instances){
+	static def discretizeClassAttribute(instances,discretization,classAttribute){
 	 // Discretize class 
-		if (exp.discretization == 'median'){
+		if (discretization == 'median'){
 			err.println "median discretization"		
-	    instances = classToMedian(instances,"low","high")        
-	  }else if (exp.discretization == 'quartile'){
+	    instances = classToMedian(instances,"low","high",classAttribute)        
+	  }else if (discretization == 'quartile'){
 			err.println "quartile discretization"		
-	    instances = classToNominalTopBottomQuartile(instances,"low","high")        
-	  }else if (exp.discretization.contains(";")){
-			fields = exp.discretization.split(";")
-	    lowerBound = fields[0] as double
-	    upperBound = fields[1] as double
-	    instances = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high")
+	    instances = classToNominalTopBottomQuartile(instances,"low","high",classAttribute)        
+	  }else if (discretization.contains(";")){
+			def fields = discretization.split(";")
+	    def lowerBound = fields[0] as double
+	    def upperBound = fields[1] as double
+	    instances = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high",classAttribute)
 	  }else{
-			err.println "UNKNOWN discretization: "+exp.discretization
+			err.println "UNKNOWN discretization: "+discretization
 			return;
 		}
 		return(instances)
@@ -269,8 +275,8 @@ class WekaMine{
   /***
   *  Converts the numeric class attribute into 
   */
-  Instances classToNominalTopBottomQuartile(data,lowString,highString){
-    def classIdx = data.setClassName(exp.classAttribute) // Necessary to get idx, since idx changes 
+  static Instances classToNominalTopBottomQuartile(data,lowString,highString,classAttribute){
+    def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
      
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
     err.print "Discretizing class attribute..."
@@ -280,7 +286,7 @@ class WekaMine{
     quartile.setInputFormat(data)
     quartile.setNominalValues(lowString,highString)
     def discretizedData = Filter.useFilter(data,quartile)
-    classIdx = discretizedData.setClassName(exp.classAttribute)
+    classIdx = discretizedData.setClassName(classAttribute)
     err.println "done."  // KJD report how many high/low as a sanity check. 
     return(discretizedData)
   }
@@ -288,8 +294,8 @@ class WekaMine{
 	/**
   *  Converts the numeric class attribute into 
   */
-  Instances classToNominalFromCutoffs(data,cutoffLow,cutoffHigh,lowString,highString){
-    def classIdx = data.setClassName(exp.classAttribute) // Necessary to get idx, since idx changes 
+  static Instances classToNominalFromCutoffs(data,cutoffLow,cutoffHigh,lowString,highString,classAttribute){
+    def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
 
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
     err.print "Discretizing class attribute..."
@@ -299,7 +305,7 @@ class WekaMine{
     quartile.setInputFormat(data)
     quartile.setNominalValues(lowString,highString)
     def discretizedData = Filter.useFilter(data,quartile)
-    classIdx = discretizedData.setClassName(exp.classAttribute)
+    classIdx = discretizedData.setClassName(classAttribute)
     err.println "done."  // KJD report how many high/low as a sanity check. 
     return(discretizedData)
   }
@@ -307,8 +313,8 @@ class WekaMine{
   /**
   *  Converts the numeric class attribute into 
   */
-  Instances classToMedian(data,lowString,highString){
-    def classIdx = data.setClassName(exp.classAttribute) // Necessary to get idx, since idx changes 
+  static Instances classToMedian(data,lowString,highString,classAttribute){
+    def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
 
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
     err.print "Discretizing class attribute..."
@@ -318,7 +324,7 @@ class WekaMine{
     quartile.setInputFormat(data)
     quartile.setNominalValues(lowString,highString)
     def discretizedData = Filter.useFilter(data,quartile)
-    classIdx = discretizedData.setClassName(exp.classAttribute)
+    classIdx = discretizedData.setClassName(classAttribute)
     err.println "done."  // KJD report how many high/low as a sanity check. 
     return(discretizedData)
   }
