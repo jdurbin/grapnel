@@ -63,6 +63,8 @@ class TwoDMap extends MultidimensionalMap{
       def colKeys = [] as Set
 			def rowKeys = rowKeySet()
       rowKeys.each{rowKey->
+				def rowSet = this[rowKey].keySet()
+				//System.err.println "rowKey: $rowKey  rowSet: $rowSet"
         colKeys = colKeys + this[rowKey].keySet()
       }
 			return(colKeys)
@@ -89,13 +91,39 @@ class TwoDMap extends MultidimensionalMap{
       }      
     }
     
+		/**
+    * Print out a 2D table that has max keys in each direction...
+    */ 
+    def printTableTranspose(delimiter,nullVal){
+
+      def rowKeys = rowKeySet()
+			def colKeys = colKeySet()		
+
+      // Print the heading...
+      print "Features$delimiter"
+      println rowKeys.join(delimiter)
+			
+      // Print the table proper...
+      colKeys.each{colKey->
+        def colVals = []
+        rowKeys.each{rowKey->
+          def val = this[rowKey][colKey]
+          if (val == [:]) colVals << nullVal
+          else colVals << val
+        }
+        print  "$colKey$delimiter"
+        println colVals.join(delimiter)        
+      }
+    }
+
+
     
     /**
     * Print out a 2D table that has max keys in each direction...
     */ 
     def printTable(delimiter,nullVal){
 
-      def rowKeys = this.keySet()
+      def rowKeys = rowKeySet()
 
       // Find the union of all column keys...
 //      def colKeys = [] as Set
@@ -103,7 +131,7 @@ class TwoDMap extends MultidimensionalMap{
   //      colKeys = colKeys + this[rowKey].keySet()
    //   }
 
-			colKeys = this.colKeySet()
+			def colKeys = colKeySet()
 
       // Print the heading...
       print "Features$delimiter"

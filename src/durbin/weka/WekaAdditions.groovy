@@ -30,7 +30,7 @@ public class WekaAdditions{
 	* Enables all of the additions to weka in WekaAdditions.  
 	*/ 
   static enable(){  
-    
+	  
     /***
     *  Return an array of the values for a named attribute. 
     */ 
@@ -65,6 +65,24 @@ public class WekaAdditions{
       setClassIndex(idx) // Zero based ..
       return(idx)
     }
+
+		/***
+		* Takes a list of instance names and returns their 
+		* correspondign instance indexes.  Assumes ID attribute
+		* holds instance names.
+		*/ 
+		Instances.metaClass.nameListToIndexList <<{nameList->
+			def rlist = []
+			Attribute id = attribute("ID");
+			def nameSet = nameList as Set
+			(0..<numInstances()).each{idx->
+				Instance inst = instance(idx)
+				String value = inst.stringValue(id)
+				if (nameSet.contains(value)) rlist << idx
+			}
+			return(rlist)
+		}
+
         
     /***
     * Returns all the attribute values for a named instance

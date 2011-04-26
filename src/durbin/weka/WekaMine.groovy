@@ -24,6 +24,7 @@ import weka.classifiers.mi.*
 import weka.classifiers.lazy.*
 import weka.classifiers.functions.suportVector.*
 import weka.classifiers.meta.FilteredClassifier;
+import weka.filters.unsupervised.instance.*;
 
 import weka.attributeSelection.*
 
@@ -419,6 +420,25 @@ class WekaMine{
     def selectedAttributeData = Filter.useFilter(data, remove);
     return(selectedAttributeData)
   }
+	
+	/***
+	* Remove all the instances from data except those named in selectedInstances
+	*/ 
+	static Instances subsetInstances(Instances data,ArrayList selectedInstances){
+		WekaAdditions.enable() // Just in case
+		
+		def remove = new RemoveRange()
+		def idxList = data.nameListToIndexList(selectedInstances)	
+		idxList = idxList.collect{it+1} // convert to one based	
+		def rangeStr = idxList.join(",")
+		System.err.println "selectedInstances: "+selectedInstances
+		System.err.println "rangeStr: "+rangeStr
+		remove.setInstancesIndices(rangeStr)
+		remove.setInvertSelection(true) // Remove everything not in this list
+		remove.setInputFormat(data)
+		def selectedInstanceData = Filter.useFilter(data,remove)
+		return(selectedInstanceData)
+	}
 	
 	
   /**
