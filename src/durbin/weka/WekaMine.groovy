@@ -201,7 +201,8 @@ class WekaMine{
 	* the experiment specification.
 	*/ 
 	static def discretizeClassAttribute(instances,discretization,classAttribute){
-	 // Discretize class 
+		
+	 	// Discretize numeric class 
 		if (discretization == 'median'){
 			err.println "median discretization"		
 	    instances = classToMedian(instances,"low","high",classAttribute)        
