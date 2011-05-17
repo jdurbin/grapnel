@@ -214,9 +214,10 @@ class WekaMine{
 	    def lowerBound = fields[0] as double
 	    def upperBound = fields[1] as double
 	    instances = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high",classAttribute)
-	  }else{
+	  }else if (discretization == 'none'){
+			err.println "NO discretization"
+		}else{
 			err.println "UNKNOWN discretization: "+discretization
-			return;
 		}
 		return(instances)
 	}
@@ -442,15 +443,26 @@ class WekaMine{
 	}
 	
 	
+	/**
+  * Read instances from a table, filling in missing value tokens as we go. 
+  */ 
+  static Instances readFromTable(dataFileName){
+		def instancesInRows = false // Default 
+		readFromTable(dataFileName,instancesInRows)
+	}
+	
+	
   /**
   * Read instances from a table, filling in missing value tokens as we go. 
   */ 
-  static Instances readNumericFromTable(dataFileName){
+  static Instances readFromTable(dataFileName,instancesInRows){
     // Read data in from table.  Handle missing values as we go.
-    err.print "Loading numeric data from $dataFileName..."
+    err.print "Loading data from $dataFileName..."
     TableFileLoader loader = new TableFileLoader()
     loader.setAddInstanceNamesAsFeatures(true)
-    Instances data = loader.read(dataFileName,"\t"){  
+
+		def relationName = dataFileName;
+    Instances data = loader.read(dataFileName,relationName,"\t",instancesInRows){  
 
       // Lots of different missing value notations...
       if ((it == "") || (it == null) || (it == "NA") || 
@@ -458,7 +470,8 @@ class WekaMine{
          (it == "?")){
         return (Instance.missingValue())
       }else{
-        return(it as Double)
+       // return(it as Double)  KJD 5/16
+			  return(it)
       }
     }
     //err.println "${data.numInstances()} x ${data.numAttributes()} done."

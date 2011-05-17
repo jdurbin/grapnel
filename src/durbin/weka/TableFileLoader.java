@@ -53,6 +53,7 @@ public class TableFileLoader {
   }
     
   
+	// The default read assumes that columns are instances...
   public Instances read(String fileName,String delimiter,Closure c) throws Exception {
 		Instances data = read(fileName,fileName,delimiter,c);
 		return(data);
@@ -80,63 +81,45 @@ public class TableFileLoader {
 		if (rowsAreInstances) {
 			return(tableRowsToInstances(t,relationName));
 		} else {
-			return(tableColsToInstances(t,relationName));
+			return(tableColsToInstances(t,relationName)); // KJD
 		}
 	}
 	
-	/***
-	*  Examines a delimited file to determine if columns are numeric or nominal. 
-	*/
-	public boolean[] isNumericColumns(String fileName,String regex) throws Exception {
-
-		// Read the col headings and figure out the number of columns in the table..
-		BufferedReader reader = new BufferedReader(new FileReader(fileName));
-		String line = reader.readLine();
-
-		 // Not quite right, because includes spurious 0,0 column. 
-		String[] fields = line.split(regex,-1); // -1 to include empty cols.
-		int numCols = fields.length -1;
-		
-		// We'll assume that each column is all of a type so we only need to check the 
-		// first row to see what type the column is, nominal or numeric. 
-		boolean [] isNumeric = new boolean[numCols];
-		line = reader.readLine();					
-		Scanner scanner = new Scanner(line).useDelimiter("\t");
-		scanner.next(); // Consume row name						
-		int colIdx = 0;
-		while(scanner.hasNext()){
-			if (scanner.hasNextDouble()) {  
-				isNumeric[colIdx] = true;
-			}else{
-				isNumeric[colIdx] = false;
-			}
-			colIdx++;								
-		}
-		return(isNumeric);
-	}
 	
-	
-	
-
   /****************************************************
   *  Convert a table to a set of instances, with <b>rows</b> representing individual </b>instances</b>
   *  and <b>columns</b> representing <b>attributes</b> 
   */
 	public Instances tableRowsToInstances(Table t,String relationName) {	
 	  
-	  if (addInstanceNamesAsFeatures){	
-	    System.err.println("addInstanceNamesAsFeatures not currently supported with RowInstances.");
-	    System.exit(1);
-	  }
-	  
 		// Set up attributes, which for rowInstances will be the colNames...
 		FastVector atts = new FastVector();
+		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
+		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...
+				
 		for (int c = 0;c < t.numCols;c++) {
-			atts.addElement(new Attribute(t.colNames[c]));
+			// We're going to assume that the first value is like all of the values 
+			// and choose our type from that...
+			String testValue = (String) t.matrix.getQuick(0,c); 			
+			Scanner scanner = new Scanner(testValue);
+			if (scanner.hasNextDouble()){
+				// It's numeric...
+				isNominal.add(false);
+				atts.addElement(new Attribute(t.colNames[c]));
+				allAttVals.add(null); // No enumeration of attribute values. 
+			}else{
+				// It's nominal... determine the range of values
+				isNominal.add(true);
+				FastVector attVals = getColValues(t,c);
+				atts.addElement(new Attribute(t.colNames[c],attVals));
+				// Save it for later
+				allAttVals.add(attVals);
+			}
 		}
 
 		// Create Instances object..
 		Instances data = new Instances(relationName,atts,0);
+		data.setRelationName(relationName);
 
 		// Fill the instances with data...
 		// For each instance...
@@ -146,82 +129,100 @@ public class TableFileLoader {
 			// For each attribute...
 			for (int c = 0;c < t.numCols;c++) {
 				Object val = t.matrix.getQuick(r,c);
-				if (val == null) 	vals[c] = Instance.missingValue();
-				else vals[c] = (Double) val;
+				
+				if (isNominal.get(c)){
+					vals[c] = allAttVals.get(c).indexOf(val);
+				}else{ 
+					if (val == null) 	{
+						vals[c] = Instance.missingValue();
+					}else {
+						vals[c] = Double.parseDouble((String)val);
+					}
+				}
 			}
+			// Add the a newly minted instance with those attribute values...
 			data.add(new Instance(1.0,vals));
 		}
+		
+		if (addInstanceNamesAsFeatures){		  		  
+			Instances newData = new Instances(data);
+	    newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
+	    int attrIdx = newData.attribute("ID").index(); // Paranoid... should be 0
+
+	    // We save the instanceNames in a list because it's handy later on...
+	    instanceNames = new ArrayList<String>();
+
+	    for(int r = 0;r < t.rowNames.length;r++){
+				instanceNames.add(t.rowNames[r]);
+				newData.instance(r).setValue(attrIdx,t.rowNames[r]);
+	    }
+			data = newData;
+	  }				
+		
 		return(data);
 	}
-	
-	/***
-	* Create a FastVector containing the set of values found in the given row...
-	*/ 
-	/*
-	public FastVector getRowValues(Table t,int rowIdx){				
-		HashSet<String> valSet = new HashSet<String>();
-		for(int c = 0;c < t.cols();c++){
-			valSet.add(t.matrix.getQuick(rowIdx,c));
-		}
-		
-		attVals = new FastVector();		
-		for(Object v : valSet){
-			attVals.addElement(v);
-		}
-		return(attVals);
-	}
-	*/
 
   /****************************************************
   *  Convert a table to a set of instances, with <b>columns</b> representing individual </b>instances</b>
   *  and <b>rows</b> representing <b>attributes</b> (e.g. as is common with microarray data)
   */
-/*
-  public Instances tableColsToInstances2(Table t,String relationName) {
+  public Instances tableColsToInstances(Table t,String relationName) {
        
   	// Set up attributes, which for colInstances will be the rowNames...
   	FastVector atts = new FastVector();
-		for (int r = 0;r < t.numRows;r++) {
+		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
+		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...
+		
+		for (int r = 0;r < t.numRows;r++) {			
 			
 			// We're going to assume that the first value is like all of the values 
 			// and choose our type from that...
-			String testValue = t.matrix.getQuick(r,0) 			
-			Scanner scanner = new Scanner(testValue)
+			String testValue = (String) t.matrix.getQuick(r,0); 			
+			Scanner scanner = new Scanner(testValue);
 			if (scanner.hasNextDouble()){
 				// It's numeric...
+				isNominal.add(false);
 				atts.addElement(new Attribute(t.rowNames[r]));
+				allAttVals.add(null); // No enumeration of attribute values. 
 			}else{
 				// It's nominal... determine the range of values
-				FastVector attVals = getRowValues(t,r)
+				isNominal.add(true);
+				FastVector attVals = getRowValues(t,r);
 				atts.addElement(new Attribute(t.rowNames[r],attVals));
+				// Save it for later
+				allAttVals.add(attVals);
 			}
 		}
-		
-		KJD need to save the numeric/nominal determination to be used during stuffing below...
 
 		// Create Instances object..
 		Instances data = new Instances(relationName,atts,0);
 		data.setRelationName(relationName);
 
+		/*******  CREATE INSTANCES **************/ 
 		// Fill the instances with data...	
 		// For each instance...
 		for (int c = 0;c < t.numCols;c++) {
-			double[] vals = new double[data.numAttributes()];			
+			double[] vals = new double[data.numAttributes()];	// Even nominal values are stored as double pointers.
 
-			// For each attribute...
+			// For each attribute fill in the numeric or attributeValue index...
 			for (int r = 0;r < t.numRows;r++) {			    
 				Object val = t.matrix.getQuick(r,c);
-				if (val == null) 	vals[r] = Instance.missingValue();
-				else vals[r] = (Double) val;								
+				if (isNominal.get(r)){
+					vals[r] = allAttVals.get(r).indexOf(val);
+				}else{ 
+					if (val == null) 	{
+						vals[r] = Instance.missingValue();
+					}else {
+						vals[r] = Double.parseDouble((String)val);								
+					}
+				}
 			}						
 			// Add the a newly minted instance with those attribute values...
 			data.add(new Instance(1.0,vals));
-		}		
+	}		
 
-   // System.err.println("******* Before Add Instance Names **********");
-    //System.err.println(data);
-
-
+   
+		/*******  ADD FEATURE NAMES **************/ 
 		if (addInstanceNamesAsFeatures){		  		  
 		  Instances newData = new Instances(data);
       newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
@@ -238,12 +239,47 @@ public class TableFileLoader {
   	}				
   	return(data);
   } 
-*/
+
+
+	/***
+	* Create a FastVector containing the set of values found in the given col...
+	*/ 
+	public FastVector getColValues(Table t,int colIdx){				
+		HashSet<String> valSet = new HashSet<String>();
+		for(int r = 0;r < t.rows();r++){
+			valSet.add((String) t.matrix.getQuick(r,colIdx));
+		}
+		
+		FastVector attVals = new FastVector();		
+		for(Object v : valSet){
+			attVals.addElement(v);
+		}
+		return(attVals);
+	}
+
+
+	/***
+	* Create a FastVector containing the set of values found in the given row...
+	*/ 
+	public FastVector getRowValues(Table t,int rowIdx){				
+		HashSet<String> valSet = new HashSet<String>();
+		for(int c = 0;c < t.cols();c++){
+			valSet.add((String) t.matrix.getQuick(rowIdx,c));
+		}
+		
+		FastVector attVals = new FastVector();		
+		for(Object v : valSet){
+			attVals.addElement(v);
+		}
+		return(attVals);
+	}
+
 
 	/****************************************************
   *  Convert a table to a set of instances, with <b>columns</b> representing individual </b>instances</b>
   *  and <b>rows</b> representing <b>attributes</b> (e.g. as is common with microarray data)
   */
+/*  DEPRECATED 
   public Instances tableColsToInstances(Table t,String relationName) {
        
   	// Set up attributes, which for colInstances will be the rowNames...
@@ -291,6 +327,7 @@ public class TableFileLoader {
   	}				
   	return(data);
   }
+*/
 }
 
 

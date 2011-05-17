@@ -54,7 +54,8 @@ public class CVUtils{
       // wrapper will keep the original dataset and keep track of the mapping 
       // between the original and the folds (minus ID). 
       def filteredClassifier = new FilteredClassifier()
-      def removeTypeFilter = new RemoveType();  
+      def removeTypeFilter = new RemoveType();
+			//removeTypeFilter.setOptions("-T string");  
           
       filteredClassifier.setClassifier(classifier)
       filteredClassifier.setFilter(removeTypeFilter)
@@ -71,18 +72,20 @@ public class CVUtils{
 
       def lines = predictions.toString().split("\n")
 
-      //System.err.println predictions
 
       // KJD TODO: Now that I've broken down and made a fork, Evaluation2, I 
       // could just add a more direct API into Evaluation2 for this...
+
+			// Probably should, in fact, since I'm now running up against having + as a nominal 
+			// class attribute, screwing up the regex below...
       
       // Output of predictions looks like:  
       // inst#     actual  predicted error prediction (ID)
       //     1      1:low      1:low       1 (P1)
       //     2     2:high      1:low   +   0.5 (P6)
       //     3     2:high     2:high       1 (P0)
-      lines[1..-1].each{line->              
-                
+      lines[1..-1].each{line->    
+	                
         // Parse out fields we're interested in..
         //def m = line =~ /\d:(\w+).*\d:(\w+).*\((.+)\)/    
         //def m = line =~ /\d:(.+).*\d:(\w+).*\((.+)\)/         
