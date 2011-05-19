@@ -63,7 +63,6 @@ public class TableFileLoader {
 		return(read(fileName,relationName,delimiter,false,c));
 	}
 
-
 	public Instances read(String fileName,String relationName,String delimiter,boolean rowsAreInstances,
 	                      Closure c) throws Exception {
 		Table t = new Table(fileName,delimiter,c);
@@ -95,18 +94,12 @@ public class TableFileLoader {
 		// Set up attributes, which for rowInstances will be the colNames...
 		FastVector atts = new FastVector();
 		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
-		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...
-				
-		for (int c = 0;c < t.numCols;c++) {
-			// We're going to assume that the first value is like all of the values 
-			// and choose our type from that...
-			String testValue = (String) t.matrix.getQuick(0,c); 			
-			Scanner scanner = new Scanner(testValue);
-			if (scanner.hasNextDouble()){
-				// It's numeric...
+		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...				
+		for (int c = 0;c < t.numCols;c++) {			
+			if (columnIsNumeric(t,c)){
 				isNominal.add(false);
 				atts.addElement(new Attribute(t.colNames[c]));
-				allAttVals.add(null); // No enumeration of attribute values. 
+				allAttVals.add(null); // No enumeration of attribute values.
 			}else{
 				// It's nominal... determine the range of values
 				isNominal.add(true);
@@ -126,18 +119,14 @@ public class TableFileLoader {
 		for (int r = 0;r < t.numRows;r++) {
 			double[] vals = new double[data.numAttributes()];
 
-			// For each attribute...
-			for (int c = 0;c < t.numCols;c++) {
-				Object val = t.matrix.getQuick(r,c);
-				
-				if (isNominal.get(c)){
-					vals[c] = allAttVals.get(c).indexOf(val);
+			// for each attribute
+			for (int c = 0;c < t.numCols;c++) {			    
+				String val = (String) t.matrix.getQuick(r,c);
+				if (val == "?") vals[c] = Instance.missingValue();
+				else if (isNominal.get(c)){
+					vals[r] = allAttVals.get(c).indexOf(val);
 				}else{ 
-					if (val == null) 	{
-						vals[c] = Instance.missingValue();
-					}else {
-						vals[c] = Double.parseDouble((String)val);
-					}
+					vals[r] = Double.parseDouble((String)val);												
 				}
 			}
 			// Add the a newly minted instance with those attribute values...
@@ -161,6 +150,48 @@ public class TableFileLoader {
 		
 		return(data);
 	}
+	
+	/****
+	* Test if a row is all numeric or if it is a nominal row. 
+	*/ 
+	public boolean rowIsNumeric(Table t,int row){
+		
+		// Find first non-missing value in row...
+		String testValue ="";
+		for(int c = 0;c < t.numCols;c++){
+			testValue = (String) t.matrix.getQuick(row,c);
+			if (testValue !="?") break; 						
+		}
+
+		// See if it's numeric...
+		Scanner scanner = new Scanner(testValue);
+		if (scanner.hasNextDouble()){
+			return(true);
+		}else{
+			return(false);
+		}
+	}
+	
+	/****
+	* Test if a column is all numeric or if it is a nominal column
+	*/ 
+	public boolean columnIsNumeric(Table t,int col){		
+		// Find first non-missing value in row...
+		String testValue = "";
+		for(int r = 0;r < t.numRows;r++){
+			testValue = (String) t.matrix.getQuick(r,col);
+			if (testValue !="?") break; 						
+		}
+
+		// See if it's numeric...
+		Scanner scanner = new Scanner(testValue);
+		if (scanner.hasNextDouble()){
+			return(true);
+		}else{
+			return(false);
+		}
+	}
+	
 
   /****************************************************
   *  Convert a table to a set of instances, with <b>columns</b> representing individual </b>instances</b>
@@ -173,19 +204,13 @@ public class TableFileLoader {
 		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
 		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...
 		
-		for (int r = 0;r < t.numRows;r++) {			
-			
-			// We're going to assume that the first value is like all of the values 
-			// and choose our type from that...
-			String testValue = (String) t.matrix.getQuick(r,0); 			
-			Scanner scanner = new Scanner(testValue);
-			if (scanner.hasNextDouble()){
-				// It's numeric...
+		for (int r = 0;r < t.numRows;r++) {						
+			if (rowIsNumeric(t,r)){
 				isNominal.add(false);
 				atts.addElement(new Attribute(t.rowNames[r]));
-				allAttVals.add(null); // No enumeration of attribute values. 
+				allAttVals.add(null); // No enumeration of attribute values.
 			}else{
-				// It's nominal... determine the range of values
+				// It's nominal... determine the range of values and create a nominal attribute...
 				isNominal.add(true);
 				FastVector attVals = getRowValues(t,r);
 				atts.addElement(new Attribute(t.rowNames[r],attVals));
@@ -206,15 +231,12 @@ public class TableFileLoader {
 
 			// For each attribute fill in the numeric or attributeValue index...
 			for (int r = 0;r < t.numRows;r++) {			    
-				Object val = t.matrix.getQuick(r,c);
-				if (isNominal.get(r)){
+				String val = (String) t.matrix.getQuick(r,c);
+				if (val == "?") vals[r] = Instance.missingValue();
+				else if (isNominal.get(r)){
 					vals[r] = allAttVals.get(r).indexOf(val);
 				}else{ 
-					if (val == null) 	{
-						vals[r] = Instance.missingValue();
-					}else {
-						vals[r] = Double.parseDouble((String)val);								
-					}
+					vals[r] = Double.parseDouble((String)val);												
 				}
 			}						
 			// Add the a newly minted instance with those attribute values...

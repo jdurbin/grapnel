@@ -468,13 +468,13 @@ class WekaMine{
       if ((it == "") || (it == null) || (it == "NA") || 
          (it == "null") || (it == 'NULL') || 
          (it == "?")){
-        return (Instance.missingValue())
+        return ("?")
       }else{
-       // return(it as Double)  KJD 5/16
+        //return(it as Double)  //KJD 5/16
 			  return(it)
       }
     }
-    //err.println "${data.numInstances()} x ${data.numAttributes()} done."
+    err.println "DEBUG ${data.numInstances()} x ${data.numAttributes()} done."
     return(data)
   }
 
