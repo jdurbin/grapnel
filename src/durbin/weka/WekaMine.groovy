@@ -103,6 +103,9 @@ class WekaMine{
 	// *********                  Pipeline Steps.                          ***********
 	//=================================================================================
 
+	def createInstancesFromDataAndClinical(data,clinical){
+		return(createInstancesFromDataAndClinical(data,clinical,exp.classAttribute))
+	}
 	
 	/***
 	* Merges data and single clinical class attribute into a single set of 
@@ -119,6 +122,8 @@ class WekaMine{
 		
   	// Merge data and clinical files (i.e. instances contained in both, omitting rest)		
   	def merged = IU.mergeNamedInstances(data,singleClinicalInstances)		
+
+		def classIdx = merged.setClassName(classAttribute)
 
 		return(merged)
 	}
@@ -168,19 +173,15 @@ class WekaMine{
 		return(data)
 	}
 	
-	
 	/***
 	* Cleans up the attributes and instances by removing degenerate cases
 	*/ 
-	def cleanUpInstances(instances){	
+	static def cleanUpInstances(instances){	
 		// Remove any attributes that don't vary at all..
+		err.print "Removing attributes that don't vary..."
   	instances = removeUselessAttributes(instances)
+		err.println "done."
     
-  	// For many class-attributes, negative values are invalid.  
-  	if (!params.allowNegativeClass){    
-    	instances = removeInstancesWithNegativeClassValues(instances)
-  	}
-
   	// Remove any instances whose class value is missingValue(). 
 		// KJD.. use of this method hasn't been tested...
 		err.print "Removing instances with missing class value. Before: ${instances.numInstances()}..."
@@ -367,17 +368,15 @@ class WekaMine{
 
 		return(instances_atsel)
 	}
-	
-	
 
+	
 	/**
   *  Remove attributes that don't vary. 
   */ 
-  Instances removeUselessAttributes(data){
+  static Instances removeUselessAttributes(data){
     err.print "Removing useless attributes. Before: ${data.numAttributes()}..."
   
     def remove = new RemoveUseless(); 
-    def classIdx = data.setClassName(exp.classAttribute)
     remove.setInputFormat(data)
     def cleanedData = Filter.useFilter(data,remove)
     err.println "done.  After: ${cleanedData.numAttributes()}"
@@ -474,7 +473,7 @@ class WekaMine{
 			  return(it)
       }
     }
-    err.println "DEBUG ${data.numInstances()} x ${data.numAttributes()} done."
+    //err.println "DEBUG ${data.numInstances()} x ${data.numAttributes()} done."
     return(data)
   }
 

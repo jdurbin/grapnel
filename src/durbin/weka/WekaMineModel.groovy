@@ -56,5 +56,77 @@ class WekaMineModel implements Serializable{
 		}
 		return(rval)		
 	}
+	
+	
+	def printResults(results){		
+		println "ID,low,high"
+
+		results.eachWithIndex{result,i->
+			r = result as ArrayList	
+			rstr = r.join(",")
+			println "${idList[i]},$rstr"
+		}		
+	}
 		
+	/***
+	* Print the results and compare with the clinical values in clinical...
+	*/ 
+	def printResultsAndCompare(results,clinical){
+		println "ID,low,high,actual,match"
+		
+		WekaAdditions.enable();
+		
+		// Build a map of samples to results...
+		def id2ClassMap = [:]
+		def classValues = clinical.attributeValues(clinical.classAttribute().name()) as ArrayList
+		def sampleIDs = clinical.attributeValues("ID") as ArrayList
+		(0..classValues.size()).each{i->
+			def id = sampleIDs[i]
+			def classVal = classValues[i]
+			id2ClassMap[id] = classVal
+		}
+		
+		def tp = 0.0;
+		def tn = 0.0;
+		def fp = 0.0;
+		def fn = 0.0;
+							
+		// Now compare predictions with actual values...
+		results.eachWithIndex{result,i->
+			def r = result as ArrayList	
+			def rstr = r.join(",")
+			def id = sampleIDs[i]
+			print "${id},$rstr"
+			if (id2ClassMap.containsKey(id)){
+				def actualVal = id2ClassMap[id]
+				print ",$actualVal"
+				def lowVal = r[0] as double
+				def highVal = r[1] as double
+				//print "\t$lowVal,$highVal,${lowVal < highVal},${actualVal == 'low'}\t"
+				if (actualVal == "high"){
+					if (lowVal < highVal){
+						tp++;
+						println ",+"
+					}else{
+						fp++;
+						println ""
+					}
+				}else{
+					if (lowVal > highVal){
+						tn++;
+						println ",+"
+					}else{						
+						fn++;
+						println ""
+					}					
+				}
+			}				
+		}
+		
+		println ""
+		println "Fraction Correct:\t"+((tp+tn)/(tp+fp+tn+fn))
+		println "Sensitivity:\t"+(tp/(tp+fn))
+		println "Specificity:\t"+(tn/(tn+fp))								
+	}
+					
 }
