@@ -91,6 +91,8 @@ public class TableFileLoader {
   */
 	public Instances tableRowsToInstances(Table t,String relationName) {	
 	  
+		System.err.print("Converting table rows to instances...");
+	
 		// Set up attributes, which for rowInstances will be the colNames...
 		FastVector atts = new FastVector();
 		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
@@ -146,7 +148,9 @@ public class TableFileLoader {
 				newData.instance(r).setValue(attrIdx,t.rowNames[r]);
 	    }
 			data = newData;
-	  }				
+	  }		
+	
+		System.err.println("done.");
 		
 		return(data);
 	}
@@ -199,6 +203,8 @@ public class TableFileLoader {
   */
   public Instances tableColsToInstances(Table t,String relationName) {
        
+		System.err.print("Converting table cols to instances...");
+
   	// Set up attributes, which for colInstances will be the rowNames...
   	FastVector atts = new FastVector();
 		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
@@ -258,7 +264,10 @@ public class TableFileLoader {
         newData.instance(c).setValue(attrIdx,t.colNames[c]);
       }            
       data = newData;
-  	}				
+  	}		
+
+		System.err.println("done.");
+		
   	return(data);
   } 
 

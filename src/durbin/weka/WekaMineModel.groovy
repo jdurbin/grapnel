@@ -58,30 +58,30 @@ class WekaMineModel implements Serializable{
 	}
 	
 	
-	def printResults(results){		
+	def printResults(results,sampleIDs){								
 		println "ID,low,high"
 
 		results.eachWithIndex{result,i->
-			r = result as ArrayList	
-			rstr = r.join(",")
-			println "${idList[i]},$rstr"
+			def r = result as ArrayList	
+			def rstr = r.join(",")
+			println "${sampleIDs[i]},$rstr"
 		}		
 	}
 		
 	/***
 	* Print the results and compare with the clinical values in clinical...
 	*/ 
-	def printResultsAndCompare(results,clinical){
+	def printResultsAndCompare(results,dataSampleIDs,clinical){
 		println "ID,low,high,actual,match"
 		
 		WekaAdditions.enable();
 		
-		// Build a map of samples to results...
+		// Build a map of clinical samples to results...
 		def id2ClassMap = [:]
 		def classValues = clinical.attributeValues(clinical.classAttribute().name()) as ArrayList
-		def sampleIDs = clinical.attributeValues("ID") as ArrayList
+		def clinicalSampleIDs = clinical.attributeValues("ID") as ArrayList
 		(0..classValues.size()).each{i->
-			def id = sampleIDs[i]
+			def id = clinicalSampleIDs[i]
 			def classVal = classValues[i]
 			id2ClassMap[id] = classVal
 		}
@@ -95,8 +95,11 @@ class WekaMineModel implements Serializable{
 		results.eachWithIndex{result,i->
 			def r = result as ArrayList	
 			def rstr = r.join(",")
-			def id = sampleIDs[i]
+			def id = dataSampleIDs[i]
+						
 			print "${id},$rstr"
+			
+			// If this sample is in the clinical data set, output it's comparison.. 
 			if (id2ClassMap.containsKey(id)){
 				def actualVal = id2ClassMap[id]
 				print ",$actualVal"
@@ -124,9 +127,12 @@ class WekaMineModel implements Serializable{
 		}
 		
 		println ""
+		println "TP:$tp\tFP:$fp\tTN:$tn\tFN:$fn"
 		println "Fraction Correct:\t"+((tp+tn)/(tp+fp+tn+fn))
 		println "Sensitivity:\t"+(tp/(tp+fn))
-		println "Specificity:\t"+(tn/(tn+fp))								
+		println "Specificity:\t"+(tn/(tn+fp))										
+		println "Precision:\t"+(tp/(tp+fp))
+		println "Recall:\t"+(tp/(tp+fn))								
 	}
 					
 }

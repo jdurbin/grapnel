@@ -111,7 +111,7 @@ class WekaMine{
 	* Merges data and single clinical class attribute into a single set of 
 	* instances. 
 	*/ 
-	static def createInstancesFromDataAndClinical(data,clinical,classAttribute){
+	static def createInstancesFromDataAndClinical(data,clinical,classAttribute){		
 				
  		// Remove all clinical attributes except for the current class...
   	def selectedAttribute = []
@@ -135,6 +135,8 @@ class WekaMine{
 	*/ 
 	static def createInstancesToMatchAttributeList(rawdata,modelAttributes){
 
+		err.print "Make data match model attributes...Initial attributes: ${rawdata.numAttributes()}..."
+
 		def rawAttributeNames = rawdata.attributeNames()
 		def rawAttributeNamesSet = rawAttributeNames as Set
 		def rawName2Idx = [:]
@@ -147,7 +149,6 @@ class WekaMine{
 			atts.addElement(new Attribute(attrName))
 		}
 		def data = new Instances("NewInstances",atts,0)
-
 
 		def numInstances = rawdata.numInstances()
 		for(int i = 0;i < numInstances;i++){
@@ -169,7 +170,10 @@ class WekaMine{
 					}
 				}
 				data.add(new Instance(1.0,vals));
-		}
+		}		
+		
+		err.println "done. Final attributes: ${data.numAttributes()}"
+		
 		return(data)
 	}
 	
