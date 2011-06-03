@@ -32,7 +32,7 @@ class WekaMineResult{
 	def WekaMineResult(String line){
 		def fields = line.split(",")
 		
-		fields.eachWithIndex{f,i-> System.err.println "field: $i \t $f"}
+		//fields.eachWithIndex{f,i-> System.err.println "field: $i \t $f"}
 		
 		jobID = fields[0] as int
 		samples = fields[1] as int
