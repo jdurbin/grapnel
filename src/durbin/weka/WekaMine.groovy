@@ -195,6 +195,74 @@ class WekaMine{
 		return(instances)
 	}
 	
+	/***
+	* Write out a list of lines, one for each cluster job, ready for Parasol or gsub or whatever.
+	*/ 
+	static def writeClusterJobList(args,numExperiments,experimentsPerJob,scriptFile){
+		
+		// Remove the -k option, keep all the rest...
+		def newargs = []
+		def bRemoveNext = false;
+		args.each{arg->
+			if ((!arg.contains("-k")) && !bRemoveNext){
+				newargs << arg
+			}else{
+				bRemoveNext = true;
+			}
+		}
+					
+		def rootCmd = "${scriptFile} ${newargs.join(" ")}"
+		def expPerJob = Double.parseDouble(experimentsPerJob) // convert string value to double
+		def numJobs = (double)numExperiments/(double)expPerJob
+		System.err.println("numExperiments: $numExperiments  numJobs: $numJobs")
+				
+		int jobStart = 0
+		int jobEnd = expPerJob -1;
+		(0..<numJobs).each{
+		  def cmdOut = "${rootCmd} -r $jobStart,$jobEnd"
+		  println cmdOut
+		  jobStart += expPerJob
+		  jobEnd += expPerJob
+		}
+
+		// Handle remainder experiments..
+
+		def lastExperiment = (jobEnd-expPerJob)
+		if (lastExperiment < numExperiments){
+		  jobStart = lastExperiment+1
+		  jobEnd = numExperiments-1
+		
+			if (jobEnd < jobStart) jobEnd = jobStart
+		
+			def cmdOut = "${rootCmd} -r $jobStart,$jobEnd"
+		  println cmdOut
+		}		
+	}
+	
+	
+	
+	/****
+	*	Removes censored samples that, due to being censored, can't be placed cleanly in one
+	* class or another...
+	*/ 
+	def removeUnclassifiableCensoredSamples(instances,clinical,censoredAttribute){
+	
+	
+			// if sample is censored and time > upper cutoff, leave it
+			// otherwise, remove it. 
+				
+			clinical.each{
+				
+			}
+		
+				
+			// Remove all clinical attributes except for the current class...
+	  	def selectedAttribute = []
+	  	selectedAttribute.add(classAttribute)
+
+	  	def singleClinicalInstances = subsetAttributes(clinical,selectedAttribute)
+	}
+	
 
 	def discretizeClassAttribute(instances){
 		discretizeClassAttribute(instances,exp.discretization,exp.classAttribute)
@@ -296,6 +364,10 @@ class WekaMine{
     def discretizedData = Filter.useFilter(data,quartile)
     classIdx = discretizedData.setClassName(classAttribute)
     err.println "done."  // KJD report how many high/low as a sanity check. 
+
+		// Hacky way to save the cutoffs for use later...
+		def newName = "${discretizedData.relationName()} cutoffs:\t${quartile.cutoff1};${quartile.cutoff2}"
+		discretizedData.setRelationName(newName)
     return(discretizedData)
   }
 
@@ -315,6 +387,8 @@ class WekaMine{
     def discretizedData = Filter.useFilter(data,quartile)
     classIdx = discretizedData.setClassName(classAttribute)
     err.println "done."  // KJD report how many high/low as a sanity check. 
+		def newName = "${discretizedData.relationName()} cutoffs:\t${quartile.cutoff1};${quartile.cutoff2}"
+		discretizedData.setRelationName(newName)
     return(discretizedData)
   }
 
@@ -334,6 +408,8 @@ class WekaMine{
     def discretizedData = Filter.useFilter(data,quartile)
     classIdx = discretizedData.setClassName(classAttribute)
     err.println "done."  // KJD report how many high/low as a sanity check. 
+		def newName = "${discretizedData.relationName()} cutoffs:\t${quartile.cutoff1};${quartile.cutoff2}"
+		discretizedData.setRelationName(newName)
     return(discretizedData)
   }
 

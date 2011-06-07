@@ -15,6 +15,7 @@ class WekaMineModel implements Serializable{
 	def atrSelMethod  // Just for records sake
 
 	def	discretization
+
 	def classifier
 	def attributes
 	

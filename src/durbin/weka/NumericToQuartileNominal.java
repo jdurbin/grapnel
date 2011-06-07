@@ -15,6 +15,7 @@ import hep.aida.bin.DynamicBin1D;
 public class NumericToQuartileNominal
 extends SimpleBatchFilter {
 
+
   /** Stores which attributes (cols) to Discretize */
   String defaultAttributes = "first-last";
   protected Range attributesToDiscretize = new Range(defaultAttributes);
@@ -27,6 +28,8 @@ extends SimpleBatchFilter {
 
   String nominalValue1 = "low";
   String nominalValue2 = "high";
+
+	String cutoffStr;
   
   /***
   * Set the string names to use for nominal values. 
@@ -137,7 +140,8 @@ extends SimpleBatchFilter {
   protected Instances process(Instances inst) {
     
     // Range has to be told what 'last' means...
-    attributesToDiscretize.setUpper(inst.numAttributes() - 1);
+		int lastIdx = inst.numAttributes()-1;
+    attributesToDiscretize.setUpper(lastIdx);
     
     // Compute objects to bin selected attributes...  Each DynamicBin1D object
   	// will compute stas for a given attribute..
@@ -154,14 +158,24 @@ extends SimpleBatchFilter {
       if (useMedian) {
         double[]  cutoffs = computeCutoffs(bins,selectedAttributes,0.50);    
 			  result = medianTransformAttributes(inst,cutoffs,selectedAttributes);			
+			
+				// KJD This is a trap when you really select more than one attribute to discretize at a time
+				cutoff1 = cutoffs[selectedAttributes[0]];
+				cutoff2 = cutoffs[selectedAttributes[0]]+0.0001;
+			
 		  } else {
 			  double[]  cutoffsHigh = computeCutoffs(bins,selectedAttributes,0.25);    
 			  double[]  cutoffsLow = computeCutoffs(bins,selectedAttributes,0.75);    
 
 			  // Splits into upper and lower quarters, removing instances that fall inbetween. 
 			  result = quartileTransformAttributes(inst,cutoffsHigh,cutoffsLow,selectedAttributes);
+			
+				// KJD This is a trap when you really select more than one attribute to discretize at a time
+				cutoff1 = cutoffsHigh[selectedAttributes[0]];
+				cutoff2 = cutoffsLow[selectedAttributes[0]];
 		  }
 		}
+		
     return result;
   }
 

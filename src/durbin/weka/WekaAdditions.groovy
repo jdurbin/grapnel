@@ -19,6 +19,7 @@ import weka.core.converters.ConverterUtils.DataSource
 * <li>Instances.setClassName(attributeName)</li>
 * <li>Instances.instanceValues(instanceName)</li>
 * <li>Instances.attributeNames()</li>
+* <li>Instances.each{}, and other Iterable sugar</li>
 * </ul>
 * Each of these methods does the same as the corresponding method in Instances except using
 * name instead of index keys. 
@@ -27,10 +28,56 @@ import weka.core.converters.ConverterUtils.DataSource
 public class WekaAdditions{
 	
 	/***
-	* Enables all of the additions to weka in WekaAdditions.  
+	* Enables all of the additions to weka in WekaAdditions.  You can stick these bits of code anywhere so long as they 
+	* are executed before you try to 
 	*/ 
   static enable(){  
 	  
+		
+		/***
+		* Return the indexed attribute value
+		*/ 
+		Instance.metaClass.getAt = {int i->
+			Attribute attribute = delegate.attribute(i as int)
+			if (attribute.isNumeric()){
+				return(delegate.value(i))
+			}else{ 
+				return(delegate.stringValue(i))
+			}
+		}
+
+		/***
+		* Return the named attribute value.  This along with iterator allows code like:
+		*
+		* <pre>
+		*
+		* instances.each{instance->
+		*		println instance['ID']
+		*	}
+		*
+		* </pre>
+		*/ 
+		Instance.metaClass.getAt = {String attributeName->
+			def dataset = dataset()
+			Attribute attribute = dataset.attribute(attributeName)
+			def i = attribute.index()
+			if (attribute.isNumeric()){
+				return(value(i))
+			}else{ 
+				return(delegate.stringValue(i))
+			}
+		}
+		
+		/***
+		* Make instances iterable... 
+		*/ 
+		Instances.metaClass.iterator = {-> 
+			def i = 0 
+			return [hasNext: { i < delegate.numInstances() }, next: { delegate.instance(i++) }] as Iterator 
+		}
+		
+		Instances.metaClass.getAt = {i-> return(delegate.instance(i))}
+	
     /***
     *  Return an array of the values for a named attribute. 
     */ 
