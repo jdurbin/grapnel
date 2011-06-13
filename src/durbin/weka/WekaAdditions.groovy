@@ -76,7 +76,7 @@ public class WekaAdditions{
 			return [hasNext: { i < delegate.numInstances() }, next: { delegate.instance(i++) }] as Iterator 
 		}
 		
-		Instances.metaClass.getAt = {i-> return(delegate.instance(i))}
+		Instances.metaClass.getAt = {int i-> return(delegate.instance(i))}
 	
     /***
     *  Return an array of the values for a named attribute. 

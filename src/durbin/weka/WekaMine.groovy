@@ -238,29 +238,61 @@ class WekaMine{
 		  println cmdOut
 		}		
 	}
-	
-	
+		
 	
 	/****
 	*	Removes censored samples that, due to being censored, can't be placed cleanly in one
 	* class or another...
 	*/ 
 	def removeUnclassifiableCensoredSamples(instances,clinical,censoredAttribute){
-	
-	
-			// if sample is censored and time > upper cutoff, leave it
-			// otherwise, remove it. 
-				
-			clinical.each{
-				
+		
+			err.print "Removing unclassifiable censored instances.. before: ${instances.numInstances()} instances ..."
+
+			def classIdx = instances.classAttribute().index()
+			//err.println "classIdx: $classIdx"
+		
+			def name2IDMap = [:]
+			clinical.eachWithIndex{clinInstance,idx->
+				name2IDMap[clinInstance["ID"]] = idx
 			}
 		
+			// if sample is censored and time > upper cutoff, leave it
+			// otherwise, remove it.
+			def useInstances = [] 		
+			instances.each{instance->
 				
-			// Remove all clinical attributes except for the current class...
-	  	def selectedAttribute = []
-	  	selectedAttribute.add(classAttribute)
-
-	  	def singleClinicalInstances = subsetAttributes(clinical,selectedAttribute)
+				def instanceName = instance["ID"]
+				
+				// look up corresponding clinical instance censored value							
+				def clinInstanceIdx = name2IDMap[instanceName]
+				//err.println "clinInstanceIdx: $clinInstanceIdx"
+				def censored = clinical[clinInstanceIdx][censoredAttribute]				
+				//err.println "censored: $censored"
+				//err.println "instanceName: $instanceName"
+				//err.println "instance.numAttributes: "+instance.numAttributes()
+				
+				// KJD: Need to fix.. the valance can go either way depending on how censored is defined
+				// 
+				if (censored < 1){
+					// KJD binary assumption
+					if (instance[classIdx] == "high"){
+						//err.println "Save instance $instanceName"
+						useInstances << instanceName
+					}else{
+						err.println "Removing instance $instanceName.  value = ${instance[classIdx]} $censoredAttribute = $censored"
+					}
+				}else{
+					//err.println "Save instance $instanceName"
+					useInstances << instanceName
+				}
+			}
+			
+			//err.println "About to filter instances..."
+			def filteredInstances = subsetInstances(instances,useInstances)
+			//err.println "done filtering instances."
+			
+			err.println "done.  After ${filteredInstances.numInstances()}"
+			return(filteredInstances);
 	}
 	
 
@@ -286,6 +318,7 @@ class WekaMine{
 			def fields = discretization.split(";")
 	    def lowerBound = fields[0] as double
 	    def upperBound = fields[1] as double
+			err.println "lower/upper cutoff discretization [$lowerBound,$upperBound]"
 	    instances = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high",classAttribute)
 	  }else if (discretization == 'none'){
 			err.println "NO discretization"
@@ -512,8 +545,8 @@ class WekaMine{
 		def idxList = data.nameListToIndexList(selectedInstances)	
 		idxList = idxList.collect{it+1} // convert to one based	
 		def rangeStr = idxList.join(",")
-		System.err.println "selectedInstances: "+selectedInstances
-		System.err.println "rangeStr: "+rangeStr
+		//System.err.println "selectedInstances: "+selectedInstances
+		//System.err.println "rangeStr: "+rangeStr
 		remove.setInstancesIndices(rangeStr)
 		remove.setInvertSelection(true) // Remove everything not in this list
 		remove.setInputFormat(data)
