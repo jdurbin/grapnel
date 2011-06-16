@@ -9,6 +9,8 @@
         <delete dir="doc/"/>
     </target>
 
+	
+	<mkdir dir="${env.HOME}/.groovy/lib"/>
 
 	<fileset id="groovylib.jars" dir="${env.GROOVY_HOME}/lib/">
 		<include name="**/*.jar"/>
