@@ -2,6 +2,8 @@ package durbin.charts;
 
 import javax.swing.JPanel;
 
+import java.awt.*
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -23,6 +25,8 @@ import org.jfree.data.statistics.*;
 *
 */ 
 class BasicCharts{
+	
+	static err = System.err
   
   /**
   * Creates an XY series from a Groovy [:], aka LinkedHashMap
@@ -125,12 +129,94 @@ class BasicCharts{
 
     return chartPanel;
   }
+
+
+
+	static dualhistogram(values1,series1name,values2,series2name,cName,xsize,ysize){
+		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,xsize,ysize,20))
+	}
+	
+	static dualhistogram(values1,series1name,values2,series2name,cName,xsize,ysize,bins){
+		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,xsize,ysize,bins))
+	}
+
+
+	/***
+	* Create a histogram from two sets of values in arbitrary collection...
+	*/ 						
+	static dualhistogram(values1,series1name,color1,values2,series2name,color2,cName,xsize,ysize,bins){
+		
+		double binmax1 = values1.max()
+		double binmax2 = values2.max()
+		double binmin1 = values1.min()
+		double binmin2 = values2.min()
+			
+		//err.println "createHistogramFromValues"
+		def series = new HistogramDataset()
+		def valarray1 = new double[values1.size()]
+		values1.eachWithIndex{v,i->valarray1[i] = v as double}
+		
+		def valarray2 = new double[values2.size()]
+		values2.eachWithIndex{v,i->valarray2[i] = v as double}
+
+		def chartTitle = "$cName"
+		series.addSeries(series1name,valarray1,100,binmin1,binmax1)
+		series.addSeries(series2name,valarray2,100,binmin2,binmax2)
+		def chartpanel = BasicCharts.histogram(chartTitle,"","",series,xsize,ysize) 
+
+		def titleFont = new java.awt.Font("SansSerif", java.awt.Font.BOLD,14)
+		def title = new org.jfree.chart.title.TextTitle(chartTitle,titleFont)
+		def chart = chartpanel.getChart()
+		chart.setTitle(title);
+		
+		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setBackgroundPaint(Color.WHITE);  // For the plot
+    plot.setForegroundAlpha(0.60f);
+
+		def renderer = plot.getRenderer();
+		renderer.setSeriesPaint(0, color1);
+		renderer.setSeriesPaint(1, color2);
+
+		return(chart)
+	}
+	
+	
+
+
+	/***
+	* Create a histogram from values in an arbitrary collection...
+	*/ 						
+	static histogram(values,cName,xsize,ysize){
+		
+		def binmax = values.max()
+		
+		//err.println "createHistogramFromValues"
+		def series = new HistogramDataset()
+		def valarray = new double[values.size()]
+		values.eachWithIndex{v,i->valarray[i] = v as double}
+
+		series.addSeries("Series1",valarray,20,0,binmax as int)
+		def chartTitle = "$cName"
+		def chartpanel = BasicCharts.histogram(chartTitle,"","",series,xsize,ysize) 
+
+		def titleFont = new java.awt.Font("SansSerif", java.awt.Font.BOLD,12)
+		def title = new org.jfree.chart.title.TextTitle(chartTitle,titleFont)
+		def chart = chartpanel.getChart()
+		chart.setTitle(title);
+
+		return(chart)
+	}
   
-  
+	/***
+	* Create histogram with default labels. 
+	*/ 
   static histogram(String title,HistogramDataset xydata,int xsize,int ysize){
     return(histogram(title,"Count","X",xydata,xsize,ysize))
   }
   
+	/***
+	* Create histogram...
+	*/ 
   static histogram(String title,String xlabel,String ylabel, 
     HistogramDataset xydata,int xsize,int ysize){
     
@@ -142,7 +228,7 @@ class BasicCharts{
     // create the chart...
     JFreeChart chart = ChartFactory.createHistogram(
         title,      // chart title
-        xlabel,                      // x axis label
+        xlabel,                      // x axis label... KJD: if null doesn't it take it from series???
         ylabel,                      // y axis label
         xydata,                  // data
         PlotOrientation.VERTICAL,
@@ -155,6 +241,9 @@ class BasicCharts{
     XYPlot plot = (XYPlot) chart.getPlot();
     plot.setDomainPannable(true);
     plot.setRangePannable(true);
+
+		if (xydata.getSeriesCount() > 1) plot.setForegroundAlpha(0.85f);
+
     def renderer = (XYBarRenderer) plot.getRenderer();
     renderer.setDrawBarOutline(false);
     renderer.setBarPainter(new StandardXYBarPainter());

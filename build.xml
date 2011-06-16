@@ -32,16 +32,16 @@
 		name="groovyc" 
 		classname="org.codehaus.groovy.ant.Groovyc" 
 		classpathref="lib.path"
-		/>	
+	/>	
 		
-    <target name="compile">
+  <target name="compile">
         <mkdir dir="target/classes"/>
         <javac srcdir="src" 
 			   destdir="target/classes"
-	       	  classpathref="lib.path"
-						includeantruntime="false"  	
+	       classpathref="lib.path"
+				 includeantruntime="false"  	
 	     />
-    </target>
+  </target>
 	
 	<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="lib.path"/>
 	
