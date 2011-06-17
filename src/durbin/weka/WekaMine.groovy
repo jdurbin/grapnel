@@ -103,9 +103,37 @@ class WekaMine{
 	// *********                  Pipeline Steps.                          ***********
 	//=================================================================================
 
+
+	/***
+	* takes a set of instances and creates a tab file from them...
+	*/ 
+	static saveDataFromInstances(fileName,instances){
+		
+		def fout = new File(fileName)
+		
+		def instNames = instances.attributeValues("ID")
+		
+		def line = "Features\t${instNames.join('\t')}"
+		fout << line
+								
+		def className = instances.className()						
+								
+		def attrNames = instances.attributeNames()
+		attrNames.each{attName->
+			if ((attName != "ID") && (attName != className)){
+				def atvalues = instances.attributeValues(attName)
+				def atvalueStrings = atvalues.collect{"$it"} // convert them to strings...				
+				line = "$attName\t${atvalueStrings.join('\t')}"
+				fout << line
+			}
+		}
+	}
+
+
 	def createInstancesFromDataAndClinical(data,clinical){
 		return(createInstancesFromDataAndClinical(data,clinical,exp.classAttribute))
 	}
+	
 	
 	/***
 	* Merges data and single clinical class attribute into a single set of 

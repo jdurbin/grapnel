@@ -23,8 +23,9 @@ class WekaMineConfig extends ArrayList{
 		def cfg = slurper.parse(new File(configFileName).toURL())
 		params = cfg.params // cfg includes all sections.  make alias for section we want. 
 
+		def headingMap = WekaMineResult.defaultHeadingMap()
 	  slurper.getExpansion('experiments').each{experiment->
-	  	this << new ExperimentSpec(experiment);
+	  	this << new ExperimentSpec(experiment,headingMap);
 	  }
 	}	
 }

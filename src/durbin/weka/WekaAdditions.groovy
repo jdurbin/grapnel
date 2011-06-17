@@ -113,6 +113,12 @@ public class WekaAdditions{
       return(idx)
     }
 
+		Instances.metaClass.className <<{
+			Attribute classAttr = attribute(classIndex())
+			return(classAttr.name())
+		}
+
+
 		/***
 		* Takes a list of instance names and returns their 
 		* correspondign instance indexes.  Assumes ID attribute

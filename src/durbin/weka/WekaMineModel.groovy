@@ -59,13 +59,24 @@ class WekaMineModel implements Serializable{
 	}
 	
 	
-	def printResults(results,sampleIDs){								
-		println "ID,low,high"
+	def printResults(results,sampleIDs){
+		printResults(Syste.out,results,sampleIDs)
+	}
+	
+	def printResults(out,results,sampleIDs){							
+		out<<"ID,lowConfidence,highConfidence,call\n"
 
 		results.eachWithIndex{result,i->
 			def r = result as ArrayList	
 			def rstr = r.join(",")
-			println "${sampleIDs[i]},$rstr"
+			def call
+			
+			def lowVal = r[0] as double
+			def highVal = r[1] as double
+			
+			if (highVal > lowVal) call = "high"
+			else call = "low"
+			out<<"${sampleIDs[i]},$rstr,$call\n"
 		}		
 	}
 		
@@ -73,7 +84,11 @@ class WekaMineModel implements Serializable{
 	* Print the results and compare with the clinical values in clinical...
 	*/ 
 	def printResultsAndCompare(results,dataSampleIDs,clinical){
-		println "ID,low,high,actual,match"
+		printResultsAndCompare(System.out,results,dataSampleIDs,clinical)
+	}
+	
+	def printResultsAndCompare(out,results,dataSampleIDs,clinical){
+		out<< "ID,lowConfidence,highConfidence,call,actual,match\n"
 		
 		WekaAdditions.enable();
 		
@@ -97,43 +112,63 @@ class WekaMineModel implements Serializable{
 			def r = result as ArrayList	
 			def rstr = r.join(",")
 			def id = dataSampleIDs[i]
-						
-			print "${id},$rstr"
+			
+			def lowVal = r[0] as double
+			def highVal = r[1] as double
+			def call
+			if (highVal > lowVal) call = "high"
+			else call = "low"
+			out<< "${id},$rstr,$call"
 			
 			// If this sample is in the clinical data set, output it's comparison.. 
 			if (id2ClassMap.containsKey(id)){
 				def actualVal = id2ClassMap[id]
-				print ",$actualVal"
-				def lowVal = r[0] as double
-				def highVal = r[1] as double
+				out<< ",$actualVal"
 				//print "\t$lowVal,$highVal,${lowVal < highVal},${actualVal == 'low'}\t"
-				if (actualVal == "high"){
-					if (lowVal < highVal){
-						tp++;
-						println ",+"
-					}else{
-						fp++;
-						println ""
-					}
-				}else{
-					if (lowVal > highVal){
-						tn++;
-						println ",+"
-					}else{						
-						fn++;
-						println ""
-					}					
+				if ((actualVal == "high") && (call == "high")){
+					tp++;
+					out<<",+\n"
+				}else if ((actualVal == "high") && (call == "low")){
+					fp++
+					out<<"\n"					
+				}else if ((actualVal == "low") && (call == "low")){
+					tn++;
+					out<<",+\n"
+				}else if ((actualVal == "low") && (call == "high")){
+					fn++;
+					out<<"\n"
 				}
 			}				
 		}
 		
-		println ""
-		println "TP:$tp\tFP:$fp\tTN:$tn\tFN:$fn"
-		println "Fraction Correct:\t"+((tp+tn)/(tp+fp+tn+fn))
-		println "Sensitivity:\t"+(tp/(tp+fn))
-		println "Specificity:\t"+(tn/(tn+fp))										
-		println "Precision:\t"+(tp/(tp+fp))
-		println "Recall:\t"+(tp/(tp+fn))								
+	 	out<< "====================\n"
+		out<< "TP\t$tp\n"
+		out<< "FP\t$fp\n"
+		out<< "TN\t$tn\n"
+		out<< "FN\t$fn\n"
+		out<< "Fraction Correct:\t${((tp+tn)/(tp+fp+tn+fn))}\n"
+		out<<"Sensitivity:\t${(tp/(tp+fn))}\n"
+		out<<"Specificity:\t${(tn/(tn+fp))}\n"										
+		out<<"Precision:\t${(tp/(tp+fp))}\n"
+		out<<"Recall:\t${(tp/(tp+fn))}\n"			
+		def mcc = matthewsCorrelationCoeficient(tp,fp,tn,fn)					
+		out<<"Matthews correlation coeficient: $mcc\n"
+	}
+	
+	def matthewsCorrelationCoeficient(tp,fp,tn,fn){
+		def sum1 = tp+fp
+		def sum2 = tp+fn
+		def sum3 = tn+fp
+		def sum4 = tn+fn
+
+		def denominator
+		if ((sum1 == 0) || (sum2 == 0) || (sum3 ==0) || (sum4 ==0)){
+			denominator = 1
+		}else{	
+			denominator = sum1*sum2*sum3*sum4
+		}
+		double mcc = ((tp*tn)-(fp*fn))/Math.sqrt(denominator)
+		return(mcc.round(4))
 	}
 					
 }

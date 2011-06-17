@@ -51,9 +51,20 @@ class ExperimentSpec{
 	}
 
     
-   def ExperimentSpec(String line){
+		/***
+		* Takes a comma separated string and creates an experiment from it. 
+		* headings2Cols gives the index of the column where the given field is derived from
+		* this can come from an output heading, or from WekaMineResult.defaultHeadingMap
+		* The idea is for all knowledge of the heading order to be confined to WekaMineResult
+		* so that we don't have to worry about things getting out of sync. 
+		*/ 
+   def ExperimentSpec(String line,headings2Cols){
     def fields = line.split(",")
-    classifierStr = fields[0]
+
+		System.err.println "DEBUG: "+headings2Cols
+
+
+    classifierStr = fields[headings2Cols['classifier']]
 
     try{
       if (classifierStr != "None"){      
@@ -67,15 +78,15 @@ class ExperimentSpec{
       throw(e)
     }
     
-    attrEvalStr = fields[1] 
+    attrEvalStr = fields[headings2Cols['attrEval']] 
     attributeEval = WekaMine.evalFromSpec(attrEvalStr)  
         
-    attrSearchStr = fields[2]
+    attrSearchStr = fields[headings2Cols['attrSearch']]
     attributeSearch = WekaMine.searchFromSpec(attrSearchStr)
     
-    numAttributes = (fields[3] as double) as int
-    classAttribute = fields[4]     
-		discretization = fields[5]
+    numAttributes = (fields[headings2Cols['numAttrs']] as double) as int
+    classAttribute = fields[headings2Cols['classAttr']]     
+		discretization = fields[headings2Cols['discretization']]
    }   
    
    String toString(){
@@ -83,5 +94,3 @@ class ExperimentSpec{
      return(rstr);
    }    
 }
-
-//classifier, attributeEval,attributeSearch,numAttributes,classAttribute"

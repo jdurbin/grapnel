@@ -32,6 +32,8 @@
 * exist.  Care must be taken when checking for existence of a value for 
 * a particular cell that you do not inadvertently create a new entry. 
 *
+* KJD: This is so mind bogglingly useful that I really should translate it into Java so that
+* it can be faster too.
 * 
 */
 class MultidimensionalMap extends LinkedHashMap {
@@ -54,6 +56,11 @@ class MultidimensionalMap extends LinkedHashMap {
 */ 
 class TwoDMap extends MultidimensionalMap{
     
+	  def TwoDMap(){}
+		def TwoDMap(fileName,delimiter){
+			read(fileName,delimiter)
+		}
+
 		def rowKeySet(){
 			return(this.keySet())
 		}
@@ -116,6 +123,25 @@ class TwoDMap extends MultidimensionalMap{
       }
     }
 
+
+		/***
+		* Reads in a table of values as a TwoDMap
+		*/ 
+		def read(datafile,delimiter){
+			TwoDMap map = this;
+			new File(datafile).withReader{r->
+				def headings = r.readLine().split(delimiter)
+				headings = headings[1..-1] // omit Feature label...
+
+				r.splitEachLine(delimiter){fields->
+					def rowName = fields[0]
+					headings.eachWithIndex{h,i->
+						map[rowName][h] = fields[i+1]		
+					}
+				}		
+			}
+			return(map)
+		}
 
     
     /**
