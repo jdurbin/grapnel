@@ -44,10 +44,8 @@
 	</target>
 	
 	<target name="jar" depends="groovy">	
-			<jar destfile="target/jar/durbinlib.jar" basedir="target/classes"></jar>
-      <mkdir dir="target/jar"/>
-
-	<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
+			<mkdir dir="target/jar"/>
+			<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
           <manifest>
               <attribute name="Main-Class" value="Perlism"/>
           </manifest>
