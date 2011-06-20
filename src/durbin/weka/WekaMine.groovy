@@ -103,30 +103,44 @@ class WekaMine{
 	// *********                  Pipeline Steps.                          ***********
 	//=================================================================================
 
+	static addID(instances,instanceNames){
+		instances.insertAttributeAt(new Attribute("ID",(FastVector)null),0)
+		int attrIdx = instances.attribute("ID").index(); // Paranoid... should be 0
+		
+		instanceNames.eachWithIndex{name,i->
+			instances.instance(i).setValue(attrIdx,name)
+		}
+		return(instances);
+	}
 
 	/***
 	* takes a set of instances and creates a tab file from them...
 	*/ 
 	static saveDataFromInstances(fileName,instances){
 		
+		err.print "Saving data to $fileName..."
 		def fout = new File(fileName)
 		
 		def instNames = instances.attributeValues("ID")
 		
 		def line = "Features\t${instNames.join('\t')}"
-		fout << line
-								
-		def className = instances.className()						
+		fout.write(line)
+		fout << "\n"
+
+		def className
+		if (instances.classIndex() < 0) className = "none"
+		else className = instances.className()						
 								
 		def attrNames = instances.attributeNames()
 		attrNames.each{attName->
 			if ((attName != "ID") && (attName != className)){
 				def atvalues = instances.attributeValues(attName)
 				def atvalueStrings = atvalues.collect{"$it"} // convert them to strings...				
-				line = "$attName\t${atvalueStrings.join('\t')}"
+				line = "$attName\t${atvalueStrings.join('\t')}\n"
 				fout << line
 			}
 		}
+		err.println "done."
 	}
 
 
@@ -479,11 +493,21 @@ class WekaMine{
 	* the instance ID.  This is done because most attribute evaluators and classifiers
 	* can not handle string attributes. 
 	*/ 
-	Instances removeInstanceID(instances){
+	static Instances removeInstanceID(instances){
 		def filter = new RemoveType()
 		filter.setInputFormat(instances);
 		def instances_notype = Filter.useFilter(instances,filter)
 		return(instances_notype)
+	}
+	
+	static Instances applyFilter(instances,filterName){
+		err.print("Apply filter $filterName...")
+		def filter = filterFromSpec(filterName)
+		filter.setInputFormat(instances);	
+		err.println "filter created..."
+		def filteredInstances = Filter.useFilter(instances,filter)
+		err.println("done.")
+		return(filteredInstances)
 	}
 
 	/**
@@ -625,6 +649,8 @@ class WekaMine{
   *  weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -M
   */
   static def classifierFromSpec(classifierSpec){
+		if (classifierSpec == 'none') return('none');
+	
     // Create a classifier from the name...
     def options = Utils.splitOptions(classifierSpec)
     def classifierName = options[0]
@@ -636,6 +662,20 @@ class WekaMine{
     def classifier = Classifier.forName(classifierName,options) 
     return(classifier)
   }
+
+	static def filterFromSpec(filterSpec){
+		 // Create a filter from the name...
+	    def options = Utils.splitOptions(filterSpec)
+	    def filterName = options[0]
+	    options[0] = ""
+		
+		  def filter = (Filter) Class.forName(filterName).newInstance();
+		  if (filter instanceof OptionHandler){
+		    ((OptionHandler) filter).setOptions(options);
+		  }
+			return(filter)		
+	}
+
 
 	static def filteredClassifierFromClassifier(classifier){
 	 // Create a classifier from the name...
