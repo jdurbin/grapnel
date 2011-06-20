@@ -504,7 +504,6 @@ class WekaMine{
 		err.print("Apply filter $filterName...")
 		def filter = filterFromSpec(filterName)
 		filter.setInputFormat(instances);	
-		err.println "filter created..."
 		def filteredInstances = Filter.useFilter(instances,filter)
 		err.println("done.")
 		return(filteredInstances)
