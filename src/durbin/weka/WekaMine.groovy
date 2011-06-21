@@ -119,32 +119,14 @@ class WekaMine{
 	static saveDataFromInstances(fileName,instances){
 		
 		err.print "Saving data to $fileName..."
-		new File(fileName).withWriter(){w->
-		
-			def instNames = instances.attributeValues("ID")
-		
-			def line = "Features\t${instNames.join('\t')}"
-			w.write(line)
-		 	w << "\n"
-
-			def className
-			if (instances.classIndex() < 0) className = "none"
-			else className = instances.className()						
-								
-			def attrNames = instances.attributeNames()
-			attrNames.each{attName->
-				if ((attName != "ID") && (attName != className)){
-					def atvalues = instances.attributeValues(attName)
-					def atvalueStrings = atvalues.collect{"$it"} // convert them to strings...				
-					line = "$attName\t${atvalueStrings.join('\t')}\n"
-				 	w << line
-				}
-			}
-			err.println "done."
-		}
+				
+		// See if this speeds things up at all..
+		def st = new SaveTab();
+		st.saveDataFromInstances(fileName,instances) 
+		err.println "done."
 	}
-
-
+	
+	
 	def createInstancesFromDataAndClinical(data,clinical){
 		return(createInstancesFromDataAndClinical(data,clinical,exp.classAttribute))
 	}
