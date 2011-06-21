@@ -7,6 +7,9 @@ import java.io.*;
 /***
 * Attempt to speed up saveDataFromInstances in wekaMine, which is fast enough on 
 * my Mac, but dog slow on tcga1.
+* 
+* It worked... so well I have to wonder if perhaps tcga1 was just loaded when I did 
+* my original tests...
 */ 
 public class SaveTab{
 	
@@ -56,8 +59,6 @@ public class SaveTab{
 		}
 		pw.print(instNames.elementAt(instNames.size()-1));
 		pw.print("\n");
-		
-		System.err.println("BOB");
 		
 		int classIdx = instances.classIndex();
 		for(int i = 0;i < instances.numAttributes();i++){
