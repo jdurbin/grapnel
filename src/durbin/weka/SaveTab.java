@@ -79,4 +79,23 @@ public class SaveTab{
 		}
 	}
 }
-			
+
+/**
+Fast version:
+real	0m12.939s
+user	0m24.017s
+sys	0m1.428s
+
+james@tcga1 /inside/grotto/wekaMineExample  $ emacs src/wekaMine/wekaMineFilter 
+james@tcga1 /inside/grotto/wekaMineExample  $ time wekaMineFilter -d data/vijver2002.tab -o filtered/vijver2002.normalized.tab -E 'weka.filters.unsupervised.attribute.Normalize' 
+
+
+Old version:
+
+real	0m17.624s
+user	0m30.419s
+sys	0m1.565s
+
+So my original 1-2 minute times must have been some load issue on tcga1. 
+
+*/ 

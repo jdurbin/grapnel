@@ -53,7 +53,7 @@ class MultidimensionalMap extends LinkedHashMap {
 *  Differs from Table mainly in that it's completely dynamic, whereas 
 *  Table requires explicit dimensions up front. 
 * 
-*/ 
+*/
 class TwoDMap extends MultidimensionalMap{
     
 	  def TwoDMap(){}
@@ -65,11 +65,11 @@ class TwoDMap extends MultidimensionalMap{
 			return(this.keySet())
 		}
 		
-		def colKeySet(){
+		def colKeySet(){			
 			// Find the union of all column keys...
       def colKeys = [] as Set
 			def rowKeys = rowKeySet()
-      rowKeys.each{rowKey->
+      rowKeys.each{rowKey->				
 				def rowSet = this[rowKey].keySet()
 				//System.err.println "rowKey: $rowKey  rowSet: $rowSet"
         colKeys = colKeys + this[rowKey].keySet()

@@ -470,6 +470,70 @@ public double[][] confusionMatrix() {
 * @param classifier the classifier with any options set.
 * @param data the data on which the cross-validation is to be 
 * performed 
+* @param foldSets is a list of cross validation folds to use. 
+* @param forPredictionsString varargs parameter that, if supplied, is
+* expected to hold a StringBuffer to print predictions to, 
+* a Range of attributes to output and a Boolean (true if the distribution
+* is to be printed)
+* @throws Exception if a classifier could not be generated 
+* successfully or the class is not defined
+*/
+public void crossValidateModelWithGivenFolds(Classifier classifier,
+Instances data, ArrayList< ArrayList<Integer> > foldSets,Object... forPredictionsPrinting) 
+throws Exception {
+
+  // We assume that the first element is a StringBuffer, the second a Range (attributes
+  // to output) and the third a Boolean (whether or not to output a distribution instead
+  // of just a classification)
+  if (forPredictionsPrinting.length > 0) {
+    // print the header first    
+    StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
+    Range attsToOutput = (Range)forPredictionsPrinting[1];
+    boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+    printClassificationsHeader(data, attsToOutput, printDist, buff);
+  }
+
+  // Create a list to store classifiers (Evaluation2)
+  // KJD: This could become a memory problem.... need to monitor that. 
+  m_cvClassifiers = new ArrayList<Classifier>();
+  
+
+	// Fold sets let you specify the folds.  Each foldSet is one Nx cross-validation. 
+	// To do 5 5x cross validations, you'd have 5 foldSets each 5 numbers long. 
+	m_NumFolds = 0;
+	for(int fs = 0;fs < foldSets.size();fs++){
+		ArrayList<Integer> foldSet = foldSets.get(fs);
+		
+		int numFolds = foldSet.size();
+		m_NumFolds+= numFolds;
+  	for (int i = 0; i < numFolds; i++) {
+			Instances train = CVUtils.trainCV(data,foldSet,i);
+						
+    	setPriors(train);
+    	Classifier copiedClassifier = Classifier.makeCopy(classifier);
+    	copiedClassifier.buildClassifier(train);
+
+    	m_cvClassifiers.add(copiedClassifier);  // KJD Evaluation2 mod.        
+      
+			Instances test = CVUtils.testCV(data,foldSet,i);			
+			
+    	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+  	}
+	}
+}
+
+
+
+/**
+* Performs a (stratified if class is nominal) cross-validation 
+* for a classifier on a set of instances. Now performs
+* a deep copy of the classifier before each call to 
+* buildClassifier() (just in case the classifier is not
+* initialized properly).
+*
+* @param classifier the classifier with any options set.
+* @param data the data on which the cross-validation is to be 
+* performed 
 * @param numFolds the number of folds for the cross-validation
 * @param random random number generator for randomization 
 * @param forPredictionsString varargs parameter that, if supplied, is
@@ -508,6 +572,8 @@ throws Exception {
   // KJD: This could become a memory problem.... need to monitor that. 
   m_cvClassifiers = new ArrayList<Classifier>();
   
+	
+
   for (int i = 0; i < numFolds; i++) {
     Instances train = data.trainCV(numFolds, i, random);
     setPriors(train);

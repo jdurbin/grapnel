@@ -85,6 +85,8 @@ class WekaMineResult{
 */
 class WekaMineResults extends ArrayList<WekaMineResult>{
 
+	static err = System.err
+
 	/***
 	* WARMING: MUST match summary heading in wekaMineResult
 	* "attrEval,attrSearch,numAttrs,clsssifier,classAttr,discretization,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    				
@@ -218,6 +220,8 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
     def attList = [] 
     
 
+//		err.println "DEBUG: cvFeatureSelections"
+
     // The classifiers that reach the cross validation code will be 
     // twice wrapped.   Once as an attribute selected classifier, and 
     // again as a filtered classifier (to remove String ID)
@@ -227,6 +231,9 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
     def intersection = [] as Set
      
     def bFirstTime = true; 
+
+		//err.println "DEBUG: num classifiers="+classifiers.size()
+
     classifiers.each{fc->  // each FilteredClassifier
             
       def asClassifier = fc.getClassifier() // AttributeSelectedClassifier
@@ -347,9 +354,13 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   */ 
   static void appendFeaturesLine(jobIdx,data,out,experiment,eval,maxFeaturesToReport){
       // Append a summary line to a file. 
-			out << getFullSummaryLine(jobIdx,data,experiment,eval)
+			def summaryLine = getFullSummaryLine(jobIdx,data,experiment,eval)
+			out << summaryLine			
+			
+			//err.println "DEBUG: maxFeaturesToReport: "+maxFeaturesToReport
+			
       // Figure out the feature selections across cross validation folds...
-      if (maxFeaturesToReport != 0){  
+      if (maxFeaturesToReport != 0){  		
         out << ","
         out << cvFeatureSelections(data,eval.getCVClassifiers(),maxFeaturesToReport)
       }      

@@ -22,6 +22,7 @@ public class BalancedSubsampler{
 	* all minority instances.  The second list contains the indices of all 
 	* majority instances.   
 	*/ 
+	//@Typed 
 	static FastVector getMinorMajorInstanceIdxs(Instances data){
 	
 		//System.err.println("CHK1");

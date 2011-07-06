@@ -51,8 +51,7 @@ public class TableFileLoader {
   public void setAttributesToMerge(Collection<String> att2Merge){
     attributesToMerge = att2Merge;
   }
-    
-  
+   
 	// The default read assumes that columns are instances...
   public Instances read(String fileName,String delimiter,Closure c) throws Exception {
 		Instances data = read(fileName,fileName,delimiter,c);
@@ -63,6 +62,12 @@ public class TableFileLoader {
 		return(read(fileName,relationName,delimiter,false,c));
 	}
 
+	public Instances read(String fileName,String relationName,String delimiter,boolean rowsAreInstances) throws Exception {
+		Table t = new Table(fileName,delimiter);
+		Instances data = tableToInstances(t,relationName,rowsAreInstances);
+		return(data);
+	}
+	
 	public Instances read(String fileName,String relationName,String delimiter,boolean rowsAreInstances,
 	                      Closure c) throws Exception {
 		Table t = new Table(fileName,delimiter,c);
@@ -82,6 +87,106 @@ public class TableFileLoader {
 		} else {
 			return(tableColsToInstances(t,relationName)); // KJD
 		}
+	}
+	
+	
+	/***
+  * Parse the column names from a line. 
+  */ 
+  public static String[] parseColNames(String line,String regex){
+    // Not quite right, because includes spurious 0,0 column. 
+		String[] fields = line.split(regex,-1); // -1 to include empty cols.
+		String[] colNames = new String[fields.length-1];				
+		for(int i = 1;i < fields.length;i++){
+		  colNames[i-1] = (fields[i]).trim();
+		}		
+		return(colNames);
+	}
+	
+	/**
+	* If we know in advance that the table is numeric, can optimize a lot...
+	* For example, on 9803 x 294 table, TableFileLoader.readNumeric takes
+	* 6s compared to 12s for WekaMine readFromTable. 
+	*/ 
+	public static Instances readNumeric(String fileName,String relationName,String delimiter) throws Exception {		
+		
+		int numAttributes = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
+		String[] attrNames = new String[numAttributes];
+		
+		System.err.print("reading data..");
+    
+		// Read the col headings and figure out the number of columns in the table..
+		BufferedReader reader = new BufferedReader(new FileReader(fileName));
+		String line = reader.readLine();
+		String[] instanceNames = parseColNames(line,delimiter);
+		int numInstances = instanceNames.length;
+		
+		// Create an array to hold the data as we read it in...
+		double dataArray[][] = new double[numAttributes][numInstances];
+			
+		// Populate the matrix with values...
+		int rowIdx = 0;
+		while ((line = reader.readLine()) != null) {
+			String[] tokens = line.split(delimiter,-1);
+			attrNames[rowIdx] = tokens[0].trim();
+		  for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
+				String valToken = tokens[colIdx+1];
+				double value;
+				if (valToken == "?") value = Instance.missingValue();
+				else value = Double.parseDouble(tokens[colIdx+1]);
+				dataArray[rowIdx][colIdx] = value;
+			}     
+			rowIdx++;
+		}	
+			
+		// Set up attributes, which for colInstances will be the rowNames...
+		FastVector atts = new FastVector();
+		for(int a = 0; a < numAttributes;a++){
+			atts.addElement(new Attribute(attrNames[a]));
+		}	
+		
+		// Create Instances object..
+		Instances data = new Instances(relationName,atts,0);
+		data.setRelationName(relationName);
+			
+		System.err.print("creating instances..");
+		
+		//System.err.println("DEBUG: numAttributes "+numAttributes);
+		
+		
+		/*******  CREATE INSTANCES **************/ 
+		// Fill the instances with data...	
+		// For each instance...
+		for (int c = 0;c < numInstances;c++) {
+			double[] vals = new double[data.numAttributes()];	// Even nominal values are stored as double pointers.      
+			for (int r = 0;r < numAttributes;r++) {			    
+				double val = dataArray[r][c];
+				vals[r] = val;
+			}
+			// Add the a newly minted instance with those attribute values...
+			data.add(new Instance(1.0,vals));
+		}
+    
+		//System.err.println("DEBUG: data.numInstances: "+data.numInstances());
+		//System.err.println("DEBUG: data.numAttributes: "+data.numAttributes());
+		//System.err.println("DEBUG: data.relationNAme"+data.relationName());
+		System.err.print("add feature names.."); 
+    
+		/*******  ADD FEATURE NAMES **************/		
+		// takes basically zero time... all time is in previous 2 chunks. 
+		Instances newData = new Instances(data);
+		newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
+		int attrIdx = newData.attribute("ID").index(); // Paranoid... should be 0
+    
+		for(int c = 0;c < numInstances;c++){
+		 	newData.instance(c).setValue(attrIdx,instanceNames[c]);
+		}            
+		data = newData;				
+		
+		//System.err.println("DEBUG: data.numInstances: "+data.numInstances());
+		//System.err.println("DEBUG: data.numAttributes: "+data.numAttributes());
+							
+		return(data);
 	}
 	
 	
@@ -209,6 +314,8 @@ public class TableFileLoader {
   	FastVector atts = new FastVector();
 		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
 		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...
+
+		System.err.print("creating attributes...");
 		
 		for (int r = 0;r < t.numRows;r++) {						
 			if (rowIsNumeric(t,r)){
@@ -224,6 +331,8 @@ public class TableFileLoader {
 				allAttVals.add(attVals);
 			}
 		}
+		
+		System.err.print("creating instances...");
 
 		// Create Instances object..
 		Instances data = new Instances(relationName,atts,0);
@@ -247,25 +356,27 @@ public class TableFileLoader {
 			}						
 			// Add the a newly minted instance with those attribute values...
 			data.add(new Instance(1.0,vals));
-	}		
+		}		
 
+		System.err.print("add feature names..."); 
    
-		/*******  ADD FEATURE NAMES **************/ 
+		/*******  ADD FEATURE NAMES **************/		
+		// takes basically zero time... all time is in previous 2 chunks. 
 		if (addInstanceNamesAsFeatures){		  		  
-		  Instances newData = new Instances(data);
-      newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
-      int attrIdx = newData.attribute("ID").index(); // Paranoid... should be 0
-      
-      // We save the instanceNames in a list because it's handy later on...
-      instanceNames = new ArrayList<String>();
-      
-      for(int c = 0;c < t.colNames.length;c++){
-        instanceNames.add(t.colNames[c]);
-        newData.instance(c).setValue(attrIdx,t.colNames[c]);
-      }            
-      data = newData;
-  	}		
-
+	  	Instances newData = new Instances(data);
+    	newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
+    	int attrIdx = newData.attribute("ID").index(); // Paranoid... should be 0
+    
+    	// We save the instanceNames in a list because it's handy later on...
+    	instanceNames = new ArrayList<String>();
+    
+    	for(int c = 0;c < t.colNames.length;c++){
+      	instanceNames.add(t.colNames[c]);
+      	newData.instance(c).setValue(attrIdx,t.colNames[c]);
+    	}            
+    	data = newData;
+  	}			
+  
 		System.err.println("done.");
 		
   	return(data);

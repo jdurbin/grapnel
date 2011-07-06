@@ -4,9 +4,17 @@ import java.util.*;
 import java.io.*;
 import java.lang.*;
 
+// Parallel colt versions of these routines...
+// I saw no speedup on MacBook Pro when using 
+// these... would be interesting to try on a many core cpu.
+// import cern.colt.matrix.tobject.*;
+// import cern.colt.matrix.tobject.impl.*;
+// import cern.colt.list.tdouble.*;
+
 import cern.colt.matrix.*;
 import cern.colt.matrix.impl.*;
 import cern.colt.list.*;
+import cern.colt.matrix.impl.AbstractMatrix2D;
 
 import groovy.lang.*;
 import groovy.lang.Closure;
@@ -61,7 +69,7 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
     data = dom;
   }
   
-  public int size(){ return(data.size()); }
+  public long size(){ return(data.size()); }
   public Object get(int idx){ return(data.get(idx)); }  
   public void set(int idx,Object value){ data.set(idx,value); }
   
@@ -70,7 +78,7 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
   }
   
   public Object getAt(int idx){
-    if (idx < 0) idx = data.size()+idx; // 5 -1 = 4
+    if (idx < 0) idx =(int) data.size()+idx; // 5 -1 = 4
     return(data.get(idx));
   }
     
@@ -87,7 +95,7 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
     
     // Convert Groovy relative range values (e.g. -2) into actual 
     // range numbers...
-    RangeInfo ri = DefaultGroovyMethodsSupport.subListBorders(this.size(),r2);        
+    RangeInfo ri = DefaultGroovyMethodsSupport.subListBorders((int)this.size(),r2);        
     int start = ri.from;
     int width = ri.to-start; 
     return(new TableMatrix1D(data.viewPart(start,width)));
@@ -159,7 +167,7 @@ public class Table extends GroovyObjectSupport{
 	/***
   * Parse the column names from a line. 
   */ 
-  public String[] parseColNames(String line,String regex){
+  public static String[] parseColNames(String line,String regex){
     // Not quite right, because includes spurious 0,0 column. 
 		String[] fields = line.split(regex,-1); // -1 to include empty cols.
 		String[] colNames = new String[fields.length-1];
@@ -285,6 +293,8 @@ public class Table extends GroovyObjectSupport{
 	public void readFile(String fileName,Closure c) throws Exception {
 	  readFile(fileName,"\t",c);
 	}
+	
+
 	
   /***
 	*  Read a delimited table from a file.

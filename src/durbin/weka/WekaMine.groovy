@@ -112,6 +112,20 @@ class WekaMine{
 		}
 		return(instances);
 	}
+	
+	
+	
+	static addAttributeAt(instances,attributeValues,attributeName){
+		instances.insertAttributeAt(new Attribute(attributeName,(FastVector)null),0)
+		int attrIdx = instances.attribute(attributeName).index(); // Paranoid... should be 0
+		
+		attributeValues.eachWithIndex{value,i->
+			instances.instance(i).setValue(attrIdx,value)
+		}
+		return(instances);
+	}
+	
+	
 
 	/***
 	* takes a set of instances and creates a tab file from them...
@@ -240,9 +254,7 @@ class WekaMine{
 	*/ 
 	static def cleanUpInstances(instances){	
 		// Remove any attributes that don't vary at all..
-		err.print "Removing attributes that don't vary..."
   	instances = removeUselessAttributes(instances)
-		err.println "done."
     
   	// Remove any instances whose class value is missingValue(). 
 		// KJD.. use of this method hasn't been tested...
@@ -438,6 +450,18 @@ class WekaMine{
 	  eval = cvu.eval
 		return(eval)
 	}
+	
+	def crossValidateModelWithGivenFolds(classifier,instances,foldSets){
+		def cvu = new CVUtils()
+		// Results contain per-sample information... 
+		// eval is a summary description of the results. 
+	  results = cvu.crossValidateModelWithGivenFolds(classifier,instances,foldSets)
+	
+	  eval = cvu.eval
+		return(eval)
+	}
+	
+	
 
   /***
   *  Converts the numeric class attribute into 
@@ -629,6 +653,24 @@ class WekaMine{
 		def instancesInRows = false // Default 
 		readFromTable(dataFileName,instancesInRows)
 	}
+	
+	
+	/**
+  * Read instances from a table, filling in missing value tokens as we go. 
+  */ 
+  static Instances readNumericFromTable(dataFileName){
+		
+    // Read data in from table.  Handle missing values as we go.
+    err.print "Loading data from $dataFileName..."
+    TableFileLoader loader = new TableFileLoader()
+    loader.setAddInstanceNamesAsFeatures(true)
+		def relationName = dataFileName;
+		
+		Instances data = loader.readNumeric(dataFileName,relationName,"\t");		
+		err.println "done."
+    return(data)
+  }
+ 
 	
 	
   /**
