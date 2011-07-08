@@ -17,16 +17,29 @@ public class FoldSets extends ArrayList{
 		WekaAdditions.enable();
 	}	
 	
+	def FoldSets(){}
+		
 	def FoldSets(fileName){
 		read(fileName)
 	}
 	
+	def valueSet = [] as Set
+	def countFolds(){
+		for(int i = 0;i < this.size();i++){
+			def currentSet = this[i]			
+			for(int j = 0;j < currentSet.size();j++){
+				valueSet.add(currentSet[j])
+			}
+		}		
+		int numFolds = valueSet.size() * this.size();		
+		return(numFolds);
+	}
 	
 	/***
 	* Read a description of the folds from a file
 	*/ 
 	def read(fileName){
-		def allFolds = []
+		def allFolds = this;
 		new File(fileName).withReader{r->
 			def headings = r.readLine().split("\t")[1..-1]
 			samples = headings
@@ -39,13 +52,12 @@ public class FoldSets extends ArrayList{
 		this = allFolds
 		return(this)
 	}
-	
-	
-	def removeMissing(data){		
+		
+	def removeMissing(Instances data){		
 		
 		def dataSamples = data.attributeValues("ID") as Set
 		
-		def newList = []
+		def newList = new FoldSets()
 		for(int i = 0;i < this.size();i++){
 			def currentSet = this[i]
 			def newset = []
@@ -56,7 +68,7 @@ public class FoldSets extends ArrayList{
 			}
 			newList << newset;
 		}	
-		this = newList;			
+		this = newList;		
 	}
 			
 }

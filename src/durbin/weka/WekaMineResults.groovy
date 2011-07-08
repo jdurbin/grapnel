@@ -9,6 +9,9 @@ import weka.attributeSelection.*;
 import durbin.util.*;
 
 class WekaMineResult{
+	
+	static err = System.err
+	
 	int jobID
 	int	samples
 	float pctCorrect
@@ -36,6 +39,7 @@ class WekaMineResult{
 	*/ 
 	static def defaultHeadingMap(){
 		def headings = headingStr.split(",")
+		
 		def headings2Cols = [:]
 		headings.eachWithIndex{h,i-> headings2Cols[h] = i}		
 		return(headings2Cols)
@@ -50,6 +54,9 @@ class WekaMineResult{
 	
 	def parse(line,headings2Cols){
 		def fields = line.split(",")				
+						
+		err.println "DEBUG fields: "+fields
+		err.println "DEBUG headings2Cols"+headings2Cols				
 						
 		attrEval = fields[headings2Cols['attrEval']] as String
 		attrSearch = fields[headings2Cols['attrSearch']] as String
