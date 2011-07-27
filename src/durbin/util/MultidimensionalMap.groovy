@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy 
+package durbin.util;
 
 /**
 * A multi-dimensional map.  Commandeered from this post: <br>

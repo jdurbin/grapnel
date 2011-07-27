@@ -2,6 +2,7 @@
 package durbin.weka;
 
 import durbin.util.*;
+import durbin.util.Table;
 
 import java.io.*;
 import java.util.*;

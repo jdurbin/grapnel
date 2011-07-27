@@ -6,6 +6,7 @@ import weka.filters.*;
 import weka.filters.unsupervised.attribute.*;
 import weka.core.converters.*
 
+import durbin.util.TwoDMap
 import durbin.paradigm.*
 import durbin.weka.*
 

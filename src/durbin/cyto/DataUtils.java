@@ -1,7 +1,3 @@
-/***
-* Lokey lab cytological profiling utilities.
-*/ 
-
 
 package durbin.cyto;
 
@@ -133,10 +129,10 @@ class DataUtils{
     
     HashMap<String,Integer> headings2ColMap = makeColMap(headings);
     int wellCol = headings2ColMap.get(DataWellHeadingCol);
-    //System.err.println("wellCol: "+wellCol);
+    // System.err.println("wellCol: "+wellCol);
 
     HashMap<String,Histogram1D> CpMByFeature = new HashMap<String,Histogram1D>();
-    
+
     int lineCount = 0;
     while ((line = reader.readLine()) != null) {
       String[] fields = line.split(",",-1);
@@ -185,52 +181,38 @@ class DataUtils{
 
         String CpMFeature = CpM+featureName;
         
-        //System.err.println("CpMFeature: "+CpMFeature);
-
         if (CpMByFeature.containsKey(CpMFeature)){  
-          //System.err.println("If  featureValue:"+featureValue);      
           Histogram1D hist = CpMByFeature.get(CpMFeature);
           
           if (hist == null){
             System.err.println("cyto.DataUtils Error: hist null for "+CpMFeature);
             continue;
           }
-          //else{
-          //  System.err.println("hist not null");
-          //}
-          
-          //System.err.println("containsKey fill "+featureName+" with: "+featureValue);
           hist.fill(Double.parseDouble(featureValue));
-        }else{
-          //System.err.println("else  featureName:"+featureName);  
+        }else{			
           StaticBin1D fbin = featureBins.get(featureName);
-          if (fbin == null){
-            System.err.println("featureBin is null for: "+featureName);
-          }
+          if (fbin == null) System.err.println("featureBin is null for: "+featureName);
                           
           double featureMin = featureBins.get(featureName).min();  // Get max and min from preprocessing
           double featureMax = featureBins.get(featureName).max();    
-          
-          if (featureMin == featureMax){
-            featureMax = featureMin + (0.5*featureMin);
-          }     
 
-          Histogram1D hist = new Histogram1D("$featureName $CpM",numBins,
+					// skip degenerate cases...
+					if (featureMin != featureMax){
+          	Histogram1D hist = new Histogram1D("$featureName $CpM",numBins,
                                               featureMin,featureMax);
                                                                                             
-          if (hist == null){
-            System.err.println("cyto.DataUtils Error: hist null for "+CpMFeature);
-            continue;
-          }          
-          //else                                                      
-          //System.err.println(featureName+" "+CpM);
-          //System.err.println("\t fill: "+featureValue);        
+            if (hist == null){
+            	System.err.println("cyto.DataUtils Error: hist null for "+CpMFeature);
+            	continue;
+          	}          
           
-          hist.fill(Double.parseDouble(featureValue));
-          CpMByFeature.put(CpMFeature,hist);
-        }      
+          	hist.fill(Double.parseDouble(featureValue));
+          	CpMByFeature.put(CpMFeature,hist);
+        	}
+      	}
       }      
     }
+    System.err.println("About to return");
     return(CpMByFeature);
   }
 
@@ -264,7 +246,7 @@ class DataUtils{
     Histogram1D experimentalHist = CpMByFeature.get(CpMFeature);
   
     if (experimentalHist == null){
-      System.err.println("ERROR: Null distribution at "+CpMFeature);
+      System.err.println("WARNING: Null distribution at "+CpMFeature);
       return(Double.NaN);
     }
   
@@ -346,12 +328,18 @@ class DataUtils{
   public static double histSquareDiff(double[] exsmooth,double[] bxsmooth,double factor){  
     //debuglist = []
     double sum = 0;
+    double bxsum = 0;
+    double exsum = 0;
+    
     for(int i = 0;i < bxsmooth.length;i++){
+      bxsum += bxsmooth[i] * i;
+      exsum += exsmooth[i] * i;
       double diff = bxsmooth[i] - (exsmooth[i]*factor);
       diff = diff * diff; // square the difference...   
       sum += diff;
     }  
     //err.println "diffsum: $sum diff,${debuglist.join(',')}"    
+    if (bxsum > exsum) sum = -sum;
     return(sum);
   }
 

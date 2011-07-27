@@ -1,3 +1,5 @@
+package durbin.weka;
+
 import weka.core.*
 import weka.core.converters.ConverterUtils.DataSource
 

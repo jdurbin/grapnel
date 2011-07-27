@@ -81,7 +81,22 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
     if (idx < 0) idx =(int) data.size()+idx; // 5 -1 = 4
     return(data.get(idx));
   }
+
+	public double[] toDoubleArray(){
+		double[] rval = new double[(int)size()];
+		for(int i =0;i < size();i++){
+			rval[i] = (Double) getAt(i);
+		}
+		return(rval);
+	}
     
+	public String toString(){
+		StringBuffer rval = new StringBuffer();
+		for(int i = 0;i < size();i++){
+			rval.append(getAt(i));
+		}
+		return(rval.toString());
+	}
   
   /****************************************************
   * Returns a view corresponding to the given range. 
@@ -137,8 +152,7 @@ public class Table extends GroovyObjectSupport{
   public Table(String fileName,String delimiter) throws Exception{
     readFile(fileName,delimiter);
   }
-  
-  
+    
   public Table(String fileName) throws Exception{
     readFile(fileName,"\t");
   }
@@ -421,7 +435,17 @@ public class Table extends GroovyObjectSupport{
 	
 	
 	public TableMatrix1D getCol(int col){
-	   return(new TableMatrix1D(matrix.viewRow(col)));
+	   return(new TableMatrix1D(matrix.viewColumn(col)));
+	}
+	
+	public TableMatrix1D getCol(String colStr){
+		int col = getColIdx(colStr);
+		return(new TableMatrix1D(matrix.viewColumn(col)));
+	}
+	
+	public TableMatrix1D getRow(String rowStr){
+		int row = getRowIdx(rowStr);
+		return(new TableMatrix1D(matrix.viewRow(row)));
 	}
 
 	/***

@@ -4,6 +4,18 @@ package durbin.weka;
 
 import com.google.common.collect.*
 
+
+class ConfigRange{
+	def ConfigRange(start,stop,inc){
+		this.start = start
+		this.stop = stop
+		this.inc = inc
+	}
+	double start
+	double stop
+	double inc
+}
+
 /**
 * Provides a compact way to describe fairly complex Weka classifier experiments. See 
 * cfgExample.txt for an example of the kind of file that this parses.  It extends Groovy's
@@ -130,7 +142,10 @@ class WekaMineConfigSlurper extends ConfigSlurper{
         //    group1 = m[0][1]
         item.find(matchBraceContents){fullmatch,group1->  
           bAnyNewMatches = true;
-          def (start,stop,inc) = parsefields(group1)    
+          def r = parsefields(group1)    
+					def start = r.start
+					def stop = r.stop
+					def inc = r.inc
           for(double value = start;value <= stop;value+= inc){
             def newItem = item.replaceFirst(matchBraceContents,value as String)
             //println "BRACES NEWLIST: $newItem"
@@ -195,7 +210,8 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     def start = fields[0] as Double
     def stop = fields[1] as Double
     def inc = fields[2] as Double
-    return [start,stop,inc]
+		ConfigRange r = new ConfigRange(start,stop,inc)
+    return(r)
   }
 
 }

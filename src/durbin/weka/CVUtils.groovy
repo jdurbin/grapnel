@@ -10,69 +10,6 @@ import weka.classifiers.meta.FilteredClassifier;
 import java.util.Random
 
 
-public class FoldSets extends ArrayList{
-	def samples;
-	
-	static{
-		WekaAdditions.enable();
-	}	
-	
-	def FoldSets(){}
-		
-	def FoldSets(fileName){
-		read(fileName)
-	}
-	
-	def valueSet = [] as Set
-	def countFolds(){
-		for(int i = 0;i < this.size();i++){
-			def currentSet = this[i]			
-			for(int j = 0;j < currentSet.size();j++){
-				valueSet.add(currentSet[j])
-			}
-		}		
-		int numFolds = valueSet.size() * this.size();		
-		return(numFolds);
-	}
-	
-	/***
-	* Read a description of the folds from a file
-	*/ 
-	def read(fileName){
-		def allFolds = this;
-		new File(fileName).withReader{r->
-			def headings = r.readLine().split("\t")[1..-1]
-			samples = headings
-			//err.println "headings: "+headings
-			r.splitEachLine("\t"){fields->
-				def foldValues = fields[1..-1].collect{it as int}
-				allFolds.add(foldValues)
-			}
-		}
-		this = allFolds
-		return(this)
-	}
-		
-	def removeMissing(Instances data){		
-		
-		def dataSamples = data.attributeValues("ID") as Set
-		
-		def newList = new FoldSets()
-		for(int i = 0;i < this.size();i++){
-			def currentSet = this[i]
-			def newset = []
-			for(int j = 0;j < currentSet.size();j++){
-				if (dataSamples.contains(samples[j])){
-					newset << currentSet[j]
-				}
-			}
-			newList << newset;
-		}	
-		this = newList;		
-	}
-			
-}
-
 /***
 * A single evaluation returned from a cross-validation experiment. (i.e. the output of CVUtils)
 */ 

@@ -151,7 +151,7 @@ class WekaMine{
 		new File(fileName).withWriter(){w->
 		
 			def instNames = instances.attributeValues("ID")
-		
+				
 			def line = "Features\t${instNames.join('\t')}"
 			w.write(line)
 		 	w << "\n"
@@ -203,7 +203,8 @@ class WekaMine{
 	/***
 	* Removes and/or adds attributes to make the resulting set of instances
 	* match those specified in the attribute list (e.g. the attributes retrieved
-	* from a trained model).  
+	* from a trained model).  In some cases rawdata has an ID, in some cases 
+	* not, have to handle that as a special case...
 	*/ 
 	static def createInstancesToMatchAttributeList(rawdata,modelAttributes){
 
@@ -213,7 +214,6 @@ class WekaMine{
 		def rawAttributeNamesSet = rawAttributeNames as Set
 		def rawName2Idx = [:]
 		rawAttributeNames.eachWithIndex{n,i->rawName2Idx[n] = i}
-
 
 		// Create a set of instances reflecting the model data...
 		def atts = new FastVector()
@@ -234,7 +234,7 @@ class WekaMine{
 
 				// For each attribute...
 				modelAttributes.eachWithIndex{modelAttrName,aIdx->
-					if (rawAttributeNamesSet.contains(modelAttrName)){
+					if (rawAttributeNamesSet.contains(modelAttrName)){												
 						def rawIdx = rawName2Idx[modelAttrName]
 						vals[aIdx] = rawVals[rawIdx]
 					}else{
@@ -243,6 +243,13 @@ class WekaMine{
 				}
 				data.add(new Instance(1.0,vals));
 		}		
+		
+		// If we were given an ID, put it back...
+		def attrNames = rawdata.attributeNames() as Set
+		if (attrNames.contains("ID")){
+			def instanceNames = rawdata.attributeValues("ID")
+			addID(data,instanceNames)
+		}				
 		
 		err.println "done. Final attributes: ${data.numAttributes()}"
 		
