@@ -212,6 +212,92 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   
     return(rval)    
   }
+
+
+	/***
+  * Returns a string containing the ordered and selected features and their 
+  * feature selection scores.  The output will be like: 
+  * 
+  * 68_IHH N/PTCH1~0.6930,105_BMP2-4/CHRDL1~0.64456,132_CELL_MIGRATION~0.4630,...
+  * 
+  * 
+  */ 
+  static String cvFeatureSelections(data,attributeSelections,maxToReport){  
+    
+    def attList = [] 
+    
+
+//		err.println "DEBUG: cvFeatureSelections"
+
+    // The classifiers that reach the cross validation code will be 
+    // twice wrapped.   Once as an attribute selected classifier, and 
+    // again as a filtered classifier (to remove String ID)
+    //
+    
+    def attribute2Score = [:]
+    def intersection = [] as Set
+     
+    def bFirstTime = true; 
+		
+		attributeSelections.each{thinAttributes->                 
+            
+			//def rankedAttrs = attributeSelection.rankedAttributes() // this is a double[][]
+			def rankedAttrs = thinAttributes.getAttributes()  // Returns the double[][] we tucked away in this thin wrapper. 
+
+      def reportCount = 0;
+      
+      def keySet = [] as Set
+      rankedAttrs.each{attrRank->
+        
+        // Only record maxToReport then skip over rest...
+				//System.err.println "maxToReport: $maxToReport\treportCount: $reportCount"
+        if (reportCount >= maxToReport) return;
+        reportCount++
+        
+        // +1 because the CV was done on Filtered instances that have removed 
+        // the 0th (ID) attribute.  KJD: While in practice I have always been 
+        // making the ID the first (0) attribute, I worry slightly that assuming 
+        // so is risky... but what a mess if ID is 5th attribute and you remove it...
+        def attIdx = (attrRank[0] as int)+1        
+        def attName = data.attribute(attIdx).name()
+        def score = attrRank[1] as Double
+        score = score.round(4)
+      
+        // Save every pair attributes and scores... save only the max score 
+        // for each attribute...
+        if (attribute2Score.keySet().contains(attName)){
+          def oldScore = attribute2Score[attName]
+          if (score > oldScore) {          
+            attribute2Score[attName] = score;
+          }
+        }else{
+          attribute2Score.put(attName,score)
+        }
+        
+        // keySet for just this one cv fold...        
+        keySet << attName        
+      }
+      
+      if (bFirstTime){
+        intersection = keySet
+        bFirstTime=false;
+      }else{      
+        intersection = intersection.intersect(keySet)
+      }      
+    }
+
+
+    // Scores 
+    def valueSortedKeys = attribute2Score.keySet().sort{-attribute2Score[it]}
+
+    def pairs = []
+    valueSortedKeys.eachWithIndex{attr,i -> 
+      if (i < maxToReport){
+        pairs << "$attr~${attribute2Score[attr]}" 
+      }
+    }    
+    return(pairs.join(","))  
+  }
   
 
   /***
@@ -222,7 +308,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   * 
   * 
   */ 
-  static String cvFeatureSelections(data,classifiers,maxToReport){  
+  static String cvFeatureSelectionsOld(data,classifiers,maxToReport){  
     
     def attList = [] 
     
@@ -246,7 +332,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
       def asClassifier = fc.getClassifier() // AttributeSelectedClassifier
       def attributeSelection = asClassifier.getAttributeSelection()
 
-      def rankedAttrs = attributeSelection.rankedAttributes()
+      def rankedAttrs = attributeSelection.rankedAttributes() // this is a double[][]
             
       def reportCount = 0;
       
@@ -359,6 +445,25 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
  	/****
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
   */ 
+  static void appendFeaturesLineOld(jobIdx,data,out,experiment,eval,maxFeaturesToReport){
+      // Append a summary line to a file. 
+			def summaryLine = getFullSummaryLine(jobIdx,data,experiment,eval)
+			out << summaryLine			
+			
+			//err.println "DEBUG: maxFeaturesToReport: "+maxFeaturesToReport
+			
+      // Figure out the feature selections across cross validation folds...
+      if (maxFeaturesToReport != 0){  		
+        out << ","
+        out << cvFeatureSelections(data,eval.getCVAttributeSelections(),maxFeaturesToReport)
+      }      
+      out<<"\n"      
+  }
+
+
+	/****
+  * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
+  */ 
   static void appendFeaturesLine(jobIdx,data,out,experiment,eval,maxFeaturesToReport){
       // Append a summary line to a file. 
 			def summaryLine = getFullSummaryLine(jobIdx,data,experiment,eval)
@@ -369,7 +474,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
       // Figure out the feature selections across cross validation folds...
       if (maxFeaturesToReport != 0){  		
         out << ","
-        out << cvFeatureSelections(data,eval.getCVClassifiers(),maxFeaturesToReport)
+        out << cvFeatureSelections(data,eval.getCVAttributeSelections(),maxFeaturesToReport)
       }      
       out<<"\n"      
   }

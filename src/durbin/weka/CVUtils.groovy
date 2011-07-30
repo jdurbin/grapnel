@@ -111,7 +111,7 @@ public class CVUtils{
 		eval = new Evaluation2(data)
 		
 		def predictions = new StringBuffer()
-		eval.crossValidateModelWithGivenFolds(filteredClassifier,data,foldSets,predictions,new Range("first,last"),false)
+		eval.crossValidateModelWithGivenFolds(filteredClassifier,data,(FoldSets) foldSets,predictions,new Range("first,last"),false)
 		def results = parsePredictions(predictions)
 		return(results);		
 	}

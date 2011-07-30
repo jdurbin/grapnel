@@ -69,6 +69,11 @@ import weka.estimators.Estimator;
 import weka.estimators.KernelEstimator;
 import weka.classifiers.*;
 
+import weka.attributeSelection.AttributeSelection;
+import durbin.weka.AttributeSelectedClassifier2;
+import weka.classifiers.meta.FilteredClassifier;
+
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
@@ -327,11 +332,11 @@ import java.util.ArrayList;
     
     // The classifiers actually created during cross-validation. 
     // 
-    public ArrayList<Classifier> m_cvClassifiers;  // Evaluation2
+    public ArrayList<ThinAttributes> m_cvAttributeSelections;  // Evaluation2
     
     // Evaluation2
-    public ArrayList<Classifier> getCVClassifiers(){
-      return(m_cvClassifiers);
+    public ArrayList<ThinAttributes> getCVAttributeSelections(){
+      return(m_cvAttributeSelections);
     }
     
 
@@ -477,9 +482,10 @@ public double[][] confusionMatrix() {
 * is to be printed)
 * @throws Exception if a classifier could not be generated 
 * successfully or the class is not defined
+* Instances data, ArrayList< ArrayList<Integer> > foldSets,Object... forPredictionsPrinting) 
 */
 public void crossValidateModelWithGivenFolds(Classifier classifier,
-Instances data, ArrayList< ArrayList<Integer> > foldSets,Object... forPredictionsPrinting) 
+Instances data, FoldSets foldSets,Object... forPredictionsPrinting) 
 throws Exception {
 
   // We assume that the first element is a StringBuffer, the second a Range (attributes
@@ -495,29 +501,44 @@ throws Exception {
 
   // Create a list to store classifiers (Evaluation2)
   // KJD: This could become a memory problem.... need to monitor that. 
-  m_cvClassifiers = new ArrayList<Classifier>();
+  //m_cvClassifiers = new ArrayList<Classifier>();
+ // weka.attributeSelection.AttributeSelection
+	m_cvAttributeSelections = new ArrayList<ThinAttributes>();
   
 
 	// Fold sets let you specify the folds.  Each foldSet is one Nx cross-validation. 
 	// To do 5 5x cross validations, you'd have 5 foldSets each 5 numbers long. 
-	m_NumFolds = 0;
+	m_NumFolds = 0;	
+	int numFolds = foldSets.foldSize(); 
+	
 	for(int fs = 0;fs < foldSets.size();fs++){
 		ArrayList<Integer> foldSet = foldSets.get(fs);
 		
-		int numFolds = foldSet.size();
+		System.err.println("\n\tFoldSet: "+fs);		
 		m_NumFolds+= numFolds;
+		System.err.println("\tnumFolds: "+numFolds);
   	for (int i = 0; i < numFolds; i++) {
+			System.err.println("\t\tFold:"+i);
 			Instances train = CVUtils.trainCV(data,foldSet,i);
 						
     	setPriors(train);
     	Classifier copiedClassifier = Classifier.makeCopy(classifier);
     	copiedClassifier.buildClassifier(train);
 
-    	m_cvClassifiers.add(copiedClassifier);  // KJD Evaluation2 mod.        
-      
+			// copiedClassifier is a FilteredClassifier...
+			FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
+			AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
+			AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2
+			double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
+			ThinAttributes thinAttributes = new ThinAttributes(rankedAttrs);
+			System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
+		  m_cvAttributeSelections.add(thinAttributes);
+
 			Instances test = CVUtils.testCV(data,foldSet,i);			
 			
     	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+
+			copiedClassifier = null; // Encourage garbage collection. 
   	}
 	}
 }
@@ -570,18 +591,26 @@ throws Exception {
   
   // Create a list to store classifiers (Evaluation2)
   // KJD: This could become a memory problem.... need to monitor that. 
-  m_cvClassifiers = new ArrayList<Classifier>();
-  
+  //m_cvClassifiers = new ArrayList<Classifier>();
+  m_cvAttributeSelections = new ArrayList<ThinAttributes>();
 	
 
   for (int i = 0; i < numFolds; i++) {
+	
+		System.err.println("\n\tFold: "+i);
     Instances train = data.trainCV(numFolds, i, random);
     setPriors(train);
     Classifier copiedClassifier = Classifier.makeCopy(classifier);
     copiedClassifier.buildClassifier(train);
 
-    m_cvClassifiers.add(copiedClassifier);  // Evaluation2 mod.
+    //m_cvClassifiers.add(copiedClassifier);  // Evaluation2 mod. RAM Hog... 
     
+		FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
+		AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
+		AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2
+		double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
+		ThinAttributes thinAttributes = new ThinAttributes(rankedAttrs);
+    m_cvAttributeSelections.add(thinAttributes);
     
     // Little debug test... 310, 3067, 2264
     //String name1 = train.attribute(310).name();
@@ -589,6 +618,8 @@ throws Exception {
       
     Instances test = data.testCV(numFolds, i);
     evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+
+		copiedClassifier = null; // try to encourage garbage colletion. 
   }
   m_NumFolds = numFolds;
 }
