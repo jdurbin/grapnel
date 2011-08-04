@@ -290,26 +290,32 @@ class WekaMine{
 					
 		def rootCmd = "${scriptFile} ${newargs.join(" ")}"
 		def expPerJob = Double.parseDouble(experimentsPerJob) // convert string value to double
-		def numJobs = (double)numExperiments/(double)expPerJob
-		System.err.println("numExperiments: $numExperiments  numJobs: $numJobs")
+		def numJobs = (double)numExperiments/(double)expPerJob				
+		//System.err.println("numExperiments: $numExperiments  numJobs: $numJobs")
 				
 		int jobStart = 0
 		int jobEnd = expPerJob -1;
 		(0..<numJobs).each{
+			//System.err.println "0..<$numJobs: jobStart: $jobStart\tjobEnd: $jobEnd"
 		  def cmdOut = "${rootCmd} -r $jobStart,$jobEnd"
 		  println cmdOut
 		  jobStart += expPerJob
-		  jobEnd += expPerJob
+		  jobEnd += expPerJob				
 		}
 
 		// Handle remainder experiments..
 
 		def lastExperiment = (jobEnd-expPerJob)
-		if (lastExperiment < numExperiments){
+		
+		//System.err.println "lastExperiment: jobstart: $jobStart, jobend: $jobEnd, $lastExperiment"
+		//System.err.println "lastExperiment $lastExperiment < numExperiments: $numExperiments"
+		if (lastExperiment < numExperiments-1){
 		  jobStart = lastExperiment+1
 		  jobEnd = numExperiments-1
 		
 			if (jobEnd < jobStart) jobEnd = jobStart
+			//System.err.println "last loop: jobStart: $jobStart, jobEnd: $jobEnd"
+			
 		
 			def cmdOut = "${rootCmd} -r $jobStart,$jobEnd"
 		  println cmdOut
