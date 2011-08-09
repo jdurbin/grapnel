@@ -614,7 +614,7 @@ throws Exception {
     
     // Little debug test... 310, 3067, 2264
     //String name1 = train.attribute(310).name();
-    System.out.println("\t rankedAttrs#: "+rankedAttrs.length);    
+    //System.out.println("\t rankedAttrs#: "+rankedAttrs.length);    
       
     Instances test = data.testCV(numFolds, i);
     evaluateModel(copiedClassifier, test, forPredictionsPrinting);
