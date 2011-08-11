@@ -454,12 +454,12 @@ class WekaMine{
 	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval.trainingEval,dataName)
 	}
 
-	def appendFeatures(out,idx,instances,maxFeaturesOut){
-  	WekaMineResults.appendFeaturesLine(idx,instances,out,exp,eval,maxFeaturesOut,dataName)
+	def appendTrainingSamples(out,idx,instances){
+  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval.trainingEval,trainResults,dataName)			                                      
 	}
 	
-	def appendTrainingSamples(out,idx,instances){
-  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,trainResults,dataName)			                                      
+	def appendFeatures(out,idx,instances,maxFeaturesOut){
+  	WekaMineResults.appendFeaturesLine(idx,instances,out,exp,eval,maxFeaturesOut,dataName)
 	}
 	
 	def appendTestSamples(out,idx,instances){
