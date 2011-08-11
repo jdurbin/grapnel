@@ -377,8 +377,8 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   */ 
   static void appendSamplesLine(jobIdx,data,out,experiment,eval,results,dataName){
       // Append a summary line to a file. 
-      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval,dataName)
-			out << getFullSummaryLine(jobIdx,data,experiment,eval)
+      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
+			out << getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
 			if (results.size() >0){						
 				results.each{r->
 					out<<","

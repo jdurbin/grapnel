@@ -449,21 +449,16 @@ class WekaMine{
 	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval,dataName)
 	}
 	
-	def appendTrainingSummary(out,idx,instances){	
-		// A training evaluation is tucked inside of the original evaluation. 	
-	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval.trainingEval,dataName)
-	}
-
-	def appendTrainingSamples(out,idx,instances){
-  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval.trainingEval,trainResults,dataName)			                                      
-	}
-	
 	def appendFeatures(out,idx,instances,maxFeaturesOut){
   	WekaMineResults.appendFeaturesLine(idx,instances,out,exp,eval,maxFeaturesOut,dataName)
 	}
 	
 	def appendTestSamples(out,idx,instances){
   	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,testResults,dataName)			                                      
+	}
+
+	def appendTrainingSamples(out,idx,instances){
+  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval.trainingEval,trainResults,dataName)			                                      
 	}
 	
 		
