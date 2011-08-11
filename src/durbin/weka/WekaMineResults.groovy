@@ -98,9 +98,9 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 	* WARMING: MUST match summary heading in wekaMineResult
 	* "attrEval,attrSearch,numAttrs,clsssifier,classAttr,discretization,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    				
 	*/
-	static String getFullSummaryLine(jobIdx,data,experiment,eval){
+	static String getFullSummaryLine(jobIdx,data,experiment,eval,dataName){
 		def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
-    def fullSummaryLine="${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classifierStr},${experiment.classAttribute},${experiment.discretization},*,$jobIdx,$summaryLine"		
+    def fullSummaryLine="${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classifierStr},${experiment.classAttribute},${experiment.discretization},${dataName},*,$jobIdx,$summaryLine"		
 		return(fullSummaryLine)
 	}
 
@@ -299,96 +299,6 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
     return(pairs.join(","))  
   }
   
-
-  /***
-  * Returns a string containing the ordered and selected features and their 
-  * feature selection scores.  The output will be like: 
-  * 
-  * 68_IHH N/PTCH1~0.6930,105_BMP2-4/CHRDL1~0.64456,132_CELL_MIGRATION~0.4630,...
-  * 
-  * 
-  */ 
-  static String cvFeatureSelectionsOld(data,classifiers,maxToReport){  
-    
-    def attList = [] 
-    
-
-//		err.println "DEBUG: cvFeatureSelections"
-
-    // The classifiers that reach the cross validation code will be 
-    // twice wrapped.   Once as an attribute selected classifier, and 
-    // again as a filtered classifier (to remove String ID)
-    //
-    
-    def attribute2Score = [:]
-    def intersection = [] as Set
-     
-    def bFirstTime = true; 
-
-		//err.println "DEBUG: num classifiers="+classifiers.size()
-
-    classifiers.each{fc->  // each FilteredClassifier
-            
-      def asClassifier = fc.getClassifier() // AttributeSelectedClassifier
-      def attributeSelection = asClassifier.getAttributeSelection()
-
-      def rankedAttrs = attributeSelection.rankedAttributes() // this is a double[][]
-            
-      def reportCount = 0;
-      
-      def keySet = [] as Set
-      rankedAttrs.each{attrRank->
-        
-        // Only record maxToReport then skip over rest...
-				//System.err.println "maxToReport: $maxToReport\treportCount: $reportCount"
-        if (reportCount >= maxToReport) return;
-        reportCount++
-        
-        // +1 because the CV was done on Filtered instances that have removed 
-        // the 0th (ID) attribute.  KJD: While in practice I have always been 
-        // making the ID the first (0) attribute, I worry slightly that assuming 
-        // so is risky... but what a mess if ID is 5th attribute and you remove it...
-        def attIdx = (attrRank[0] as int)+1        
-        def attName = data.attribute(attIdx).name()
-        def score = attrRank[1] as Double
-        score = score.round(4)
-      
-        // Save every pair attributes and scores... save only the max score 
-        // for each attribute...
-        if (attribute2Score.keySet().contains(attName)){
-          def oldScore = attribute2Score[attName]
-          if (score > oldScore) {          
-            attribute2Score[attName] = score;
-          }
-        }else{
-          attribute2Score.put(attName,score)
-        }
-        
-        // keySet for just this one cv fold...        
-        keySet << attName        
-      }
-      
-      if (bFirstTime){
-        intersection = keySet
-        bFirstTime=false;
-      }else{      
-        intersection = intersection.intersect(keySet)
-      }      
-    }
-
-
-    // Scores 
-    def valueSortedKeys = attribute2Score.keySet().sort{-attribute2Score[it]}
-
-    def pairs = []
-    valueSortedKeys.eachWithIndex{attr,i -> 
-      if (i < maxToReport){
-        pairs << "$attr~${attribute2Score[attr]}" 
-      }
-    }    
-    return(pairs.join(","))  
-  }
-
   /****
   * Appends a results summary line for AttributeSelection ONLY experiments 
   * to the output stream out. 
@@ -436,37 +346,20 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   * Appends a results summary line to the output stream out
   *
   */ 
-  static void appendSummaryLine(jobIdx,data,out,experiment,eval){
+  static void appendSummaryLine(jobIdx,data,out,experiment,eval,dataName){
       // Append a summary line to a file. 
-			out << getFullSummaryLine(jobIdx,data,experiment,eval)
+			out << getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
       out<<"\n"      
   } 
 
- 	/****
-  * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
-  */ 
-  static void appendFeaturesLineOld(jobIdx,data,out,experiment,eval,maxFeaturesToReport){
-      // Append a summary line to a file. 
-			def summaryLine = getFullSummaryLine(jobIdx,data,experiment,eval)
-			out << summaryLine			
-			
-			//err.println "DEBUG: maxFeaturesToReport: "+maxFeaturesToReport
-			
-      // Figure out the feature selections across cross validation folds...
-      if (maxFeaturesToReport != 0){  		
-        out << ","
-        out << cvFeatureSelections(data,eval.getCVAttributeSelections(),maxFeaturesToReport)
-      }      
-      out<<"\n"      
-  }
 
 
 	/****
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
   */ 
-  static void appendFeaturesLine(jobIdx,data,out,experiment,eval,maxFeaturesToReport){
+  static void appendFeaturesLine(jobIdx,data,out,experiment,eval,maxFeaturesToReport,dataName){
       // Append a summary line to a file. 
-			def summaryLine = getFullSummaryLine(jobIdx,data,experiment,eval)
+			def summaryLine = getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
 			out << summaryLine			
 			
 			//err.println "DEBUG: maxFeaturesToReport: "+maxFeaturesToReport
@@ -482,9 +375,9 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
  	/****
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
   */ 
-  static void appendSamplesLine(jobIdx,data,out,experiment,eval,results){
+  static void appendSamplesLine(jobIdx,data,out,experiment,eval,results,dataName){
       // Append a summary line to a file. 
-      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
+      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval,dataName)
 			out << getFullSummaryLine(jobIdx,data,experiment,eval)
 			if (results.size() >0){						
 				results.each{r->

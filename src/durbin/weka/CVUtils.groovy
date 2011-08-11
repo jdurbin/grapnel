@@ -43,13 +43,6 @@ public class CVUtils{
 
 	static err = System.err
 
-	// Evaluation2 is a modified version of weka Evaluation that saves
-	// the classifiers created in a cross-validation experiment for 
-	// later access. 
-	Evaluation2 eval;
-
-
-
 	/***
 	* Generate cross validation test set from a saved set of folds...
 	*/ 
@@ -85,58 +78,12 @@ public class CVUtils{
 	}
 	
 	
-	def getFilteredClassifier(classifier){
-			// Create a classifier from the name...
-			// By using filtered classifer to remove ID, the cross-validation
-			// wrapper will keep the original dataset and keep track of the mapping 
-			// between the original and the folds (minus ID). 
-			def filteredClassifier = new FilteredClassifier()
-			def removeTypeFilter = new RemoveType();
-			//removeTypeFilter.setOptions("-T string");  
-
-			filteredClassifier.setClassifier(classifier)
-			filteredClassifier.setFilter(removeTypeFilter)
-		
-			return(filteredClassifier)
-	}
-	
-	/***
-	* cross validate model with folds generated in advance. 
-	*/ 
-	List<EvaluationResult> crossValidateModelWithGivenFolds(classifier,data,foldSets){
-				
-		def filteredClassifier = getFilteredClassifier(classifier);		
-
-		// Perform cross-validation of the model..
-		eval = new Evaluation2(data)
-		
-		def predictions = new StringBuffer()
-		eval.crossValidateModelWithGivenFolds(filteredClassifier,data,(FoldSets) foldSets,predictions,new Range("first,last"),false)
-		def results = parsePredictions(predictions)
-		return(results);		
-	}
-
-	/***
-	* cross validate model with generated folds. 
-	*/ 
-	List<EvaluationResult> crossValidateModel(classifier,data,cvFolds,rng){
-		
-		def filteredClassifier = getFilteredClassifier(classifier);	
-
-		// Perform cross-validation of the model..
-		eval = new Evaluation2(data)
-		def predictions = new StringBuffer()
-		eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions,new Range("first,last"),false)
-		
-		def results = parsePredictions(predictions)
-		return(results)		
-	}
 	
 
 	/***
 	* Parse the predictions out of the results text. 
 	*/ 
-	def parsePredictions(predictions){	
+	static def parsePredictions(predictions){	
 		def results = new ArrayList<EvaluationResult>()
 		def lines = predictions.toString().split("\n")
 

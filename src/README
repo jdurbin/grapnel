@@ -1,2 +1,11 @@
 
 
+wekaMine offers many features and additions over Weka itself:
+
+
+* Suscinct description of complex experiments/repeatable experiments. 
+* Better access to attributes in cross validated experiments. 
+* Custom cross-validation folds. 
+* Additional classifiers, attribute selectors, etc. 
+* Support for instance ID's. 
+* Support for cluster jobs. 

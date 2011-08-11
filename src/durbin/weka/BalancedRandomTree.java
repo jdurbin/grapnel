@@ -137,8 +137,14 @@ WeightedInstancesHandler, Randomizable, Drawable {
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
 
+	// Balanced subsampling parameters. 
 	protected double m_BootstrapFraction = 1;
 	protected boolean m_DownsampleMajor = false;
+
+	// Variance based informativeness parameters
+	protected double[] m_PropPos = null; // don't actually need to store this...
+	protected double m_reductionInVariance = 0.0;
+	
 
 	public BalancedRandomTree(){}
 
@@ -583,6 +589,8 @@ WeightedInstancesHandler, Randomizable, Drawable {
 		// Create a balanced subsample of the fullData... either by downsampling the major class
 		// or resampling the minor class. 		
 		Instances data;
+		
+		/** KJD KJD KJD TEMPORARY FOR TESTING 
 		if (m_DownsampleMajor){
 			data = BalancedSubsampler.balanceSubsampleMinorMajor(fullData,m_BootstrapFraction,m_rng);
 		}else{
@@ -594,6 +602,8 @@ WeightedInstancesHandler, Randomizable, Drawable {
 			resampleFilter.setRandomSeed(m_rng.nextInt());
 			data = Filter.useFilter(fullData,resampleFilter);
 		}
+		*/
+		data = fullData;
 	
     // Make sure K value is in range
     if (m_KValue > data.numAttributes() - 1)
@@ -971,7 +981,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
         Instance inst = data.instance(i);
         if (!inst.isMissing(m_Attribute)) {
           if (data.attribute(m_Attribute).isNominal()) {
-            m_Prop[(int)inst.value(m_Attribute)] += inst.weight();
+            m_Prop[(int)inst.value(m_Attribute)] += inst.weight();						
           } else {
             m_Prop[(inst.value(m_Attribute) < m_SplitPoint) ? 0 : 1] += inst.weight();
           }

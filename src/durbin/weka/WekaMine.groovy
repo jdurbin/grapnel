@@ -77,8 +77,15 @@ class WekaMine{
 	def data
 	def clinical
 	
-	def results
-	def eval
+	def dataName
+	
+	List<EvaluationResult> testResults
+	List<EvaluationResult> trainResults
+		
+	// Evaluation2 is a modified version of weka Evaluation that saves
+	// the features selected in a cross-validation experiment for 
+	// later access. 
+	Evaluation2 eval;
 	
 	static{
 		WekaAdditions.enable()
@@ -439,15 +446,24 @@ class WekaMine{
 	}
 	
 	def appendSummary(out,idx,instances){		
-	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval)
+	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval,dataName)
 	}
 	
+	def appendTrainingSummary(out,idx,instances){	
+		// A training evaluation is tucked inside of the original evaluation. 	
+	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval.trainingEval,dataName)
+	}
+
 	def appendFeatures(out,idx,instances,maxFeaturesOut){
-  	WekaMineResults.appendFeaturesLine(idx,instances,out,exp,eval,maxFeaturesOut)
+  	WekaMineResults.appendFeaturesLine(idx,instances,out,exp,eval,maxFeaturesOut,dataName)
 	}
 	
-	def appendSamples(out,idx,instances){
-  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,results)			                                      
+	def appendTrainingSamples(out,idx,instances){
+  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,trainResults,dataName)			                                      
+	}
+	
+	def appendTestSamples(out,idx,instances){
+  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,testResults,dataName)			                                      
 	}
 	
 		
@@ -455,23 +471,63 @@ class WekaMine{
 	// *********                  Lower level functions.                    ***********
 	//=================================================================================
 
-	def crossValidateModel(classifier,instances,folds,randomSeed){
-		def cvu = new CVUtils()
-		// Results contain per-sample information... 
-		// eval is a summary description of the results. 
-	  results = cvu.crossValidateModel(classifier,instances,folds,randomSeed)
-	  eval = cvu.eval
-		return(eval)
+	def getFilteredClassifier(classifier){
+			// Create a classifier from the name...
+			// By using filtered classifer to remove ID, the cross-validation
+			// wrapper will keep the original dataset and keep track of the mapping 
+			// between the original and the folds (minus ID). 
+			def filteredClassifier = new FilteredClassifier()
+			def removeTypeFilter = new RemoveType();
+			//removeTypeFilter.setOptions("-T string");  
+
+			filteredClassifier.setClassifier(classifier)
+			filteredClassifier.setFilter(removeTypeFilter)
+		
+			return(filteredClassifier)
 	}
+
 	
-	def crossValidateModelWithGivenFolds(classifier,instances,foldSets){
-		def cvu = new CVUtils()
-		// Results contain per-sample information... 
-		// eval is a summary description of the results. 
-	  results = cvu.crossValidateModelWithGivenFolds(classifier,instances,foldSets)
-	
-	  eval = cvu.eval
-		return(eval)
+	/***
+	* cross validate model with folds generated in advance. 
+	*/ 
+	def crossValidateModelWithGivenFolds(classifier,data,foldSets,evalTraining){				
+		def filteredClassifier = getFilteredClassifier(classifier);		
+
+		// Perform cross-validation of the model..
+		eval = new Evaluation2(data)
+		
+		def predictions = new StringBuffer()
+		def trainPredictions = null;
+		if (evalTraining) trainPredictions = new StringBuffer()		
+		eval.crossValidateModelWithGivenFolds(filteredClassifier,data,(FoldSets) foldSets,predictions,new Range("first,last"),false,trainPredictions)
+		testResults = CVUtils.parsePredictions(predictions)
+
+		if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
+		else trainResults = null
+						
+		return(eval);		
+	}
+
+	/***
+	* cross validate model with generated folds. 
+	*/ 
+	def crossValidateModel(classifier,data,cvFolds,rng,evalTraining){
+		
+		def filteredClassifier = getFilteredClassifier(classifier);	
+
+		// Perform cross-validation of the model..
+		eval = new Evaluation2(data)
+		def predictions = new StringBuffer()
+		
+		def trainPredictions = null;
+		if (evalTraining) trainPredictions = new StringBuffer()
+		eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions,new Range("first,last"),false,trainPredictions)
+		testResults = CVUtils.parsePredictions(predictions)
+				
+		if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
+		else trainResults = null
+		
+		return(eval)		
 	}
 	
 	

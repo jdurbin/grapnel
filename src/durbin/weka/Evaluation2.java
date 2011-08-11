@@ -329,6 +329,13 @@ import java.util.ArrayList;
     /** enables/disables the use of priors, e.g., if no training set is
     * present in case of de-serialized schemes */
     protected boolean m_NoPriors = false;
+
+
+		// Pretty hacky way to do this, but evaluateModel has so many little things it tweaks that it'd be a 
+		// pain to change them all, roughly a rewrite of this whole class, which will be good someday, just not 
+		// today...
+		public Evaluation2 trainingEval;
+
     
     // The classifiers actually created during cross-validation. 
     // 
@@ -499,13 +506,6 @@ throws Exception {
     printClassificationsHeader(data, attsToOutput, printDist, buff);
   }
 
-  // Create a list to store classifiers (Evaluation2)
-  // KJD: This could become a memory problem.... need to monitor that. 
-  //m_cvClassifiers = new ArrayList<Classifier>();
- // weka.attributeSelection.AttributeSelection
-	m_cvAttributeSelections = new ArrayList<ThinAttributes>();
-  
-
 	// Fold sets let you specify the folds.  Each foldSet is one Nx cross-validation. 
 	// To do 5 5x cross validations, you'd have 5 foldSets each 5 numbers long. 
 	m_NumFolds = 0;	
@@ -520,30 +520,12 @@ throws Exception {
   	for (int i = 0; i < numFolds; i++) {
 			System.err.println("\t\tFold:"+i);
 			Instances train = CVUtils.trainCV(data,foldSet,i);
-						
-    	setPriors(train);
-    	Classifier copiedClassifier = Classifier.makeCopy(classifier);
-    	copiedClassifier.buildClassifier(train);
-
-			// copiedClassifier is a FilteredClassifier...
-			FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
-			AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
-			AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2
-			double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
-			ThinAttributes thinAttributes = new ThinAttributes(rankedAttrs);
-			System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
-		  m_cvAttributeSelections.add(thinAttributes);
-
 			Instances test = CVUtils.testCV(data,foldSet,i);			
-			
-    	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
-
-			copiedClassifier = null; // Encourage garbage collection. 
+						
+    	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
   	}
 	}
 }
-
-
 
 /**
 * Performs a (stratified if class is nominal) cross-validation 
@@ -561,6 +543,8 @@ throws Exception {
 * expected to hold a StringBuffer to print predictions to, 
 * a Range of attributes to output and a Boolean (true if the distribution
 * is to be printed)
+* Added additional buffer to print out the results from the training 
+* set, if asked for (seems meaningless to me, but some want to see it)
 * @throws Exception if a classifier could not be generated 
 * successfully or the class is not defined
 */
@@ -587,42 +571,56 @@ throws Exception {
     printClassificationsHeader(data, attsToOutput, printDist, buff);
   }
 
-  // Do the folds
-  
-  // Create a list to store classifiers (Evaluation2)
-  // KJD: This could become a memory problem.... need to monitor that. 
-  //m_cvClassifiers = new ArrayList<Classifier>();
-  m_cvAttributeSelections = new ArrayList<ThinAttributes>();
-	
-
-  for (int i = 0; i < numFolds; i++) {
-	
+  // Do the folds	
+  for (int i = 0; i < numFolds; i++) {	
 		System.err.println("\n\tFold: "+i);
     Instances train = data.trainCV(numFolds, i, random);
-    setPriors(train);
-    Classifier copiedClassifier = Classifier.makeCopy(classifier);
-    copiedClassifier.buildClassifier(train);
-
-    //m_cvClassifiers.add(copiedClassifier);  // Evaluation2 mod. RAM Hog... 
-    
-		FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
-		AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
-		AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2
-		double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
-		ThinAttributes thinAttributes = new ThinAttributes(rankedAttrs);
-    m_cvAttributeSelections.add(thinAttributes);
-    
-    // Little debug test... 310, 3067, 2264
-    //String name1 = train.attribute(310).name();
-    //System.out.println("\t rankedAttrs#: "+rankedAttrs.length);    
-      
     Instances test = data.testCV(numFolds, i);
-    evaluateModel(copiedClassifier, test, forPredictionsPrinting);
-
-		copiedClassifier = null; // try to encourage garbage colletion. 
+		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
   }
   m_NumFolds = numFolds;
 }
+
+/***
+* Evaluates a single fold of the cross-validation. 
+* 
+*/ 
+public void evaluateSingleFold(Instances data, Instances train,Instances test,Classifier classifier,Object... forPredictionsPrinting) throws Exception{
+	
+	// Create a list to store classifiers (Evaluation2)
+	m_cvAttributeSelections = new ArrayList<ThinAttributes>();
+	
+	setPriors(train);
+	Classifier copiedClassifier = Classifier.makeCopy(classifier);
+	copiedClassifier.buildClassifier(train);
+
+	// copiedClassifier is a FilteredClassifier...
+	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
+	AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
+	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2
+	double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
+	ThinAttributes thinAttributes = new ThinAttributes(rankedAttrs);
+	//System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
+  m_cvAttributeSelections.add(thinAttributes);
+	
+	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+	
+	// If there is a non-null fourth element, it is assumed to be a second buffer to store the evaluations on the 
+	// training samples.  This is a bit of a hack, but allows me to touch as little of the code as possible...
+	if (forPredictionsPrinting[3] != null){
+		
+		trainingEval = new Evaluation2(data);
+		
+		StringBuffer saveTestBuf = (StringBuffer)forPredictionsPrinting[0]; // Save the test buffer...
+		forPredictionsPrinting[0] = forPredictionsPrinting[3]; // substitute the test buffer for the main buffer
+		trainingEval.evaluateModel(copiedClassifier,train,forPredictionsPrinting); // evaluate model on training data. 
+		forPredictionsPrinting[3] = forPredictionsPrinting[0]; // redundant, but makes me feel better. 
+		forPredictionsPrinting[0] = saveTestBuf;  // Restore test buffer
+	}
+	
+	copiedClassifier = null; // Encourage garbage collection.
+}
+
 
 /**
 * Performs a (stratified if class is nominal) cross-validation 
