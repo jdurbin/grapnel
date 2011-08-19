@@ -25,6 +25,7 @@ import weka.classifiers.lazy.*
 import weka.classifiers.functions.suportVector.*
 import weka.classifiers.meta.FilteredClassifier;
 import weka.filters.unsupervised.instance.*;
+import weka.filters.unsupervised.attribute.NumericToNominal
 
 import weka.attributeSelection.*
 
@@ -412,6 +413,9 @@ class WekaMine{
 	    instances = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high",classAttribute)
 	  }else if (discretization == 'none'){
 			err.println "NO discretization"
+		}else if (discretization == 'nominal'){
+			err.println "Creating nominal attributes from coded numeric values."
+			instances = classToNominal(instances,classAttribute)
 		}else{
 			err.println "UNKNOWN discretization: "+discretization
 		}
@@ -525,6 +529,15 @@ class WekaMine{
 		return(eval)		
 	}
 	
+	
+	static Instances classToNominal(data,classAttribute){
+		def classIdx = data.setClassName(classAttribute) 
+		def numericToNominal = new NumericToNominal()
+		numericToNominal.setAttributeIndices("${classIdx+1}".toString())
+		numericToNominal.setInputFormat(data)
+		def filteredData = Filter.useFilter(data,numericToNominal)
+		return(filteredData)
+	}
 	
 
   /***

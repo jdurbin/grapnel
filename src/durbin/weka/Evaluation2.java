@@ -528,6 +528,80 @@ throws Exception {
 }
 
 /**
+* Cross validates model across independent datasets.  That is, 
+* for k-fold cross validation it will select samples out of k-1
+* of the given datasets for training and use the remaing dataset
+* for testing, repeating this procedure k times.  The idea is to 
+* simulate the real-world scenario of having, say, ten microarray 
+* datasets, possibly from different labs, for training, and using
+* the trained model on the remaining dataset. 
+* 
+* Performs a (stratified if class is nominal) cross-validation 
+* for a classifier on a collection of Instances. Now performs
+* a deep copy of the classifier before each call to 
+* buildClassifier() (just in case the classifier is not
+* initialized properly).
+*
+* @param classifier the classifier with any options set.
+* @param data the data on which the cross-validation is to be 
+* performed 
+* @param numFolds the number of folds for the cross-validation
+* @param random random number generator for randomization 
+* @param forPredictionsString varargs parameter that, if supplied, is
+* expected to hold a StringBuffer to print predictions to, 
+* a Range of attributes to output and a Boolean (true if the distribution
+* is to be printed)
+* Added additional buffer to print out the results from the training 
+* set, if asked for (seems meaningless to me, but some want to see it)
+* @throws Exception if a classifier could not be generated 
+* successfully or the class is not defined
+*/
+/*		
+public void crossValidateModel(Classifier classifier,
+InstanceSets datasets, int numFolds, Random random,
+Object... forPredictionsPrinting) 
+throws Exception {
+				
+
+  // Make a copy of the data we can reorder
+  //data = new Instances(data);
+  //data.randomize(random);
+  //if (data.classAttribute().isNominal()) {
+  //  data.stratify(numFolds);
+  //}
+
+  // We assume that the first element is a StringBuffer, the second a Range (attributes
+  // to output) and the third a Boolean (whether or not to output a distribution instead
+  // of just a classification)
+  if (forPredictionsPrinting.length > 0) {
+    // print the header first    
+    StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
+    Range attsToOutput = (Range)forPredictionsPrinting[1];
+    boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+    printClassificationsHeader(data, attsToOutput, printDist, buff);
+  }
+
+  // Do the folds	
+  for (int i = 0; i < numFolds; i++) {	
+		System.err.println("\n\tFold: "+i);
+		
+		// Train should be the attributes that result from the intersection of the 
+		// training data. 
+    Instances train = datasets.trainCV(numFolds, i, random);
+
+		// Test will have it's attributes trimmed/expanded (with wildcards) to match 
+		// train. As a result of this, it is possible that train will build a model 
+		// on features that test does not even contain. 
+    Instances test = datasets.testCV(numFolds, i);
+		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
+  }
+  m_NumFolds = numFolds;
+}
+*/
+
+
+
+/**
 * Performs a (stratified if class is nominal) cross-validation 
 * for a classifier on a set of instances. Now performs
 * a deep copy of the classifier before each call to 

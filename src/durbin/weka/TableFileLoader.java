@@ -135,11 +135,9 @@ public class TableFileLoader {
 				double value;				
 				if (valToken.equals("?")){
 					value = Instance.missingValue();
-				}
-				else if (valToken.equals("NA")){
+				}else if (valToken.equals("NA")){
 					value = Instance.missingValue();
-				}
-				else value = Double.parseDouble(valToken);
+				}else value = Double.parseDouble(valToken);
 				dataArray[rowIdx][colIdx] = value;
 			}     
 			rowIdx++;
