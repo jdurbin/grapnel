@@ -10,6 +10,10 @@ package durbin.weka;
 */
 class WekaMineModel implements Serializable{
 	
+	static {WekaAdditions.enable()}
+	
+	static err = System.err
+	
 	static final long serialVersionUID = 1L;
 	
 	def atrSelMethod  // Just for records sake
@@ -18,40 +22,59 @@ class WekaMineModel implements Serializable{
 
 	def classifier
 	def attributes
+	def className
+	def classValues
 	
-	
-	// KJD: should save the names of the classes this classifier predicts...
-	// high/low... ERPOS, ERNEG, etc.   This will mean,probably, specifying the name of 
-	// the classes in the configuration file and then propagating them to the results 
-	// output and so on...
 			
-	def WekaMineModel(instances,classifier){
-		
-		WekaAdditions.enable()
-		
+	def WekaMineModel(instances,classifier){		
 		this.classifier = classifier		
 		this.discretization = "none"
-		attributes = instances.attributeNames()		
+		attributes = instances.attributeNames()	
+		attributes = attributes - "ID" // Don't save ID if there is one. 
+				
+		className = instances.className()
+		attributes = attributes - className	
+		
+		classValues = []
+		def classAttr = instances.attribute(className)
+		for(i in (0..<classAttr.numValues())){
+			classValues.add(classAttr.value(i))
+		}		
 	}
 	
 	def WekaMineModel(instances,classifier,discretization){		
-		WekaAdditions.enable()		
 		this.classifier = classifier		
 		this.discretization = discretization
-		attributes = instances.attributeNames()		
-	}
+		attributes = instances.attributeNames()	
+		attributes = attributes - "ID" // don't save ID if there is one. 
+		
+		// Want to keep class attribute separate from attributes.
+		className = instances.className()
+		attributes = attributes - className	
 
-	
+		classValues = []
+		def classAttr = instances.attribute(className)
+		for(i in (0..<classAttr.numValues())){
+			classValues.add(classAttr.value(i))
+		}				
+	}	
 	
 	def classAttribute(){
-		return(attributes[-1])
+		return(className)
+		//return(attributes[-1])
 	}
 	
 	def classify(instances){
 		def rval = []
-		def numInstances = instances.numInstances()
+		def numInstances = instances.numInstances()		
+		
 		for(int i = 0;i < numInstances;i++){
-			def instance = instances.instance(i)
+			def instance = instances.instance(i)					
+				
+			//err.println "classifyInstance:"
+			//def pred = classifier.classifyInstance(instance)
+			//err.println "pred.class="+pred.class
+			//err.println "pred: "+pred				
 			def dist = classifier.distributionForInstance(instance)
 			rval.add(dist)
 		}
@@ -63,19 +86,26 @@ class WekaMineModel implements Serializable{
 		printResults(Syste.out,results,sampleIDs)
 	}
 	
+	def getMaxIdx(list){
+		def maxVal = -9999999;
+		def maxIdx = 0;
+		list.eachWithIndex{val,i->
+			if (val > maxVal) {
+				maxVal = val
+				maxIdx = i
+			}
+		}
+		return(maxIdx)
+	}
+	
 	def printResults(out,results,sampleIDs){							
-		out<<"ID,lowConfidence,highConfidence,call\n"
+		out<<"ID,confidence1,confidence2,call\n"
 
 		results.eachWithIndex{result,i->
-			def r = result as ArrayList	
-			def rstr = r.join(",")
-			def call
-			
-			def lowVal = r[0] as double
-			def highVal = r[1] as double
-			
-			if (highVal > lowVal) call = "high"
-			else call = "low"
+			def r = result as ArrayList	// distribution for instance...			
+			def maxIdx = getMaxIdx(r)
+			def call = classValues[maxIdx] // look up the name of this.
+			def rstr = r.join(",")	
 			out<<"${sampleIDs[i]},$rstr,$call\n"
 		}		
 	}
@@ -88,12 +118,12 @@ class WekaMineModel implements Serializable{
 	}
 	
 	def printResultsAndCompare(out,results,dataSampleIDs,clinical){
-		out<< "ID,lowConfidence,highConfidence,call,actual,match\n"
+		out<< "ID,lowConfidence,highConfidence,call,actual\n"
 		
 		WekaAdditions.enable();
 		
 		// Build a map of clinical samples to results...
-		def id2ClassMap = [:]
+		def id2ClassMap = [:]						
 		def classValues = clinical.attributeValues(clinical.classAttribute().name()) as ArrayList
 		def clinicalSampleIDs = clinical.attributeValues("ID") as ArrayList
 		(0..classValues.size()).each{i->
@@ -109,21 +139,37 @@ class WekaMineModel implements Serializable{
 							
 		// Now compare predictions with actual values...
 		results.eachWithIndex{result,i->
+			def r = result as ArrayList	// distribution for instance...			
+			def maxIdx = getMaxIdx(r)
+			def call = classValues[maxIdx] // look up the name of this.
+			def rstr = r.join(",")	
+			
+			def id = dataSampleIDs[i]
+			
+		/*	
 			def r = result as ArrayList	
 			def rstr = r.join(",")
-			def id = dataSampleIDs[i]
+
 			
 			def lowVal = r[0] as double
 			def highVal = r[1] as double
 			def call
 			if (highVal > lowVal) call = "high"
 			else call = "low"
+			*/
 			out<< "${id},$rstr,$call"
 			
 			// If this sample is in the clinical data set, output it's comparison.. 
 			if (id2ClassMap.containsKey(id)){
 				def actualVal = id2ClassMap[id]
 				out<< ",$actualVal"
+			}else{
+				out<< ",?"
+			}
+			out<<"\n"
+		}
+			// Need to re-think the comparison stats. 
+			/*
 				//print "\t$lowVal,$highVal,${lowVal < highVal},${actualVal == 'low'}\t"
 				if ((actualVal == "high") && (call == "high")){
 					tp++;
@@ -153,6 +199,7 @@ class WekaMineModel implements Serializable{
 		out<<"Recall:\t${(tp/(tp+fn))}\n"			
 		def mcc = matthewsCorrelationCoeficient(tp,fp,tn,fn)					
 		out<<"Matthews correlation coeficient: $mcc\n"
+		*/
 	}
 	
 	def matthewsCorrelationCoeficient(tp,fp,tn,fn){

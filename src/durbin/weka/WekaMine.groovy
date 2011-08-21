@@ -209,6 +209,22 @@ class WekaMine{
 	}
 	
 	/***
+	* Creates a class attribute where all the values are Instance.missingValue()
+	* This gives an appropriate model for classifiers to use (namespace, etc.)
+	*/ 
+	static def createEmptyClassAttribute(data,attributeName,attributeValues){
+		def newData = new Instances(data);
+		def values = new FastVector()
+		attributeValues.each{values.addElement(it)}
+		newData.insertAttributeAt(new Attribute(attributeName, values), newData.numAttributes());
+		for (int i = 0; i < newData.numInstances(); i++) {
+			newData.instance(i).setValue(newData.numAttributes() - 1,Instance.missingValue());
+		}	
+		return(newData);
+	}
+	
+	
+	/***
 	* Removes and/or adds attributes to make the resulting set of instances
 	* match those specified in the attribute list (e.g. the attributes retrieved
 	* from a trained model).  In some cases rawdata has an ID, in some cases 
@@ -249,15 +265,25 @@ class WekaMine{
 						vals[aIdx] = Instance.missingValue();
 					}
 				}
-				data.add(new Instance(1.0,vals));
+
+				//println "\nOLD INSTANCE ELAC1: ${instance['ELAC1']} NUP205: ${instance['NUP205']}"					
+				def newInstance = new Instance(1.0,vals)
+				data.add(newInstance);
 		}		
+
+		//data.each{newInstance->
+		//	println "NEW INSTANCE ELAC1: ${newInstance['ELAC1']} NUP205: ${newInstance['NUP205']}}"	
+		//}
 		
+		
+		/*
 		// If we were given an ID, put it back...
 		def attrNames = rawdata.attributeNames() as Set
 		if (attrNames.contains("ID")){
 			def instanceNames = rawdata.attributeValues("ID")
 			addID(data,instanceNames)
-		}				
+		}	
+		*/			
 		
 		err.println "done. Final attributes: ${data.numAttributes()}"
 		
@@ -398,28 +424,33 @@ class WekaMine{
 	*/ 
 	static def discretizeClassAttribute(instances,discretization,classAttribute){
 		
+		def cutoffString = ""
+		
 	 	// Discretize numeric class 
 		if (discretization == 'median'){
 			err.println "median discretization"		
-	    instances = classToMedian(instances,"low","high",classAttribute)        
+	    (instances,cutoffString) = classToMedian(instances,"low","high",classAttribute)        
 	  }else if (discretization == 'quartile'){
 			err.println "quartile discretization"		
-	    instances = classToNominalTopBottomQuartile(instances,"low","high",classAttribute)        
+	    (instances,cutoffString) = classToNominalTopBottomQuartile(instances,"low","high",classAttribute)        
 	  }else if (discretization.contains(";")){
 			def fields = discretization.split(";")
 	    def lowerBound = fields[0] as double
 	    def upperBound = fields[1] as double
 			err.println "lower/upper cutoff discretization [$lowerBound,$upperBound]"
-	    instances = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high",classAttribute)
+	    (instances,cutoffString) = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high",classAttribute)
 	  }else if (discretization == 'none'){
 			err.println "NO discretization"
+			cutoffString = "none"
 		}else if (discretization == 'nominal'){
-			err.println "Creating nominal attributes from coded numeric values."
-			instances = classToNominal(instances,classAttribute)
+			err.print "Creating nominal attributes from coded numeric values."
+			cutoffString = 'nominal'
+			(instances,cutoffString) = classToNominal(instances,classAttribute)
+			err.println "done."
 		}else{
 			err.println "UNKNOWN discretization: "+discretization
 		}
-		return(instances)
+		return([instances,cutoffString])
 	}
 	
 	/***
@@ -484,6 +515,25 @@ class WekaMine{
 		
 			return(filteredClassifier)
 	}
+	
+	/**
+	* Remove string attributes.  Specifically the string attribute that contains 
+	* the instance ID.  This is done because most attribute evaluators and classifiers
+	* can not handle string attributes. 
+	*/ 
+	static Instances removeInstanceID(instances){
+		def filter = new RemoveType()
+		filter.setInputFormat(instances);
+		def instances_notype = Filter.useFilter(instances,filter)
+		return(instances_notype)
+	}
+
+	def removeID(instances){
+		def filter = new RemoveType();
+		filter.setInputFormat(instances);
+		def newinstances = Filter.useFilter(instances,filter)
+		return(newinstances);
+	}
 
 	
 	/***
@@ -530,20 +580,20 @@ class WekaMine{
 	}
 	
 	
-	static Instances classToNominal(data,classAttribute){
+	static def classToNominal(data,classAttribute){
 		def classIdx = data.setClassName(classAttribute) 
 		def numericToNominal = new NumericToNominal()
 		numericToNominal.setAttributeIndices("${classIdx+1}".toString())
 		numericToNominal.setInputFormat(data)
 		def filteredData = Filter.useFilter(data,numericToNominal)
-		return(filteredData)
+		return([filteredData,'nominal'])
 	}
 	
 
   /***
   *  Converts the numeric class attribute into 
   */
-  static Instances classToNominalTopBottomQuartile(data,lowString,highString,classAttribute){
+  static def classToNominalTopBottomQuartile(data,lowString,highString,classAttribute){
     def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
      
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
@@ -560,13 +610,14 @@ class WekaMine{
 		// Hacky way to save the cutoffs for use later...
 		def newName = "${discretizedData.relationName()} cutoffs:\t${quartile.cutoff1};${quartile.cutoff2}"
 		discretizedData.setRelationName(newName)
-    return(discretizedData)
+		def cutoffString = "${quartile.cutoff1};${quartile.cutoff2}"				
+	  return([discretizedData,cutoffString])
   }
 
 	/**
   *  Converts the numeric class attribute into 
   */
-  static Instances classToNominalFromCutoffs(data,cutoffLow,cutoffHigh,lowString,highString,classAttribute){
+  static def classToNominalFromCutoffs(data,cutoffLow,cutoffHigh,lowString,highString,classAttribute){
     def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
 
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
@@ -581,13 +632,14 @@ class WekaMine{
     err.println "done."  // KJD report how many high/low as a sanity check. 
 		def newName = "${discretizedData.relationName()} cutoffs:\t${quartile.cutoff1};${quartile.cutoff2}"
 		discretizedData.setRelationName(newName)
-    return(discretizedData)
+		def cutoffString = "${quartile.cutoff1};${quartile.cutoff2}"				
+	  return([discretizedData,cutoffString])
   }
 
   /**
   *  Converts the numeric class attribute into 
   */
-  static Instances classToMedian(data,lowString,highString,classAttribute){
+  static def classToMedian(data,lowString,highString,classAttribute){
     def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
 
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
@@ -602,20 +654,11 @@ class WekaMine{
     err.println "done."  // KJD report how many high/low as a sanity check. 
 		def newName = "${discretizedData.relationName()} cutoffs:\t${quartile.cutoff1};${quartile.cutoff2}"
 		discretizedData.setRelationName(newName)
-    return(discretizedData)
+		def cutoffString = "${quartile.cutoff1};${quartile.cutoff2}"				
+    return([discretizedData,cutoffString])
   }
 
-	/**
-	* Remove string attributes.  Specifically the string attribute that contains 
-	* the instance ID.  This is done because most attribute evaluators and classifiers
-	* can not handle string attributes. 
-	*/ 
-	static Instances removeInstanceID(instances){
-		def filter = new RemoveType()
-		filter.setInputFormat(instances);
-		def instances_notype = Filter.useFilter(instances,filter)
-		return(instances_notype)
-	}
+	
 	
 	static Instances applyFilter(instances,filterName){
 		err.print("Apply filter $filterName...")

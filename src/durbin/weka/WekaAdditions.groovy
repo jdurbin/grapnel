@@ -70,6 +70,18 @@ public class WekaAdditions{
 			}
 		}
 		
+		
+			Instance.metaClass.getAt = {int attributeIdx->
+				def dataset = dataset()
+				Attribute attribute = dataset.attribute(attributeIdx)
+				def i = attribute.index()
+				if (attribute.isNumeric()){
+					return(value(i))
+				}else{ 
+					return(delegate.stringValue(i))
+				}
+			}
+		
 		/***
 		* Make instances iterable... 
 		*/ 
@@ -95,7 +107,7 @@ public class WekaAdditions{
             rvals.add(value)
           }
       }else if (attribute.isString()){
-        (0..<numInstances()).each{idx->
+        (0..< numInstances()).each{idx->
           Instance instance = instance(idx)
           def value = instance.stringValue(attribute) 
           rvals.add(value)
@@ -109,7 +121,8 @@ public class WekaAdditions{
     * Returns the index of the named class. 
     */     
     Instances.metaClass.setClassName << {attributeName->
-      Attribute attr = attribute(attributeName)      
+      Attribute attr = attribute(attributeName)   
+   
       def idx = attr.index()
       setClassIndex(idx) // Zero based ..
       return(idx)

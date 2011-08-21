@@ -17,6 +17,8 @@ class ExperimentSpec{
    def classAttribute
 
 	 def discretization
+	
+	 def dataFile
 
    // Just to have something handy to print
    def classifierStr
@@ -43,6 +45,8 @@ class ExperimentSpec{
 		  numAttributes = wmr.numAttrs
 		  classAttribute = wmr.classAttr   
 			discretization = wmr.discretization
+			
+			dataFile = wmr.dataFile
 			
 		}catch(Exception e){
 			System.err.println e
@@ -90,7 +94,7 @@ class ExperimentSpec{
    }   
    
    String toString(){
-     def rstr = classifierStr+","+attrEvalStr+","+attrSearchStr
+     def rstr = attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization+","+dataFile
      return(rstr);
    }    
 }

@@ -113,14 +113,14 @@ public class TableFileLoader {
 		
 		int numAttributes = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
 		String[] attrNames = new String[numAttributes];
-		
-		System.err.print("reading data..");
     
 		// Read the col headings and figure out the number of columns in the table..
 		BufferedReader reader = new BufferedReader(new FileReader(fileName));
 		String line = reader.readLine();
 		String[] instanceNames = parseColNames(line,delimiter);
 		int numInstances = instanceNames.length;
+		
+		System.err.print("reading "+numAttributes+" x "+numInstances+" table..");
 		
 		// Create an array to hold the data as we read it in...
 		double dataArray[][] = new double[numAttributes][numInstances];
@@ -393,7 +393,11 @@ public class TableFileLoader {
 	public FastVector getColValues(Table t,int colIdx){				
 		HashSet<String> valSet = new HashSet<String>();
 		for(int r = 0;r < t.rows();r++){
-			valSet.add((String) t.matrix.getQuick(r,colIdx));
+			String val = (String)t.matrix.getQuick(r,colIdx);
+			// Don't want to include "missing value" as one of the nominal values...
+			if (!val.equals("?")){
+				valSet.add(val);
+			}
 		}
 		
 		FastVector attVals = new FastVector();		
@@ -410,7 +414,11 @@ public class TableFileLoader {
 	public FastVector getRowValues(Table t,int rowIdx){				
 		HashSet<String> valSet = new HashSet<String>();
 		for(int c = 0;c < t.cols();c++){
-			valSet.add((String) t.matrix.getQuick(rowIdx,c));
+			String val = (String) t.matrix.getQuick(rowIdx,c);
+			// Don't want to include "missing value" as one of the nominal values...
+			if (!val.equals("?")){
+				valSet.add(val);
+			}
 		}
 		
 		FastVector attVals = new FastVector();		

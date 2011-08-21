@@ -31,8 +31,37 @@ class WekaMineResult{
 	int numAttrs
 	String classAttr
 	String discretization
+	String dataFile
 	
-	static def headingStr = "attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    		
+	static def headingStr = "attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,dataFile,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    		
+	
+	String toString(){
+		def sb = []
+		sb << attrEval
+		sb << attrSearch
+		sb << numAttrs
+		sb << classifier
+		sb << classAttr
+		sb << discretization
+		sb << dataFile
+		sb << "*"
+		sb << jobID
+		sb << samples
+		sb << pctCorrect
+		sb << precision0
+		sb << recall0 
+		sb << precision1
+		sb << recall1
+		sb << tp1
+		sb << fp1
+		sb << tn1
+		sb << fn1
+		sb << rms
+		sb << roc
+		
+		def rval = sb.join(",")
+		return(rval)    		
+	}
 	
 	/*** 
 	* If we're not given a heading map, we can assume it comes from the default...
@@ -40,11 +69,13 @@ class WekaMineResult{
 	static def defaultHeadingMap(){
 		def headings = headingStr.split(",")
 		
+		//err.println "DEBUG: headings:"+headings
+		
 		def headings2Cols = [:]
 		headings.eachWithIndex{h,i-> headings2Cols[h] = i}		
 		return(headings2Cols)
 	}
-	
+		
 	/***
 	* If we're given a heading, use that...
 	*/ 
@@ -55,12 +86,14 @@ class WekaMineResult{
 	def parse(line,headings2Cols){
 		def fields = line.split(",")				
 						
-		err.println "DEBUG fields: "+fields
-		err.println "DEBUG headings2Cols"+headings2Cols				
+		//err.println "DEBUG fields: "+fields
+		//err.println "DEBUG headings2Cols"+headings2Cols				
 						
 		attrEval = fields[headings2Cols['attrEval']] as String
 		attrSearch = fields[headings2Cols['attrSearch']] as String
 		numAttrs = fields[headings2Cols['numAttrs']] as int
+		
+		dataFile = fields[headings2Cols['dataFile']] as String
 		
 		jobID = fields[headings2Cols['jobID']] as int
 		samples = fields[headings2Cols['samples']] as int
@@ -110,7 +143,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 	*/ 
 	def WekaMineResults(resultsFile){
 		new File(resultsFile).withReader{r->
-			def headings = r.readLine()  
+			def headings = r.readLine().split(",")						
 			def heading2Col = [:]
 			headings.eachWithIndex{h,i-> heading2Col[h] = i}
 			
