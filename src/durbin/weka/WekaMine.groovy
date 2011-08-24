@@ -390,7 +390,7 @@ class WekaMine{
 				
 				// KJD: Need to fix.. the valance can go either way depending on how censored is defined
 				// 
-				if (censored < 1){
+				if (censored >= 1){
 					// KJD binary assumption
 					if (instance[classIdx] == "high"){
 						//err.println "Save instance $instanceName"

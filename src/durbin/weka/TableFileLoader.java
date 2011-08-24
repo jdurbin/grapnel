@@ -137,6 +137,8 @@ public class TableFileLoader {
 					value = Instance.missingValue();
 				}else if (valToken.equals("NA")){
 					value = Instance.missingValue();
+				}else if (valToken.equals("")){
+					value = Instance.missingValue();
 				}else value = Double.parseDouble(valToken);
 				dataArray[rowIdx][colIdx] = value;
 			}     

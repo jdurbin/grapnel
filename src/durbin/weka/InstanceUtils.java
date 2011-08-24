@@ -16,7 +16,6 @@ import weka.filters.unsupervised.attribute.Remove;
 */
 public class InstanceUtils {
 
-  
   /***
 	 *  Takes a collection of attribute names and returns an array of the corresponding
 	 *  attribute indices for those names.

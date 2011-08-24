@@ -181,12 +181,16 @@ class Charts{
 	}
 	
 	
-
+	static histogram(values,cName,xsize,ysize){		
+		def chartpanel = histogram(values,cName,xsize,ysize,50)
+		return(chartpanel)
+	}
+	
 
 	/***
 	* Create a histogram from values in an arbitrary collection...
 	*/ 						
-	static histogram(values,cName,xsize,ysize){
+	static histogram(values,cName,xsize,ysize,numBins){
 		
 		def binmax = values.max()
 		def binmin = values.min()
@@ -196,7 +200,7 @@ class Charts{
 		def valarray = new double[values.size()]
 		values.eachWithIndex{v,i->valarray[i] = v as double}
 
-		series.addSeries("Series1",valarray,50,binmin as double,binmax as double)
+		series.addSeries("Series1",valarray,numBins,binmin as double,binmax as double)
 		def chartTitle = "$cName"
 		def chartpanel = Charts.histogram(chartTitle,"","",series,xsize,ysize) 
 
