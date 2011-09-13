@@ -203,11 +203,15 @@ public class TableFileLoader {
 	public Instances tableRowsToInstances(Table t,String relationName) {	
 	  
 		System.err.print("Converting table rows to instances...");
-	
+		
 		// Set up attributes, which for rowInstances will be the colNames...
 		FastVector atts = new FastVector();
 		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
 		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...				
+
+
+		System.err.print("creating attributes...");
+
 		for (int c = 0;c < t.numCols;c++) {			
 			if (columnIsNumeric(t,c)){
 				isNominal.add(false);
@@ -223,6 +227,8 @@ public class TableFileLoader {
 			}
 		}
 
+		System.err.print("creating instances...");
+
 		// Create Instances object..
 		Instances data = new Instances(relationName,atts,0);
 		data.setRelationName(relationName);
@@ -232,19 +238,21 @@ public class TableFileLoader {
 		for (int r = 0;r < t.numRows;r++) {
 			double[] vals = new double[data.numAttributes()];
 
-			// for each attribute
+			// for each attribute			
 			for (int c = 0;c < t.numCols;c++) {			    
 				String val = (String) t.matrix.getQuick(r,c);
 				if (val == "?") vals[c] = Instance.missingValue();
 				else if (isNominal.get(c)){
-					vals[r] = allAttVals.get(c).indexOf(val);
+					vals[c] = allAttVals.get(c).indexOf(val);
 				}else{ 
-					vals[r] = Double.parseDouble((String)val);												
+					vals[c] = Double.parseDouble((String)val);												
 				}
 			}
 			// Add the a newly minted instance with those attribute values...
 			data.add(new Instance(1.0,vals));
 		}
+		
+		System.err.print("add feature names..."); 
 		
 		if (addInstanceNamesAsFeatures){		  		  
 			Instances newData = new Instances(data);
