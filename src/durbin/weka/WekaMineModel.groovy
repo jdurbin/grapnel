@@ -25,6 +25,20 @@ class WekaMineModel implements Serializable{
 	def className
 	def classValues
 	
+	String toString(){
+		def rval = "";
+		rval += "AttributeSeletion: $atrSelMethod\n"
+		rval += "Discretization: $discretization\n"
+		rval += "Class Name: $className\n"
+		rval += "ClassValues: ${classValues.join(";")}\n"				
+		rval += "Classifier:\n$classifier\n"
+		return(rval);
+	}
+	
+	def attributes(){
+		return(attributes);
+	}
+	
 			
 	def WekaMineModel(instances,classifier){		
 		this.classifier = classifier		
