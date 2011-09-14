@@ -31,7 +31,7 @@ class WekaMineModel implements Serializable{
 		rval += "Discretization: $discretization\n"
 		rval += "Class Name: $className\n"
 		rval += "ClassValues: ${classValues.join(";")}\n"				
-		rval += "Classifier:\n$classifier\n"
+		rval += "Classifier: $classifier\n"
 		return(rval);
 	}
 	
