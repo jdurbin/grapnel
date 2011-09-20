@@ -55,7 +55,7 @@ public class SaveTab{
 		pw.write("Features\t");
 		for(int i = 0;i < instNames.size()-1;i++){
 			pw.print(instNames.elementAt(i));
-			pw.print(",");
+			pw.print("\t");
 		}
 		pw.print(instNames.elementAt(instNames.size()-1));
 		pw.print("\n");
@@ -68,10 +68,10 @@ public class SaveTab{
 			
 				FastVector atValues = attributeValues(instances,attribute);
 				pw.print(attName);
-				pw.print(",");
+				pw.print("\t");
 				for(int v = 0;v < atValues.size()-1;v++){
 					pw.print(atValues.elementAt(v));
-					pw.print(",");
+					pw.print("\t");
 				}
 				pw.print(atValues.elementAt(atValues.size()-1));
 				pw.print("\n");
