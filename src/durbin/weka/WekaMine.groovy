@@ -151,6 +151,8 @@ class WekaMine{
 	
 	/***
 	* takes a set of instances and creates a tab file from them...
+	*
+	* deprecated for faster version in SaveTab.java
 	*/ 
 	static saveDataFromInstances2(fileName,instances){
 		

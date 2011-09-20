@@ -34,9 +34,9 @@ class FoldSets{
 	
 	int foldSize(){
 			for(int i = 0;i < data.size();i++){
-				def currentSet = data[i]			
+				def currentSet = data[i]		
 				for(int j = 0;j < currentSet.size();j++){
-					valueSet.add(currentSet[j])
+					valueSet.add(currentSet[j])										
 				}
 			}
 			return(valueSet.size())
@@ -56,10 +56,22 @@ class FoldSets{
 			samples = headings
 			//err.println "headings: "+headings
 			r.splitEachLine("\t"){fields->
-				def foldValues = fields[1..-1].collect{it as int}				
+				def foldValues = fields[1..-1].collect{it as int}	
+				
+				//System.err.println "before foldValues.size: ${foldValues.size()} foldValues:$foldValues"
+				
+				// Convert to zero base from 1 base..
+				foldValues = foldValues.collect{it -1}	
+				//System.err.println "foldValues.size: ${foldValues.size()} foldValues:$foldValues"
+				
+				//System.err.println "DEBUG foldValues = "+foldValues
+						
 				data.add(foldValues as ArrayList<Integer>)
 			}
 		}
+		
+		//System.err.println "DEBUG: data="+data
+		
 		return(this)
 	}
 	
