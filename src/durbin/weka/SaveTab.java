@@ -77,7 +77,9 @@ public class SaveTab{
 				pw.print("\n");
 			}
 		}
+		pw.close();
 	}
+	
 }
 
 /**
