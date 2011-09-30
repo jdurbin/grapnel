@@ -177,14 +177,9 @@ class WekaMineModel implements Serializable{
 			if (id2ClassMap.containsKey(id)){
 				def actualVal = id2ClassMap[id]
 				out<< ",$actualVal"
-			}else{
-				out<< ",?"
-			}
-			out<<"\n"
-		}
-			// Need to re-think the comparison stats. 
-			/*
-				//print "\t$lowVal,$highVal,${lowVal < highVal},${actualVal == 'low'}\t"
+				
+				// KJD Need to re-think the comparison stats for multi-class and user specified nominal
+			//print "\t$lowVal,$highVal,${lowVal < highVal},${actualVal == 'low'}\t"
 				if ((actualVal == "high") && (call == "high")){
 					tp++;
 					out<<",+\n"
@@ -197,9 +192,11 @@ class WekaMineModel implements Serializable{
 				}else if ((actualVal == "low") && (call == "high")){
 					fn++;
 					out<<"\n"
-				}
-			}				
-		}
+				}				
+			}else{
+				out<< ",?\n"
+			}
+		} // results.each				
 		
 	 	out<< "====================\n"
 		out<< "TP\t$tp\n"
@@ -213,7 +210,7 @@ class WekaMineModel implements Serializable{
 		out<<"Recall:\t${(tp/(tp+fn))}\n"			
 		def mcc = matthewsCorrelationCoeficient(tp,fp,tn,fn)					
 		out<<"Matthews correlation coeficient: $mcc\n"
-		*/
+	
 	}
 	
 	def matthewsCorrelationCoeficient(tp,fp,tn,fn){

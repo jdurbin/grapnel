@@ -509,19 +509,17 @@ throws Exception {
 	// Fold sets let you specify the folds.  Each foldSet is one Nx cross-validation. 
 	// To do 5 5x cross validations, you'd have 5 foldSets each 5 numbers long. 
 	m_NumFolds = 0;	
-	int numFolds = foldSets.foldSize(); 
-	
-	for(int fs = 0;fs < foldSets.size();fs++){
-		ArrayList<Integer> foldSet = foldSets.get(fs);
-		
-		System.err.println("\n\tFoldSet: "+fs);		
+	for(int fsIdx = 0;fsIdx < foldSets.size();fsIdx++){
+		FoldSet foldSet = foldSets.get(fsIdx);
+		int numFolds = foldSet.numFolds();
+		System.err.println("\n\tFoldSet: "+fsIdx);		
 		m_NumFolds+= numFolds;
 		System.err.println("\tnumFolds: "+numFolds);
+		
   	for (int i = 0; i < numFolds; i++) {
-			System.err.println("\t\tFold:"+i);
+			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
 			Instances train = CVUtils.trainCV(data,foldSet,i);
-			Instances test = CVUtils.testCV(data,foldSet,i);			
-						
+			Instances test = CVUtils.testCV(data,foldSet,i);									
     	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
   	}
 	}

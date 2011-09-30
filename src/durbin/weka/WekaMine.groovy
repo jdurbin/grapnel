@@ -196,10 +196,11 @@ class WekaMine{
 	static def createInstancesFromDataAndClinical(data,clinical,classAttribute){		
 				
  		// Remove all clinical attributes except for the current class...
-  	def selectedAttribute = []
-  	selectedAttribute.add(classAttribute)
+  	def selectedAttributes = []
+  	selectedAttributes.add(classAttribute)
 
-  	def singleClinicalInstances = subsetAttributes(clinical,selectedAttribute)  
+		selectedAttributes.add("ID") // Want to preserve the ID along with classAttribute  KJD
+  	def singleClinicalInstances = subsetAttributes(clinical,selectedAttributes)  
 		singleClinicalInstances.setClassName(classAttribute)
 		
   	// Merge data and clinical files (i.e. instances contained in both, omitting rest)		
@@ -737,8 +738,6 @@ class WekaMine{
     //err.println "SelectedAttributes: $selectedAttributes"
 
     // Remove all attributes that aren't selected 
-    // Must preserve ID, however!!!  So explicitly add it to selected attributes...
-    selectedAttributes.add("ID")
     def attrIndicesStr = IU.attributeNames2Indices(data,selectedAttributes)
     def remove = new Remove();
     remove.setAttributeIndices(attrIndicesStr);
@@ -755,7 +754,10 @@ class WekaMine{
 		WekaAdditions.enable() // Just in case
 		
 		def remove = new RemoveRange()
-		def idxList = data.nameListToIndexList(selectedInstances)	
+		
+		// KJD selectedInstances should be a Set, because we don't care about order and 
+		// can't have repetitions...
+		def idxList = data.nameSetToIndexList(selectedInstances)	
 		idxList = idxList.collect{it+1} // convert to one based	
 		def rangeStr = idxList.join(",")
 		//System.err.println "selectedInstances: "+selectedInstances

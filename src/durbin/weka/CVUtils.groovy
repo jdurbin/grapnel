@@ -46,38 +46,35 @@ public class CVUtils{
 	/***
 	* Generate cross validation test set from a saved set of folds...
 	*/ 
-	static Instances testCV(Instances data,cvAssignments,fold){
-		Instances test = new Instances(data,data.numInstances())
-		for(int i = 0;i<cvAssignments.size();i++){
-			if (cvAssignments[i] == fold){
-				data.copyInstances(i,test,1)
-			}
-		}	
+	static Instances testCV(Instances data,FoldSet foldset,int fold){
+		def testSampleNames = foldset.getTestSamples(fold)					
+		// Look up the instance indexes for this list of names...
+		def testSampleIdxs = data.nameListToIndexList(testSampleNames)		
+		
+		// Copy each instance to the test set...
+		Instances test = new Instances(data,testSampleNames.size())
+		testSampleIdxs.each{idx->
+			if (idx != -1) data.copyInstances(idx,test,1);	// -1 means no instance with that name
+		}		
 		return(test)
 	}
 
 	/****
 	* Generate a cross validation training set from a saved set of folds. 
 	*/ 
-	static Instances trainCV(Instances data,cvAssignments,fold){
-		Instances train = new Instances(data,data.numInstances())
+	static Instances trainCV(Instances data,FoldSet foldset,int fold){
+		def trainSampleNames = foldset.getTrainSamples(fold)					
 		
-		//err.println "CHECK data.size="+data.numInstances()
-		//err.println "CHECK trainCV: "+train.numInstances()
-		//err.println "CHECK cvAssignments.size="+cvAssignments.size()
-		
-		for(int i = 0;i<cvAssignments.size();i++){
-			if (cvAssignments[i] != fold){
-				data.copyInstances(i,train,1)
-			}
-		}	
-		
-		//err.println "CHECK trainCV after copy: "+train.numInstances()
-		
-		return(train)
+		// Look up the instance indexes for this list of names...
+		def trainSampleIdxs = data.nameListToIndexList(trainSampleNames)		
+
+		// Copy each instance to the test set...
+		Instances train = new Instances(data,trainSampleNames.size())
+			trainSampleIdxs.each{idx->
+				if (idx != -1) data.copyInstances(idx,train,1);	// -1 means no instance with that name
+			}		
+			return(train)
 	}
-	
-	
 	
 
 	/***

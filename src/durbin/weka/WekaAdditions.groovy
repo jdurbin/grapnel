@@ -132,21 +132,49 @@ public class WekaAdditions{
 			Attribute classAttr = attribute(classIndex())
 			return(classAttr.name())
 		}
+		
+		
+		/***
+		* Takes a list of instance names and returns their 
+		* correspondign instance indexes.  Assumes ID attribute
+		* holds instance names. 
+		*/ 
+		Instances.metaClass.nameListToIndexList <<{nameList->			
+			def name2IdxMap = [:]
+			Attribute id = attribute("ID");
+			for(idx in 0..<numInstances()){
+				Instance inst = instance(idx)
+				String instanceName = inst.stringValue(id)
+				name2IdxMap[instanceName] = idx;
+			}
+			
+			def rList = []
+			for(name in nameList){
+				if (name2IdxMap.containsKey(name)){
+					rList << name2IdxMap[name]
+				}else{
+					rList << -1 // No such instance...
+				}
+			}						
+			return(rList)
+		}
 
 
 		/***
 		* Takes a list of instance names and returns their 
 		* correspondign instance indexes.  Assumes ID attribute
-		* holds instance names.
+		* holds instance names. Each name can occur only once. 
+		* No correspondence is assumed between order in and 
+		* order out. 
 		*/ 
-		Instances.metaClass.nameListToIndexList <<{nameList->
+		Instances.metaClass.nameSetToIndexList <<{nameCollection->
 			def rlist = []
 			Attribute id = attribute("ID");
-			def nameSet = nameList as Set
-			(0..<numInstances()).each{idx->
+			def nameSet = nameCollection as Set // Just in case we're given a list to begin with...
+			for(idx in 0..<numInstances()){
 				Instance inst = instance(idx)
-				String value = inst.stringValue(id)
-				if (nameSet.contains(value)) rlist << idx
+				String instanceName = inst.stringValue(id)
+				if (nameSet.contains(instanceName)) rlist << idx
 			}
 			return(rlist)
 		}
