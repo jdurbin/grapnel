@@ -29,6 +29,8 @@ public class BimodalityIndexFilter extends SimpleBatchFilter {
 		+ "containing the index of the processed instance.";
 	}
 	
+	String getRevision(){return("1.0");}
+	
 	/**
    * Parses a given list of options. <p/>
    */
