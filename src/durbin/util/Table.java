@@ -82,6 +82,13 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
     return(data.get(idx));
   }
 
+
+//	public TableMatrix1D getAt(String colName){
+ //   int cidx = getRowIdx(rowName);
+ //   return(getRow(ridx));
+ // }
+
+
 	public double[] toDoubleArray(){
 		double[] rval = new double[(int)size()];
 		for(int i =0;i < size();i++){

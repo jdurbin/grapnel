@@ -66,8 +66,6 @@ class ExperimentSpec{
     def fields = line.split(",")
 
 		//System.err.println "DEBUG: "+headings2Cols
-
-
     classifierStr = fields[headings2Cols['classifier']]
 
     try{

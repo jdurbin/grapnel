@@ -282,9 +282,14 @@ public class TableFileLoader {
 		// Find first non-missing value in row...
 		String testValue ="";
 		for(int c = 0;c < t.numCols;c++){
-			testValue = (String) t.matrix.getQuick(row,c);
+			testValue = (String) t.matrix.getQuick(row,c);						
+			if (testValue == null){
+				System.err.println("WARNING: Missing value on table row.  Possible extra carriage return at end of data file.");
+				return(false); // Something went wrong, but not numeric for sure.
+			}
 			if (testValue !="?") break; 						
 		}
+
 
 		// See if it's numeric...
 		Scanner scanner = new Scanner(testValue);

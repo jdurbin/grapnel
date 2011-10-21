@@ -41,8 +41,8 @@ class ConfigRange{
 class WekaMineConfigSlurper extends ConfigSlurper{
   
   // Compile a regex to match strings that contain paired braces.
-  // (Some people, when confronted with a problem, think “I know, I’ll use regular expressions!”
-  // Now they have two problems. — Jaime Zawinski)
+  // Some people, when confronted with a problem, think “I know, I’ll use regular expressions!”
+  // Now they have two problems. — Jaime Zawinski
   static def containsPairedBraces = ~/.*?\{.*\}.*?/
   static def matchBraceContents = ~/\{(.*?)\}/
 
