@@ -1,15 +1,12 @@
 package durbin.weka;
 
-import durbin.stat.BimodalMixtureModel as BMM
-
 import weka.core.*;
 import weka.core.Capabilities.*;
-import weka.core.Capabilities.Capability
+import weka.core.Capabilities.Capability;
 import weka.filters.*;
-import jMEF.*;
 
-import org.apache.commons.math.stat.ranking.*
-import org.apache.commons.math.distribution.*
+import org.apache.commons.math.stat.ranking.*;
+import org.apache.commons.math.distribution.*;
 
 //***********************************************************************
 //***************  NOT FUNCTIONING YET... BEING WRITTEN *****************
@@ -17,11 +14,8 @@ import org.apache.commons.math.distribution.*
 
 public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 
-	double[] attr2bmi;
-	double 	 bimodalityThreshold = 0;
-
-	static{WekaAdditions.enable()}
-	static err = System.err
+	static{WekaAdditions.enable();}
+	//static err = System.err
 
 	public String globalInfo() {
 		return   "Replaces  "
@@ -39,7 +33,7 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 		return result;
 	}
 
-	Instances determineOutputFormat(Instances inputFormat) {
+	protected Instances determineOutputFormat(Instances inputFormat) {
 		Instances result = new Instances(inputFormat, 0);
 		return result;
 	}
@@ -53,40 +47,44 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 	* b<-apply(data,2,rankNA)
 	* c<-apply(b, c(1,2),qexp)
 	*/ 
-	Instances process(Instances instances) {
+	protected Instances process(Instances instances) throws Exception {
 	
 		Instances result = new Instances(determineOutputFormat(instances), 0);
-		def exp = new ExponentialDistributionImpl(1.0);
+		ExponentialDistributionImpl exp = new ExponentialDistributionImpl(1.0);
 		
 		// Save rank lists for each attribute...
 		NaturalRanking ranking = new NaturalRanking(NaNStrategy.FIXED,TiesStrategy.MAXIMUM);						
 
-		for(i in 0..< instances.numInstances()){			
+		for(int i = 0;i < instances.numInstances();i++){
+		//for(i in 0..< instances.numInstances()){			
 			double[] newValues = new double[instances.numAttributes()]; // create space for new values
-			Instance inst = instances.instance(i)
+			Instance inst = instances.instance(i);
 			
 			// rank the attribute values...
-			double[] attrvals = inst.toDoubleArray() 											
-			double [] attrranks = ranking.rank(attrvals)
+			double[] attrvals = inst.toDoubleArray(); 											
+			double [] attrranks = ranking.rank(attrvals);
+			double attsum = attrranks.length - countNAN(attrvals);
+			double invattsum = (double)(1.0/attsum);
 			
 			for (int a = 0; a < instances.numAttributes(); a++){
-				double oldval = attrvals[a]
-				def rank = attrranks[a]
-				def attsum = attrranks.length - countNAN(attrranks)					
-				double scaled = (rank/attsum) - (1/(attsum))	
-				newValues[a] = exp.inverseCumulativeProbability(scaled)
+				double oldval = attrvals[a];
+				double rank = attrranks[a];
+				double scaled = rank*invattsum - invattsum;
+				double newVal = Math.abs(exp.inverseCumulativeProbability(Math.abs(scaled)));
+				newValues[a] = newVal;
 			}
 			result.add(new Instance(1, newValues));
 		}
 		return result;
 	}
 	
-	def countNAN(vals){
-		def count = 0;
-		vals.each{
-			if (it == Double.NaN) count++
+	double countNAN(double[] vals){
+		int count = 0;
+		for(int i = 0;i < vals.length;i++){
+			double val = vals[i];
+			if (val == Double.NaN) count++;
 		}
-		return(count)
+		return(count);
 	}
 	
 		
