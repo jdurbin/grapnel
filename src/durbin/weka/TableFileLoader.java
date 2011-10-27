@@ -276,6 +276,8 @@ public class TableFileLoader {
 	
 	/****
 	* Test if a row is all numeric or if it is a nominal row. 
+	* This is a QND test that only checks the first non-missing value 
+	* to determine type of the whole row. 
 	*/ 
 	public boolean rowIsNumeric(Table t,int row){
 		
@@ -290,7 +292,6 @@ public class TableFileLoader {
 			if (testValue !="?") break; 						
 		}
 
-
 		// See if it's numeric...
 		Scanner scanner = new Scanner(testValue);
 		if (scanner.hasNextDouble()){
@@ -302,6 +303,9 @@ public class TableFileLoader {
 	
 	/****
 	* Test if a column is all numeric or if it is a nominal column
+	* This is a QND test that only checks the first non-missing value 
+	* to determine the type of the whole column. 
+	* 
 	*/ 
 	public boolean columnIsNumeric(Table t,int col){		
 		// Find first non-missing value in row...

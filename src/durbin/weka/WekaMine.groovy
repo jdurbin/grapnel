@@ -91,12 +91,10 @@ class WekaMine{
 	static{
 		WekaAdditions.enable()
 	}
-	
 		
 	//def instances
 	static def err = System.err // sugar
-					
-		
+							
 	def WekaMine(data,clinical,exp,params){
 		this.data = data // The CNV,EXP, or whatever data
 		this.clinical = clinical // Instances that will be used as class attributes. 
@@ -904,5 +902,9 @@ class WekaMine{
      return(search)
    }
 
+
+	static def computeNullModel(instances,exp,nullModelIterations){
+		
+	}
 			
 }

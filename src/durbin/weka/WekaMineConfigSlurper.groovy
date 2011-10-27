@@ -69,8 +69,6 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     if (rows == null) throw new RuntimeException("ML Experiment $id does not appear to be in database.")
     
     row = rows[0]
-
-      
   }
   
 
