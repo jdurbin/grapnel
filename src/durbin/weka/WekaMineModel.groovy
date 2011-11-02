@@ -224,7 +224,8 @@ class WekaMineModel implements Serializable{
 		} // results.each				
 		
 	 	out<< "====================\n"
-	  out<< "Positive: $val1 Negative: $val0\n"
+	  out<< "Positive: $val1\n"
+	  out<< "Negative: $val0\n"
 		out<< "TP\t$tp\n"
 		out<< "FP\t$fp\n"
 		out<< "TN\t$tn\n"
