@@ -10,6 +10,8 @@ import weka.core.Capabilities.Capability
 import weka.filters.*;
 import jMEF.*;
 
+// KJD would be nice to have option to filter but not replace values with BMI. 
+
 public class BimodalityIndexFilter extends SimpleBatchFilter {
 
 	double[] attr2bmi;

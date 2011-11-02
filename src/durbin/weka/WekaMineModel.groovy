@@ -78,6 +78,9 @@ class WekaMineModel implements Serializable{
 		//return(attributes[-1])
 	}
 	
+	/****
+	*
+	*/ 
 	def classify(instances){
 		def rval = []
 		def numInstances = instances.numInstances()		
@@ -131,6 +134,12 @@ class WekaMineModel implements Serializable{
 		printResultsAndCompare(System.out,results,dataSampleIDs,clinical)
 	}
 	
+	/***
+	* results == distributionForInstance
+	* dataSampleIDs == instanceIDs
+	* clinical == clinical data
+	* 
+	*/ 
 	def printResultsAndCompare(out,results,dataSampleIDs,clinical){
 		out<< "ID,lowConfidence,highConfidence,call,actual\n"
 		
@@ -139,6 +148,18 @@ class WekaMineModel implements Serializable{
 		// Build a map of clinical samples to results...
 		def id2ClassMap = [:]						
 		def classValues = clinical.attributeValues(clinical.classAttribute().name()) as ArrayList
+		def classSet = classValues as Set
+		classSet = classSet as ArrayList // convert the set back to an array so we can index it later...
+		
+		if (classSet.size() > 2){
+			err.println "Sorry, but model comparison currently doesn't support more than two class values."
+			err.println "This is planned for an update soon."
+			err.println "ClassValues:"
+			err.println classSet
+			return;
+		}
+		
+		
 		def clinicalSampleIDs = clinical.attributeValues("ID") as ArrayList
 		(0..classValues.size()).each{i->
 			def id = clinicalSampleIDs[i]
@@ -150,6 +171,10 @@ class WekaMineModel implements Serializable{
 		def tn = 0.0;
 		def fp = 0.0;
 		def fn = 0.0;
+							
+		// Will break in a hurry if there are more than two...
+		def val0 = classSet[0]
+		def val1 = classSet[1]					
 							
 		// Now compare predictions with actual values...
 		results.eachWithIndex{result,i->
@@ -180,16 +205,16 @@ class WekaMineModel implements Serializable{
 				
 				// KJD Need to re-think the comparison stats for multi-class and user specified nominal
 			//print "\t$lowVal,$highVal,${lowVal < highVal},${actualVal == 'low'}\t"
-				if ((actualVal == "high") && (call == "high")){
+				if ((actualVal == val1) && (call == val1)){
 					tp++;
 					out<<",+\n"
-				}else if ((actualVal == "high") && (call == "low")){
+				}else if ((actualVal == val1) && (call == val0)){
 					fp++
 					out<<"\n"					
-				}else if ((actualVal == "low") && (call == "low")){
+				}else if ((actualVal == val0) && (call == val0)){
 					tn++;
 					out<<",+\n"
-				}else if ((actualVal == "low") && (call == "high")){
+				}else if ((actualVal == val0) && (call == val1)){
 					fn++;
 					out<<"\n"
 				}				
@@ -199,6 +224,7 @@ class WekaMineModel implements Serializable{
 		} // results.each				
 		
 	 	out<< "====================\n"
+	  out<< "Positive: $val1 Negative: $val0\n"
 		out<< "TP\t$tp\n"
 		out<< "FP\t$fp\n"
 		out<< "TN\t$tn\n"
