@@ -178,12 +178,36 @@ class TwoDMap extends MultidimensionalMap{
       }
     }
     
+
+
+
+		def writeTable(File out){
+			writeTable(out,"\t","NA"){}
+		}
+
+		def writeTable(File out,Closure c){
+			writeTable(out,"\t","NA",c)
+		}
+		
+
+		def writeTable(String fileName){
+			writeTable(fileName,"\t","NA"){}
+		}
+		
+		def writeTable(fileName,delimiter,nullVal){
+			out = new File(fileName)
+			writeTable(fileName,delimiter,nullValue){}
+		}
+
+
+
+
     /**
     * Write out a 2D table that has max keys in each direction...
     */ 
-    def writeTable(fileName,delimiter,nullVal){
+    def writeTable(File out,delimiter,nullVal,Closure c){
 
-      new File(fileName).withWriter(){w->
+      out.withWriter(){w->
 
         def rowKeys = this.keySet()
 
@@ -205,7 +229,7 @@ class TwoDMap extends MultidimensionalMap{
           colKeys.each{colKey->
             def val = this[rowKey][colKey]
             if (val == [:]) rowVals << nullVal
-            else rowVals << val
+            else rowVals << c.call(val)
           }
           w.write("$rowKey$delimiter")
           w.writeLine(rowVals.join(delimiter))
