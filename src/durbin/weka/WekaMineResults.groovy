@@ -294,7 +294,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
         def attIdx = (attrRank[0] as int)+1        
         def attName = data.attribute(attIdx).name()
         def score = attrRank[1] as Double
-        score = score.round(4)
+        //score = score.round(4)
       
         // Save every pair attributes and scores... save only the max score 
         // for each attribute...
@@ -364,7 +364,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
          def attIdx = (attrRank[0] as int)+1        
          def attName = data.attribute(attIdx).name()
          def score = attrRank[1] as Double
-         score = score.round(4)             
+         //score = score.round(4)             
          attrList << "$attName~$score" as String
        }
        lineOut = lineOut + ","
