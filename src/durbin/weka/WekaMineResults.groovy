@@ -408,10 +408,33 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
  	/****
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 
   */ 
-  static void appendSamplesLine(jobIdx,data,out,experiment,eval,results,dataName){
+  static void appendSamplesLine(jobIdx,data,out,experiment,Evaluation2 eval2,dataName){
+//																List<EvaluationResult> results,dataName){
+																																		
       // Append a summary line to a file. 
-      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
-			out << getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
+      def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval2)
+			def classAttribute = data.classAttribute()
+			def  predictions = eval2.m_Predictions
+			
+			//err.println "predictions.size: "+predictions.size()
+			//err.println "results.size: "+results.size()
+			
+			out << getFullSummaryLine(jobIdx,data,experiment,eval2,dataName)
+			for(i in 0..<predictions.size()){
+				out<<","
+				def id = data.attribute("ID")
+				def p = (NominalPredictionPlus) predictions.elementAt(i)
+				def sampleName = p.instanceName
+				def actual = classAttribute.value((int)p.actual())
+				def predicted = classAttribute.value((int)p.predicted())	
+				def dist = p.distribution() as ArrayList
+				def distStr = dist.join(":")
+				def margin = p.margin()
+				out<< "$sampleName~$actual;$predicted;$distStr"
+			}
+			out<<"\n"
+			
+			/* Old way of getting these values...
 			if (results.size() >0){						
 				results.each{r->
 					out<<","
@@ -422,9 +445,11 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 					def probability = r.probability
 					def resultStr = "$sampleID~$actual;$predicted;$probability"
 					out<<resultStr
+					err.println "resultStr: $resultStr"
 				}
 			}			
       out<<"\n"      
+			*/ 
   }
 
 	/**

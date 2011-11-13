@@ -97,6 +97,8 @@ public class CVUtils{
 		//     3     2:high     2:high       1 (P0)
 		lines[1..-1].each{line->    
 
+			//err.println "KJD DEBUG prediction line: $line"
+
 			// Parse out fields we're interested in..
 			//def m = line =~ /\d:(\w+).*\d:(\w+).*\((.+)\)/    
 			//def m = line =~ /\d:(.+).*\d:(\w+).*\((.+)\)/         

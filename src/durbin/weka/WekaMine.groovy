@@ -66,7 +66,7 @@ import weka.attributeSelection.*
 *	
 *	pipeline.appendSummary(out,jobIdx,instances)
 *	pipeline.appendFeatures(fout,jobIdx,instances,options.maxFeaturesOut as Integer)
-*	pipeline.appendSamples(sout, jobIdx,instances)
+*	pipeline.APPENDsAMPLEs(sout, jobIdx,instances)
 *	
 *}
 *</pre>
@@ -80,8 +80,9 @@ class WekaMine{
 	
 	def dataName
 	
-	List<EvaluationResult> testResults
-	List<EvaluationResult> trainResults
+	// No longer parsing results from forPredictionsPrinting
+	//List<EvaluationResult> testResults
+	//List<EvaluationResult> trainResults
 		
 	// Evaluation2 is a modified version of weka Evaluation that saves
 	// the features selected in a cross-validation experiment for 
@@ -490,11 +491,11 @@ class WekaMine{
 	}
 	
 	def appendTestSamples(out,idx,instances){
-  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,testResults,dataName)			                                      
+  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval,dataName)			                                      
 	}
 
 	def appendTrainingSamples(out,idx,instances){
-  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval.trainingEval,trainResults,dataName)			                                      
+  	WekaMineResults.appendSamplesLine(idx,instances,out,exp,eval.trainingEval,dataName)			                                      
 	}
 	
 		
@@ -550,10 +551,10 @@ class WekaMine{
 		def trainPredictions = null;
 		if (evalTraining) trainPredictions = new StringBuffer()		
 		eval.crossValidateModelWithGivenFolds(filteredClassifier,data,(FoldSets) foldSets,predictions,new Range("first,last"),false,trainPredictions)
-		testResults = CVUtils.parsePredictions(predictions)
+		//testResults = CVUtils.parsePredictions(predictions)
 
-		if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
-		else trainResults = null
+		//if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
+		//else trainResults = null
 						
 		return(eval);		
 	}
@@ -572,10 +573,10 @@ class WekaMine{
 		def trainPredictions = null;
 		if (evalTraining) trainPredictions = new StringBuffer()
 		eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions,new Range("first,last"),false,trainPredictions)
-		testResults = CVUtils.parsePredictions(predictions)
+		//testResults = CVUtils.parsePredictions(predictions)
 				
-		if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
-		else trainResults = null
+		//if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
+		//else trainResults = null
 		
 		return(eval)		
 	}

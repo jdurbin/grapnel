@@ -72,6 +72,7 @@ import weka.classifiers.*;
 import weka.attributeSelection.AttributeSelection;
 import durbin.weka.AttributeSelectedClassifier2;
 import weka.classifiers.meta.FilteredClassifier;
+import durbin.weka.NominalPredictionPlus;
 
 
 import java.beans.BeanInfo;
@@ -333,12 +334,12 @@ import java.util.ArrayList;
 
 		// Pretty hacky way to do this, but evaluateModel has so many little things it tweaks that it'd be a 
 		// pain to change them all, roughly a rewrite of this whole class, which will be good someday, just not 
-		// today...
+		// today... KJD
 		public Evaluation2 trainingEval;
 
     
     // The classifiers actually created during cross-validation. 
-    // 
+    // KJD
     public ArrayList<ThinAttributes> m_cvAttributeSelections;  // Evaluation2
     
     // Evaluation2
@@ -1625,7 +1626,7 @@ String [] options) throws Exception {
         data.instance(i));
       if (buff != null) {
         buff.append(predictionText(classifier, data.instance(i), i, 
-          attsToOutput, printDist));
+          attsToOutput, printDist)); // KJD1
       }
     }
 
@@ -1659,8 +1660,8 @@ Instance instance) throws Exception {
       pred = Instance.missingValue();
     }
     updateStatsForClassifier(dist, instance);
-    m_Predictions.addElement(new NominalPrediction(instance.classValue(), dist, 
-      instance.weight()));
+		//KJD Should look instance name up by attribute name "ID"
+    m_Predictions.addElement(new NominalPredictionPlus(instance.classValue(), dist,instance.weight(),instance.toString(0)));
   } else {
     pred = classifier.classifyInstance(classMissing);
     updateStatsForPredictor(pred, instance);
@@ -1744,8 +1745,7 @@ Instance instance) throws Exception {
       pred = Instance.missingValue();
     }
     updateStatsForClassifier(dist, instance);
-    m_Predictions.addElement(new NominalPrediction(instance.classValue(), dist, 
-      instance.weight()));
+    m_Predictions.addElement(new NominalPredictionPlus(instance.classValue(), dist, instance.weight(),instance.toString(0)));
   } else {
     pred = dist[0];
     updateStatsForPredictor(pred, instance);
@@ -3380,7 +3380,8 @@ throws Exception {
 
   StringBuffer result = new StringBuffer();
   int width = 10;
-  int prec = 3;
+  //int prec = 3; // KJD
+	int prec = 5;
 
   Instance withMissing = (Instance)inst.copy();
   withMissing.setDataset(inst.dataset());
@@ -3445,6 +3446,8 @@ throws Exception {
 
   // attributes
   result.append(" " + attributeValuesString(withMissing, attributesToOutput) + "\n");
+
+	//System.err.println("KJD DEBUG: result:"+result.toString());
 
   return result.toString();
 }

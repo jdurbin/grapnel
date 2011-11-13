@@ -294,9 +294,12 @@ public class TableFileLoader {
 
 		// See if it's numeric...
 		Scanner scanner = new Scanner(testValue);
+		//System.err.print("scanner testValue:"+testValue);
 		if (scanner.hasNextDouble()){
+			//System.err.println("\thasNextDouble TRUE");
 			return(true);
 		}else{
+			//System.err.println("\thasNextDouble FALSE");
 			return(false);
 		}
 	}

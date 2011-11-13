@@ -253,7 +253,7 @@ class WekaMineModel implements Serializable{
 			denominator = sum1*sum2*sum3*sum4
 		}
 		double mcc = ((tp*tn)-(fp*fn))/Math.sqrt(denominator)
-		return(mcc.round(4))
+		return(mcc.round(6))
 	}
 					
 }

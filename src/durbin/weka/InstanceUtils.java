@@ -304,5 +304,85 @@ public class InstanceUtils {
     merged.deleteAttributeAt(removeIDIdx);
     return(merged);    
 	}
+	
+	
+	/***
+	* Removes and/or adds attributes to make the resulting set of instances
+	* match those specified in the attribute list (e.g. the attributes retrieved
+	* from a trained model).  In some cases rawdata has an ID, in some cases 
+	* not, have to handle that as a special case...
+	*/ 
+	
+	
+	
+	/*
+	
+	KJD Translation from Groovy in process...
+	
+	static Instances createInstancesToMatchAttributeList(Instances rawdata,
+		ArrayList<String> modelAttributes){
+
+		System.err.print("Make data match model attributes...Initial attributes: "+rawdata.numAttributes());
+
+		ArrayList<String> rawAttributeNames = rawdata.attributeNames();
+		Set rawAttributeNamesSet = new HashSet();
+		for(String attr : rawAttributeNames){
+			rawAttributeNamesSet.add(attr);
+		}
+
+		HashMap<String,Integer> rawName2Idx = new HashMap<String,Integer>();
+		rawAttributeNames.eachWithIndex{n,i->rawName2Idx[n] = i}
+
+		// Create a set of instances reflecting the model data...
+		def atts = new FastVector()
+		modelAttributes.each{attrName-> 
+			atts.addElement(new Attribute(attrName))
+		}
+		def data = new Instances("NewInstances",atts,0)
+
+		def numInstances = rawdata.numInstances()
+		for(int i = 0;i < numInstances;i++){
+
+				// Get the values from the new data...
+				def instance = rawdata.instance(i)
+				double[] rawVals = instance.toDoubleArray()
+
+				// Create space for the new values...
+				double[] vals = new double[data.numAttributes()];
+
+				// For each attribute...
+				modelAttributes.eachWithIndex{modelAttrName,aIdx->
+					if (rawAttributeNamesSet.contains(modelAttrName)){												
+						def rawIdx = rawName2Idx[modelAttrName]
+						vals[aIdx] = rawVals[rawIdx]
+					}else{
+						vals[aIdx] = Instance.missingValue();
+					}
+				}
+
+				//println "\nOLD INSTANCE ELAC1: ${instance['ELAC1']} NUP205: ${instance['NUP205']}"					
+				def newInstance = new Instance(1.0,vals)
+				data.add(newInstance);
+		}		
+
+		//data.each{newInstance->
+		//	println "NEW INSTANCE ELAC1: ${newInstance['ELAC1']} NUP205: ${newInstance['NUP205']}}"	
+		//}
+		
+		
+	
+		// If we were given an ID, put it back...
+		//def attrNames = rawdata.attributeNames() as Set
+		//if (attrNames.contains("ID")){
+		//	def instanceNames = rawdata.attributeValues("ID")
+		//	addID(data,instanceNames)
+		//}	
+						
+		//err.println "done. Final attributes: ${data.numAttributes()}"
+		
+		//return(data)
+	//}
+	*/
+	
 }
 
