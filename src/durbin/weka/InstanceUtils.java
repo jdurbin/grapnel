@@ -15,6 +15,11 @@ import weka.filters.unsupervised.attribute.Remove;
 * back and forth between instance/attribute names and indices. 
 */
 public class InstanceUtils {
+	
+	static{
+		WekaAdditions.enable();
+	}
+	
 
   /***
 	 *  Takes a collection of attribute names and returns an array of the corresponding
@@ -65,7 +70,7 @@ public class InstanceUtils {
 	*  Return the attributes as a set of strings. 
 	*
 	*/	
-  public static Set<String> getAttributeNames(Instances data){
+  public static Set<String> getAttributeNamesSet(Instances data){
     Set<String> rval = new HashSet<String>();
     for(int i = 0;i < data.numAttributes();i++){
       Attribute a = data.attribute(i);
@@ -74,7 +79,19 @@ public class InstanceUtils {
     }
     return(rval);
   }
+
+	public static ArrayList<String> getAttributeNames(Instances data){
+    ArrayList<String> rval = new ArrayList<String>();
+    for(int i = 0;i < data.numAttributes();i++){
+      Attribute a = data.attribute(i);
+      String attrName = a.name();
+      rval.add(attrName);
+    }
+    return(rval);
+  }
   
+
+
   /***
   * Return a list of instance names. 
   */ 
@@ -311,78 +328,71 @@ public class InstanceUtils {
 	* match those specified in the attribute list (e.g. the attributes retrieved
 	* from a trained model).  In some cases rawdata has an ID, in some cases 
 	* not, have to handle that as a special case...
-	*/ 
-	
-	
-	
-	/*
-	
-	KJD Translation from Groovy in process...
-	
+	*/
 	static Instances createInstancesToMatchAttributeList(Instances rawdata,
 		ArrayList<String> modelAttributes){
 
 		System.err.print("Make data match model attributes...Initial attributes: "+rawdata.numAttributes());
 
-		ArrayList<String> rawAttributeNames = rawdata.attributeNames();
-		Set rawAttributeNamesSet = new HashSet();
-		for(String attr : rawAttributeNames){
-			rawAttributeNamesSet.add(attr);
-		}
+		ArrayList<String> rawAttributeNames = getAttributeNames(rawdata);
+		Set<String> rawAttributeNamesSet = getAttributeNamesSet(rawdata);
 
 		HashMap<String,Integer> rawName2Idx = new HashMap<String,Integer>();
-		rawAttributeNames.eachWithIndex{n,i->rawName2Idx[n] = i}
+		int i = 0;
+		for(String n: rawAttributeNames){		
+			rawName2Idx.put(n,i);
+			i++;
+		}
 
 		// Create a set of instances reflecting the model data...
-		def atts = new FastVector()
-		modelAttributes.each{attrName-> 
-			atts.addElement(new Attribute(attrName))
+		FastVector atts = new FastVector();
+		for(String attrName: modelAttributes){
+			atts.addElement(new Attribute(attrName));
 		}
-		def data = new Instances("NewInstances",atts,0)
+		
+		Instances data = new Instances("NewInstances",atts,0);
 
-		def numInstances = rawdata.numInstances()
-		for(int i = 0;i < numInstances;i++){
+		int numInstances = rawdata.numInstances();
+		for(i = 0;i < numInstances;i++){
 
 				// Get the values from the new data...
-				def instance = rawdata.instance(i)
-				double[] rawVals = instance.toDoubleArray()
+				Instance instance = rawdata.instance(i);
+				double[] rawVals = instance.toDoubleArray();
 
 				// Create space for the new values...
 				double[] vals = new double[data.numAttributes()];
 
 				// For each attribute...
-				modelAttributes.eachWithIndex{modelAttrName,aIdx->
+				int aIdx =0;
+				for(String modelAttrName: modelAttributes){
 					if (rawAttributeNamesSet.contains(modelAttrName)){												
-						def rawIdx = rawName2Idx[modelAttrName]
-						vals[aIdx] = rawVals[rawIdx]
+						int rawIdx = rawName2Idx.get(modelAttrName);
+						vals[aIdx] = rawVals[rawIdx];
 					}else{
 						vals[aIdx] = Instance.missingValue();
 					}
+					aIdx++;
 				}
 
 				//println "\nOLD INSTANCE ELAC1: ${instance['ELAC1']} NUP205: ${instance['NUP205']}"					
-				def newInstance = new Instance(1.0,vals)
+				Instance newInstance = new Instance(1.0,vals);
 				data.add(newInstance);
-		}		
-
-		//data.each{newInstance->
-		//	println "NEW INSTANCE ELAC1: ${newInstance['ELAC1']} NUP205: ${newInstance['NUP205']}}"	
-		//}
+		}
 		
-		
+		System.err.println("done. Final attributes: "+data.numAttributes());
+		return(data);
+	}	
 	
-		// If we were given an ID, put it back...
-		//def attrNames = rawdata.attributeNames() as Set
-		//if (attrNames.contains("ID")){
-		//	def instanceNames = rawdata.attributeValues("ID")
-		//	addID(data,instanceNames)
-		//}	
-						
-		//err.println "done. Final attributes: ${data.numAttributes()}"
-		
-		//return(data)
-	//}
+	/*
+	ArrayList getAttributeNames(Instances data){
+		for(attrIdx = 0; attrIdx < data.numAttributes();attrIdx++){
+			Attribute attr = data.attribute(attrIdx);
+			String name = attr.name();
+			rvals.add(name);
+		}
+		return(rvals);
+	}
 	*/
-	
+		
 }
 

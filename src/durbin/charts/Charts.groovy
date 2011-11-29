@@ -1,22 +1,18 @@
 package durbin.charts;
 
-import javax.swing.JPanel;
-
-import java.awt.*
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
+import org.jfree.chart.*
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.plot.*
 import org.jfree.chart.renderer.xy.*;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
+import org.jfree.data.xy.*;
+import org.jfree.ui.*
 import org.jfree.data.statistics.*;
+
+import groovy.swing.SwingBuilder
+import java.awt.*
+import javax.swing.WindowConstants as WC
+import javax.swing.*
+
 
 /**
 * Configuring JFreeChart charts is not hard, but it does clutter up your code. 
@@ -27,7 +23,35 @@ import org.jfree.data.statistics.*;
 class Charts{
 	
 	static err = System.err
-  
+	
+/**************************************************************************************************
+	                                           Display Charts
+***************************************************************************************************/
+	
+	
+	static show(chart){
+		def title = chart.getTitle().getText()
+		show(chart,title);
+	}
+			
+	/***
+	* Creates a window and displays the chart.
+	*/ 
+	static show(chart,chartTitle){
+		def swing = new SwingBuilder()
+		def frame = swing.frame(title:'Histogram Test',
+														defaultCloseOperation:WC.EXIT_ON_CLOSE,
+														pack:true,show:true) {
+			borderLayout()
+			panel(new ChartPanel(chart),preferredSize: new java.awt.Dimension(500, 270),mouseWheelEnabled:true)
+		}
+		return(swing)		
+	}
+
+	/**************************************************************************************************
+		                                           Utilities
+	***************************************************************************************************/
+	 
   /**
   * Creates an XY series from a Groovy [:], aka LinkedHashMap
   */ 
@@ -45,6 +69,10 @@ class Charts{
     return(dataset);
   }
   
+	/**************************************************************************************************
+	                                           Line
+	***************************************************************************************************/
+
   
   /**
   * Returns a default line chart.  Not hard to do, but I like to just grab my standard
@@ -55,7 +83,7 @@ class Charts{
     return(lineChart(title,xydata,xsize,ysize))
   }
   
-  static lineChart(String title,XYSeriesCollection xydata,int xsize,int ysize){
+  static lineChart(String title,XYSeriesCollection xydata){
     
     // create the chart...
     JFreeChart chart = ChartFactory.createXYLineChart(
@@ -81,18 +109,21 @@ class Charts{
     NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
     rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-    ChartPanel chartPanel = new ChartPanel(chart);    
-    chartPanel.setPreferredSize(new java.awt.Dimension(xsize,ysize));    
-
-    return chartPanel;
+    return chart;
   }
   
-  static scatterPlot(String title,XYSeriesCollection xydata,int xsize,int ysize){
-    return(scatterPlot(title,"X","Y",xydata,xsize,ysize))
+	/**************************************************************************************************
+	                                           Scatter
+	***************************************************************************************************/
+
+
+
+  static scatterPlot(String title,XYSeriesCollection xydata){
+    return(scatterPlot(title,"X","Y",xydata))
   }
   
   static scatterPlot(String title,String xlabel,String ylabel, 
-    XYSeriesCollection xydata,int xsize,int ysize){
+    XYSeriesCollection xydata){
     
     // Only show legend if there is more than one series. 
     def bShowLegend = false;
@@ -124,73 +155,18 @@ class Charts{
     NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
     rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-    ChartPanel chartPanel = new ChartPanel(chart);    
-    chartPanel.setPreferredSize(new java.awt.Dimension(xsize,ysize));    
-
-    return chartPanel;
+    return chart;
   }
 
-
-
-	static dualhistogram(values1,series1name,values2,series2name,cName,xsize,ysize){
-		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,xsize,ysize,20))
-	}
 	
-	static dualhistogram(values1,series1name,values2,series2name,cName,xsize,ysize,bins){
-		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,xsize,ysize,bins))
-	}
-
-
-	/***
-	* Create a histogram from two sets of values in arbitrary collection...
-	*/ 						
-	static dualhistogram(values1,series1name,color1,values2,series2name,color2,cName,xsize,ysize,bins){
-		
-		double binmax1 = values1.max()
-		double binmax2 = values2.max()
-		double binmin1 = values1.min()
-		double binmin2 = values2.min()
-			
-		//err.println "createHistogramFromValues"
-		def series = new HistogramDataset()
-		def valarray1 = new double[values1.size()]
-		values1.eachWithIndex{v,i->valarray1[i] = v as double}
-		
-		def valarray2 = new double[values2.size()]
-		values2.eachWithIndex{v,i->valarray2[i] = v as double}
-
-		def chartTitle = "$cName"
-		series.addSeries(series1name,valarray1,100,binmin1,binmax1)
-		series.addSeries(series2name,valarray2,100,binmin2,binmax2)
-		def chartpanel = Charts.histogram(chartTitle,"","",series,xsize,ysize) 
-
-		def titleFont = new java.awt.Font("SansSerif", java.awt.Font.BOLD,14)
-		def title = new org.jfree.chart.title.TextTitle(chartTitle,titleFont)
-		def chart = chartpanel.getChart()
-		chart.setTitle(title);
-		
-		XYPlot plot = (XYPlot) chart.getPlot();
-		plot.setBackgroundPaint(Color.WHITE);  // For the plot
-    plot.setForegroundAlpha(0.60f);
-
-		def renderer = plot.getRenderer();
-		renderer.setSeriesPaint(0, color1);
-		renderer.setSeriesPaint(1, color2);
-
-		return(chart)
-	}
-	
-	
-	static histogram(values,cName,xsize,ysize){		
-		def chartpanel = histogram(values,cName,xsize,ysize,50)
-		return(chartpanel)
-	}
-	
+/**************************************************************************************************
+                                           HISTOGRAM
+***************************************************************************************************/
 
 	/***
 	* Create a histogram from values in an arbitrary collection...
 	*/ 						
-	static histogram(values,cName,xsize,ysize,numBins){
+	static hist(values,cName){
 		
 		def binmax = values.max()
 		def binmin = values.min()
@@ -200,30 +176,28 @@ class Charts{
 		def valarray = new double[values.size()]
 		values.eachWithIndex{v,i->valarray[i] = v as double}
 
-		series.addSeries("Series1",valarray,numBins,binmin as double,binmax as double)
+		series.addSeries("Series1",valarray,50,binmin as double,binmax as double)
 		def chartTitle = "$cName"
-		def chartpanel = Charts.histogram(chartTitle,"","",series,xsize,ysize) 
+		def chart = Charts.hist(chartTitle,"","",series) 
 
 		def titleFont = new java.awt.Font("SansSerif", java.awt.Font.BOLD,12)
 		def title = new org.jfree.chart.title.TextTitle(chartTitle,titleFont)
-		def chart = chartpanel.getChart()
 		chart.setTitle(title);
 
-		return(chartpanel)
+		return(chart)
 	}
   
 	/***
-	* Create histogram with default labels. 
+	* Create  with default labels. 
 	*/ 
-  static histogram(String title,HistogramDataset xydata,int xsize,int ysize){
-    return(histogram(title,"Count","X",xydata,xsize,ysize))
+  static hist(String title,HistogramDataset xydata){
+    return(hist(title,"Count","X",xydata))
   }
   
 	/***
 	* Create histogram...
 	*/ 
-  static histogram(String title,String xlabel,String ylabel, 
-    HistogramDataset xydata,int xsize,int ysize){
+  static hist(String title,String xlabel,String ylabel, HistogramDataset xydata){
     
     // Only show legend if there is more than one series. 
     def bShowLegend = false;
@@ -258,15 +232,58 @@ class Charts{
     NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
     rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-    ChartPanel chartPanel = new ChartPanel(chart);    
-    chartPanel.setPreferredSize(new java.awt.Dimension(xsize,ysize));    
+    return chart;
+  }
 
-    return chartPanel;
-  }
-  
-  
-     
-  static barChart(String title,double[][] data,int xsize,int ysize){
-    
-  }
+
+	/**************************************************************************************************
+	                                           DUALHISTOGRAM 
+	***************************************************************************************************/
+
+	static dualhistogram(values1,series1name,values2,series2name,cName){
+		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,20))
+	}
+
+	static dualhistogram(values1,series1name,values2,series2name,cName,bins){
+		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,bins))
+	}
+
+
+	/***
+	* Create a histogram from two sets of values in arbitrary collection...
+	*/ 						
+	static dualhistogram(values1,series1name,color1,values2,series2name,color2,cName,bins){
+
+		double binmax1 = values1.max()
+		double binmax2 = values2.max()
+		double binmin1 = values1.min()
+		double binmin2 = values2.min()
+
+		//err.println "createHistogramFromValues"
+		def series = new HistogramDataset()
+		def valarray1 = new double[values1.size()]
+		values1.eachWithIndex{v,i->valarray1[i] = v as double}
+
+		def valarray2 = new double[values2.size()]
+		values2.eachWithIndex{v,i->valarray2[i] = v as double}
+
+		def chartTitle = "$cName"
+		series.addSeries(series1name,valarray1,100,binmin1,binmax1)
+		series.addSeries(series2name,valarray2,100,binmin2,binmax2)
+		def chart = Charts.hist(chartTitle,"","",series) 
+
+		def titleFont = new java.awt.Font("SansSerif", java.awt.Font.BOLD,14)
+		def title = new org.jfree.chart.title.TextTitle(chartTitle,titleFont)
+		chart.setTitle(title);
+
+		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setBackgroundPaint(Color.WHITE);  // For the plot
+    plot.setForegroundAlpha(0.60f);
+
+		def renderer = plot.getRenderer();
+		renderer.setSeriesPaint(0, color1);
+		renderer.setSeriesPaint(1, color2);
+
+		return(chart)
+	} 
 }

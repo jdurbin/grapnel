@@ -134,6 +134,15 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
 * be accessed by row/column index or by row/column name.  However, in practice
 * I am using Multidimensional map for most things now, with adequate performance. 
 * This is still used in a few places, though. 
+*	
+*	Note: There is a specialized table, DoubleTable, that is a more efficient version
+*	of table when the data is all numeric.  DoubleTable has an easier to use API.  Eventually
+*	the api for Table should be made to match and be made into an interface with two 
+*	implementations:
+*	
+*	Table ->  DoubleTable
+*	          ObjectTable
+*	
 */
 public class Table extends GroovyObjectSupport{
 
