@@ -646,7 +646,7 @@ throws Exception {
 
   // Do the folds	
   for (int i = 0; i < numFolds; i++) {	
-		System.err.println("\n\tFold: "+i);
+		System.err.println("\tFold: "+i);
     Instances train = data.trainCV(numFolds, i, random);
     Instances test = data.testCV(numFolds, i);
 		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);

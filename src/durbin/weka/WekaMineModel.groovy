@@ -25,6 +25,8 @@ class WekaMineModel implements Serializable{
 	def className
 	def classValues
 	
+	BootstrapNullModel bnm; 
+		
 	String toString(){
 		def rval = "";
 		rval += "AttributeSeletion: $atrSelMethod\n"
@@ -37,6 +39,10 @@ class WekaMineModel implements Serializable{
 	
 	def attributes(){
 		return(attributes);
+	}
+	
+	def setNullModel(BootstrapNullModel nullmodel){
+		bnm = nullmodel;
 	}
 	
 			
@@ -98,6 +104,33 @@ class WekaMineModel implements Serializable{
 		return(rval)		
 	}
 	
+	/***
+	* Permutes the class lables and evaluates performance in a cross-validated setting. 
+	* Accumulated values are saved in BootstrapNullModel for future significance computations. 
+	**/ 
+	def computeBootstrapNullModel(instances,nullModelIterations){						
+
+		def rng = new Random();
+		
+		bnm = new BootstrapNullModel(classValues.size())
+									
+		// Generate the desired number of permutations of the model...
+		for(i in 0..<nullModelIterations){
+			err.print "Null model iteration $i..."
+			//def pinstances = bnm.permuteClassLabels(instances)
+			def pinstances = bnm.permuteAttributeValues(instances)
+			
+			// Apply classifier to these instances...
+			// one result per instance, each result is a distribution for instance...
+			// Note: it is assumed that instances have already been cleaned up. 
+			def results = classify(pinstances)
+			
+			// Will need to have a null distribution for each class value... 						
+			bnm.addPoints(results)
+			err.println "done."
+		}
+	}
+	
 	
 	def printResults(results,sampleIDs){
 		printResults(Syste.out,results,sampleIDs)
@@ -115,15 +148,29 @@ class WekaMineModel implements Serializable{
 		return(maxIdx)
 	}
 	
-	def printResults(out,results,sampleIDs){							
-		out<<"ID,confidence1,confidence2,call\n"
-
+	/***
+	*  Will break on multi-class classifiers. 
+	*/ 
+	def printResults(out,results,sampleIDs){
+		if (bnm != null){
+			out<<"ID,confidence1,confidence2,call,nullConfidence1,nullConfidence2\n"
+		}else{
+			out<<"ID,confidence1,confidence2,call\n"
+		}
+									
 		results.eachWithIndex{result,i->
 			def r = result as ArrayList	// distribution for instance...			
 			def maxIdx = getMaxIdx(r)
 			def call = classValues[maxIdx] // look up the name of this.
 			def rstr = r.join(",")	
-			out<<"${sampleIDs[i]},$rstr,$call\n"
+			
+			if (bnm != null){
+				def nullConf1 = bnm.getSignificance(r[0],0)						
+				def nullConf2 = bnm.getSignificance(r[1],1)
+				out<<"${sampleIDs[i]},$rstr,$call,$nullConf1,$nullConf2\n"
+			}else{
+				out<<"${sampleIDs[i]},$rstr,$call\n"
+			}
 		}		
 	}
 		

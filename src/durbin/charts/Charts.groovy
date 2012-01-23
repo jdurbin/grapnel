@@ -13,6 +13,7 @@ import java.awt.*
 import javax.swing.WindowConstants as WC
 import javax.swing.*
 
+import durbin.util.*
 
 /**
 * Configuring JFreeChart charts is not hard, but it does clutter up your code. 
@@ -29,15 +30,25 @@ class Charts{
 ***************************************************************************************************/
 	
 	
-	static show(chart){
+	
+	
+	static saveChart(chart,fileName){
+		err.println "Saving chart to $fileName..."
+		def chartpanel = new ChartPanel(chart);
+		ImageUtils.savePanelAsPNG(chartpanel,fileName)
+		err.print "saving done."
+	}
+	
+	
+	static showChart(chart){
 		def title = chart.getTitle().getText()
-		show(chart,title);
+		showChart(chart,title);
 	}
 			
 	/***
 	* Creates a window and displays the chart.
 	*/ 
-	static show(chart,chartTitle){
+	static showChart(chart,chartTitle){
 		def swing = new SwingBuilder()
 		def frame = swing.frame(title:'Histogram Test',
 														defaultCloseOperation:WC.EXIT_ON_CLOSE,
