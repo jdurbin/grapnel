@@ -13,6 +13,7 @@ import weka.filters.unsupervised.instance.RemoveWithValues
 import weka.filters.unsupervised.attribute.RemoveType
 import weka.filters.unsupervised.attribute.RemoveUseless
 import weka.filters.supervised.attribute.*
+import weka.filters.supervised.instance.*
 
 import weka.classifiers.*
 import weka.classifiers.functions.*
@@ -745,6 +746,68 @@ class WekaMine{
     def selectedAttributeData = Filter.useFilter(data, remove);
     return(selectedAttributeData)
   }
+
+	/***
+	* Will return the first holdoutFraction instances as a set of instances. 
+	* Will remove those instances from data. 
+	*/ 
+	static Instances holdOutInstances(Instances data,double holdoutFraction){
+		def metaFolds = (1.0/holdoutFraction) as int
+		
+		def filter = new StratifiedRemoveFolds()		
+		filter.setInputFormat(data);
+		filter.setNumFolds(metaFolds)
+		filter.setFold(1)
+		filter.setInvertSelection(false)
+		def holdout = Filter.useFilter(data,filter)
+		return(holdout);
+	}
+
+
+	/***
+	* Will return the first remaining instances in data after holdOutInstances
+	* called on data. 
+	*/ 
+	static Instances remainingInstances(Instances data,double holdoutFraction){
+		def metaFolds = (1.0/holdoutFraction)	as int
+		def filter = new StratifiedRemoveFolds()
+		filter.setInputFormat(data);
+		filter.setNumFolds(metaFolds)
+		filter.setFold(1)
+		filter.setInvertSelection(true)
+		def remaining = Filter.useFilter(data,filter)
+		return(remaining);
+	}
+	
+	
+	/***
+	* Build a model for instances and evaluate them on holdoutInstances
+	*/ 
+	def buildAndEvaluateOnHoldout(instances,holdoutInstances){
+		// Create a classifier from all of the non-validation samples...
+		// Discretize the class attribute...
+		def cutoffs
+		(instances,cutoffs) = discretizeClassAttribute(instances)
+		
+		// Remove ID attribute, since attribute evaluators and classifiers choke on it...
+		instances = removeInstanceID(instances)
+		
+		// Apply the attribute selection algorithm to instances...
+		instances = selectAttributes(instances)
+		err.print("Build evaluation classifier ${exp.classifierStr}...")
+		exp.classifier.buildClassifier(instances);
+		err.println("done.")
+		
+		def model = new WekaMineModel(instances,exp.classifier,cutoffs)	
+		// The model has no ID, so we save the ID for later reporting...
+		instanceIDs = holdoutInstances.attributeValues("ID") as ArrayList
+		
+		def results = model.classify(holdoutInstances)
+		def tp,tn,fp,fn;
+		(tp,tn,fp,fn) = model.accuracy(results,clinical)
+		return([tp,tn,fp,fn])
+	}
+
 	
 	/***
 	* Remove all the instances from data except those named in selectedInstances

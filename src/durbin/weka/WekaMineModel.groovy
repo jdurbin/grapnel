@@ -182,6 +182,68 @@ class WekaMineModel implements Serializable{
 	}
 	
 	/***
+	*	Evaluate the accuracy of the given results...
+	*/
+	def confusionMatrixFor(dataSampleIDs,results,clinical){
+			// Build a map of clinical samples to results...
+			def id2ClassMap = [:]						
+			def classValues = clinical.attributeValues(clinical.classAttribute().name()) as ArrayList
+			def classSet = classValues as Set
+			classSet = classSet as ArrayList // convert the set back to an array so we can index it later...
+
+			if (classSet.size() > 2){
+				err.println "Sorry, but model comparison currently doesn't support more than two class values."
+				err.println "This is planned for an update soon."
+				err.println "ClassValues:"
+				err.println classSet
+				return;
+			}
+
+			def clinicalSampleIDs = clinical.attributeValues("ID") as ArrayList
+			(0..classValues.size()).each{i->
+				def id = clinicalSampleIDs[i]
+				def classVal = classValues[i]
+				id2ClassMap[id] = classVal
+			}
+
+			def tp = 0.0;
+			def tn = 0.0;
+			def fp = 0.0;
+			def fn = 0.0;
+
+			// Will break in a hurry if there are more than two...
+			def val0 = classSet[0]
+			def val1 = classSet[1]					
+
+			confusionForSample = []
+			
+			// Now compare predictions with actual values...
+			results.eachWithIndex{result,i->
+				def r = result as ArrayList	// distribution for instance...			
+				def maxIdx = getMaxIdx(r)
+				def call = classValues[maxIdx] // look up the name of this.
+				def rstr = r.join(",")	
+
+				def id = dataSampleIDs[i]
+				// If this sample is in the clinical data set, output it's comparison.. 
+				if (id2ClassMap.containsKey(id)){
+					def actualVal = id2ClassMap[id]
+					if ((actualVal == val1) && (call == val1)){
+						tp++;						
+					}else if ((actualVal == val1) && (call == val0)){
+						fp++
+					}else if ((actualVal == val0) && (call == val0)){
+						tn++;
+					}else if ((actualVal == val0) && (call == val1)){
+						fn++;
+					}				
+				}
+			} // results.each
+			return([tp,tn,fp,fn])
+	}
+		
+	
+	/***
 	* results == distributionForInstance
 	* dataSampleIDs == instanceIDs
 	* clinical == clinical data
