@@ -59,7 +59,6 @@ class TwoDMap extends MultidimensionalMap{
     
 	  def TwoDMap(){}
 		def TwoDMap(String fileName,String delimiter){ read(fileName,delimiter,rowLabels)}
-		def TwoDMap(String fileName,String delimiter){read(fileName,delimiter,rowLabels)}
 
 		def rowKeySet(){
 			return(this.keySet())
