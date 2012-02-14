@@ -11,6 +11,7 @@ import weka.attributeSelection.*
 */ 
 class ExperimentSpec{
    def classifier
+	 def filter
    def attributeEval
    def attributeSearch
    def numAttributes

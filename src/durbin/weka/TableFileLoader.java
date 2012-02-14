@@ -395,7 +395,7 @@ public class TableFileLoader {
     
     	// We save the instanceNames in a list because it's handy later on...
     	instanceNames = new ArrayList<String>();
-    
+    	
     	for(int c = 0;c < t.colNames.length;c++){
       	instanceNames.add(t.colNames[c]);
       	newData.instance(c).setValue(attrIdx,t.colNames[c]);
@@ -437,6 +437,14 @@ public class TableFileLoader {
 		HashSet<String> valSet = new HashSet<String>();
 		for(int c = 0;c < t.cols();c++){
 			String val = (String) t.matrix.getQuick(rowIdx,c);
+			
+			if (val == null) {
+				System.err.println("null value in row:"+rowIdx+" col:"+c);
+				for(int i = 0;i < t.cols();i++){
+					System.err.println("\t"+i+"\t"+t.matrix.getQuick(rowIdx,c));
+				}
+			}
+			
 			// Don't want to include "missing value" as one of the nominal values...
 			if (!val.equals("?")){
 				valSet.add(val);

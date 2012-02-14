@@ -42,6 +42,25 @@ public class DoubleTable extends GroovyObjectSupport{
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
   public DoubleTable(){}
+	
+	public DoubleTable(ArrayList<String> rNames,ArrayList<String> cNames){
+		numRows = rNames.size();
+		numCols = cNames.size();
+		matrix = new DenseDoubleMatrix2D(numRows,numCols);
+		
+		rowNames = new String[numRows];
+		for(int i = 0;i < rNames.size();i++){
+			rowNames[i] = rNames.get(i);
+		}
+		
+		colNames = new String[numCols];
+		for(int i = 0;i < cNames.size();i++){
+			colNames[i] = cNames.get(i);
+		}
+		
+		createNameMap(colNames,colName2Idx);
+		createNameMap(rowNames,rowName2Idx);
+	}
   
   public DoubleTable(int rows,int cols){
     numRows = rows;
@@ -200,6 +219,7 @@ public class DoubleTable extends GroovyObjectSupport{
 			rowNames[rowIdx] = tokens[0].trim();
 									      
       for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
+				//System.err.println("colIdx:"+colIdx+" tokens: "+tokens[colIdx+1]);
         matrix.setQuick(rowIdx,colIdx,Double.parseDouble(tokens[colIdx+1]));                
       }     
 			rowIdx++;

@@ -58,7 +58,7 @@ class MultidimensionalMap extends LinkedHashMap {
 class TwoDMap extends MultidimensionalMap{
     
 	  def TwoDMap(){}
-		def TwoDMap(String fileName,String delimiter){ read(fileName,delimiter,rowLabels)}
+		def TwoDMap(String fileName,String delimiter){ read(fileName,delimiter,true)}
 
 		def rowKeySet(){
 			return(this.keySet())
@@ -122,34 +122,34 @@ class TwoDMap extends MultidimensionalMap{
       }
     }
 
-			/***
-			* Reads in a table of values as a TwoDMap
-			*/ 
-			def read(datafile,delimiter,isRowLabel){
-				if (isRowLabel){
-					read(datafile,delimiter)
-				}else{
-					readNoRowLabel(datafile,delimiter)
-				}
+		/***
+		* Reads in a table of values as a TwoDMap
+		*/ 
+		def read(datafile,delimiter,isRowLabel){
+			if (isRowLabel){
+				read(datafile,delimiter)
+			}else{
+				readNoRowLabel(datafile,delimiter)
 			}
+		}
 			
-			def readNoRowLabel(datafile,delimiter){
-				TwoDMap map = this;
-				new File(datafile).withReader{r->
-					def headings = r.readLine().split(delimiter)
-					headings = headings[1..-1] // omit Feature label...
+		def readNoRowLabel(datafile,delimiter){
+			TwoDMap map = this;
+			new File(datafile).withReader{r->
+				def headings = r.readLine().split(delimiter)
+				headings = headings[1..-1] // omit Feature label...
 
-					def rowIdx = 0;
-					r.splitEachLine(delimiter){fields->
-						//def rowName = fields[0]
-						rowName = "Row$rowIdx"
-						headings.eachWithIndex{h,i->
-							map[rowName][h] = fields[i+1]		
-						}
-					}		
-				}
-				return(map)
+				def rowIdx = 0;
+				r.splitEachLine(delimiter){fields->
+					//def rowName = fields[0]
+					rowName = "Row$rowIdx"
+					headings.eachWithIndex{h,i->
+						map[rowName][h] = fields[i+1]		
+					}
+				}		
 			}
+			return(map)
+		}
 
 
 		/***

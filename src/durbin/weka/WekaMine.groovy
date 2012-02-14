@@ -446,7 +446,7 @@ class WekaMine{
 			err.println "NO discretization"
 			cutoffString = "none"
 		}else if (discretization == 'nominal'){
-			err.print "Creating nominal attributes from coded numeric values."
+			err.print "Creating nominal attributes from coded numeric values for class $classAttribute"
 			cutoffString = 'nominal'
 			(instances,cutoffString) = classToNominal(instances,classAttribute)
 			err.println "done."

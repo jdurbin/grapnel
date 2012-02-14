@@ -9,6 +9,7 @@ package durbin.weka;
 */
 public class WekaNames{
 	
+	static err = System.err
 	
 	/***
 	* Given: weka.classifiers.trees.J48 -C 0.25 -M 2 <br><br>
@@ -21,6 +22,16 @@ public class WekaNames{
 				return(m[0][1])
 			}
 		}
+		
+		m = (spec =~ /durbin\.weka\.\w+/)		
+		if (m.size() >=1){		
+			if (m[0].size() >=1){
+				return(m[0][1])
+			}
+		}
+				
+		err.println "Null base classifier?"
+		err.println "match: $m"
 		return(null)
 	}
 }
