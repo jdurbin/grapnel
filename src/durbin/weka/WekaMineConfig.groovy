@@ -18,6 +18,46 @@ class WekaMineConfig extends ArrayList{
 
 	def params;
 	
+	def WekaMineConfig(){}
+		
+	/**
+	* Reads the configuration as a flat list of experiments instead of a config file. 
+	*/ 
+	def readFlat(String experimentList,Range range){
+		def headingMap = WekaMineResult.defaultHeadingMap()
+		def lineIdx = 0;
+		new File(experimentList).withReader{r->
+			String heading = r.readLine()
+			lineIdx = 0;
+			
+			// If -1 given in range, go from From to end...
+			if (range.getTo() == -1){
+				range.eachLine{expStr->
+					if (lineIdx >= range.getFrom()){
+						this << new ExperimentSpec(expStr,headingMap);
+					}
+					lineIdx++
+				}
+			}else{			
+				r.eachLine{expStr->
+					if (range.contains(lineIdx)){
+						this << new ExperimentSpec(expStr,headingMap);
+					}
+					lineIdx++
+				}
+			}
+		}
+	
+		params = new java.util.Properties()
+		
+		// default parameters since flat config file doesn't have any...
+		// Hmmm.. maybe these should be tacked onto the end of each experiment...
+		params.cvFolds = 10;
+		params.cvSeed = -1;		
+	
+		return(lineIdx);
+	}
+		
 	/**
 	* If there is a chance the config will contain the "ALL" keyword, this version of the 
 	* constructor will be able to fill in the headers...

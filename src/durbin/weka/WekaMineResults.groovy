@@ -34,6 +34,8 @@ class WekaMineResult{
 	String dataFile
 	
 	static def headingStr = "attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,dataFile,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    		
+	static def expHeadingStr = "attrEval,attrSearch,numAttrs,classifier,classAttr,discretization"
+	
 	
 	String toString(){
 		def sb = []

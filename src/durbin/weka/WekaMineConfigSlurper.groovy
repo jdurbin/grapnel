@@ -83,7 +83,8 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     // User defined fields...
     //println cfg.algorithms.keySet()
     cfg.expand.keySet().each{sectionKey->
-      def sectionContents = cfg.expand."$sectionKey"      
+      def sectionContents = cfg.expand."$sectionKey"  
+    
       sectionContents.each{item->        
         def hasBeenExpanded = false // flag to note if something has been expanded in any way. 
 
@@ -101,7 +102,8 @@ class WekaMineConfigSlurper extends ConfigSlurper{
         if (item.contains("\$")){            
           // Since item may already be brace expanded, need to pass in the entire
           // list of brace expansions to expandDollarSign
-          expandedList = expandDollarSign(substitutionMap,expandedList)
+          //expandedList = expandDollarSign(substitutionMap,expandedList)
+					expandedList = WekaMineConfigSlurperUtils.expandDollarSign(substitutionMap,expandedList)
 
           substitutionMap.putAll(sectionKey,expandedList)  
           hasBeenExpanded = true          
@@ -140,10 +142,12 @@ class WekaMineConfigSlurper extends ConfigSlurper{
         //    group1 = m[0][1]
         item.find(matchBraceContents){fullmatch,group1->  
           bAnyNewMatches = true;
-          def r = parsefields(group1)    
-					def start = r.start
-					def stop = r.stop
-					def inc = r.inc
+  				
+					def fields = group1.split(",")
+				  def start = fields[0] as Double
+				  def stop = fields[1] as Double
+				  def inc = fields[2] as Double
+  
           for(double value = start;value <= stop;value+= inc){
             def newItem = item.replaceFirst(matchBraceContents,value as String)
             //println "BRACES NEWLIST: $newItem"
@@ -157,6 +161,7 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     // them...
     if (bAnyNewMatches){
       newlist = expandBraces(newlist)
+			return(newlist)
     }else{  
       // otherwise, recursion is over, return the list we have
       return(list)
@@ -193,8 +198,10 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     // them...
     if (bAnyNewMatches){
       newlist = expandDollarSign(substitutionMap,newlist)
+			return(newlist)
     }else{  
       // otherwise, recursion is over, return the list we have
+			//System.err.println "RECURSION OVER list.size = "+list.size()
       return(list)
     }
   }

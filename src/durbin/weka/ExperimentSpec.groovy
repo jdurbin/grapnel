@@ -55,6 +55,8 @@ class ExperimentSpec{
 		}						
 	}
 
+
+
     
 		/***
 		* Takes a comma separated string and creates an experiment from it. 
@@ -95,5 +97,10 @@ class ExperimentSpec{
    String toString(){
      def rstr = attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization+","+dataFile
      return(rstr);
-   }    
+   } 
+
+	 String toOutputString(){
+     def rstr = attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization
+     return(rstr);
+   }   
 }
