@@ -153,6 +153,8 @@ public class Table extends GroovyObjectSupport{
 	public int numCols;
 	public int numRows;
 	
+	public int colOffset = 1; // Default doesn't include first column in table. 
+		
   public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
@@ -168,7 +170,13 @@ public class Table extends GroovyObjectSupport{
   public Table(String fileName,String delimiter) throws Exception{
     readFile(fileName,delimiter);
   }
-    
+
+
+	public Table(String fileName,String delimiter,boolean bFirstRowInTable) throws Exception{
+		setFirstRowInTable(bFirstRowInTable);
+    readFile(fileName,delimiter);
+  }
+
   public Table(String fileName) throws Exception{
     readFile(fileName,"\t");
   }
@@ -194,19 +202,37 @@ public class Table extends GroovyObjectSupport{
 		return(numCols);
 	}
 	
+	
+	public void setFirstRowInTable(boolean bFirstRowInTable){		
+		// The first row will always populate the rowNames, but sometimes we want
+		// to put the first row in the table itself (e.g. when stuffing into JTable)
+		if(bFirstRowInTable){
+			colOffset = 0;			
+		}else{
+			colOffset = 1;
+		}
+	}
+	
 	/***
   * Parse the column names from a line. 
   */ 
-  public static String[] parseColNames(String line,String regex){
+  public String[] parseColNames(String line,String regex){
     // Not quite right, because includes spurious 0,0 column. 
 		String[] fields = line.split(regex,-1); // -1 to include empty cols.
-		String[] colNames = new String[fields.length-1];
+				
+		String[] colNames;
 		
-		//System.out.println("colNames.length="+colNames.length+" fields.lenght="+fields.length);
-		
-		for(int i = 1;i < fields.length;i++){
-		  //System.out.println("i-1 : "+(i-1)+" i :"+i);
-		  colNames[i-1] = (fields[i]).trim();
+		// If we are reading the first row in as a column, need to 
+		if (colOffset == 0){
+			colNames = new String[fields.length];
+			for(int i = 0;i < fields.length;i++){
+		  	colNames[i] = (fields[i]).trim();
+			}
+		}else{
+			colNames = new String[fields.length-1];
+			for(int i = 1;i < fields.length;i++){
+		  	colNames[i-1] = (fields[i]).trim();
+			}
 		}		
 		return(colNames);
 	}
@@ -312,7 +338,8 @@ public class Table extends GroovyObjectSupport{
 			rowNames[rowIdx] = tokens[0].trim();
 									      
       for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
-        matrix.setQuick(rowIdx,colIdx,tokens[colIdx+1]);                
+				//System.err.println("rowIdx:"+rowIdx+" colIdx:"+colIdx+" colOffset:"+colOffset+" tokens.length:"+tokens.length);
+        matrix.setQuick(rowIdx,colIdx,tokens[colIdx+colOffset]);                
       }     
 			rowIdx++;
 		}
@@ -355,7 +382,7 @@ public class Table extends GroovyObjectSupport{
   		rowNames[rowIdx] = tokens[0].trim();
 
       for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
-        matrix.setQuick(rowIdx,colIdx,c.call(tokens[colIdx+1]));                
+        matrix.setQuick(rowIdx,colIdx,c.call(tokens[colIdx+colOffset]));                
       }     
   		rowIdx++;
   	}

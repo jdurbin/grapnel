@@ -198,6 +198,8 @@ class TwoDMap extends MultidimensionalMap{
         colKeys.each{colKey->
           def val = this[rowKey][colKey]
           if (val == [:]) rowVals << nullVal
+					else if (val == "null") rowVals << nullVal
+					else if (val == "NULL") rowVals << nullVal
           else rowVals << val
         }
         print  "$rowKey$delimiter"
@@ -263,4 +265,46 @@ class TwoDMap extends MultidimensionalMap{
         }
       }        
     }
+
+
+
+/**   Clean up and make a merge function...
+mergeByRowKey  something like that...
+		err.print "Reading $f1..."
+		d1 = new TwoDMap(f1,"\t")
+		err.println "done. ${d1.rows()}x${d1.cols()}"
+
+		err.print "Reading $f2..."
+		d2 = new TwoDMap(f2,"\t")
+		err.println "done. ${d2.rows()}x${d2.cols()}"
+
+
+		tout = new TwoDMap()
+
+		d1rows = d1.rowKeySet()
+		d1cols = d1.colKeySet()
+
+		d2rows = d2.rowKeySet()
+		d2cols = d2.colKeySet()
+
+		d1rows.each{patientID->
+			// If a patient isn't in both tables, omit it. 
+			if (d2rows.contains(patientID)){
+				d1cols.each{feature->
+					tout[patientID][feature] = d1[patientID][feature]
+				}
+				d2cols.each{feature->
+					tout[patientID][feature] = d2[patientID][feature]
+				}				
+			}
+		}
+*/
+
+
+
+
+
+
+
+
 }

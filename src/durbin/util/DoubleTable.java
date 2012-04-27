@@ -38,6 +38,8 @@ public class DoubleTable extends GroovyObjectSupport{
 	public int numCols;
 	public int numRows;
 	
+	public int colOffset = 1; // Default doesn't include first column in table. 
+	
   public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
@@ -80,8 +82,17 @@ public class DoubleTable extends GroovyObjectSupport{
   public DoubleTable(String fileName,Closure c) throws Exception{
     readFile(fileName,"\t",c);
   }
-  
-  
+
+	public void setFirstRowInTable(boolean bFirstRowInTable){		
+		// The first row will always populate the rowNames, but sometimes we want
+		// to put the first row in the table itself (e.g. when stuffing into JTable)
+		if(bFirstRowInTable){
+			colOffset = 0;			
+		}else{
+			colOffset = 1;
+		}
+	}
+    
   /***
   * Create and read a table from a file, applying the closure to each cell 
   * in the table as it is read and before it is saved to the table (e.g. to 
@@ -220,7 +231,7 @@ public class DoubleTable extends GroovyObjectSupport{
 									      
       for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
 				//System.err.println("colIdx:"+colIdx+" tokens: "+tokens[colIdx+1]);
-        matrix.setQuick(rowIdx,colIdx,Double.parseDouble(tokens[colIdx+1]));                
+        matrix.setQuick(rowIdx,colIdx,Double.parseDouble(tokens[colIdx+colOffset]));                
       }     
 			rowIdx++;
 		}
@@ -263,7 +274,7 @@ public class DoubleTable extends GroovyObjectSupport{
   		rowNames[rowIdx] = tokens[0].trim();
 
       for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
-        matrix.setQuick(rowIdx,colIdx,(Double) c.call(Double.parseDouble(tokens[colIdx+1])));                
+        matrix.setQuick(rowIdx,colIdx,(Double) c.call(Double.parseDouble(tokens[colIdx+colOffset])));                
       }     
   		rowIdx++;
   	}

@@ -103,7 +103,7 @@ class WekaMineConfigSlurper extends ConfigSlurper{
           // Since item may already be brace expanded, need to pass in the entire
           // list of brace expansions to expandDollarSign
           //expandedList = expandDollarSign(substitutionMap,expandedList)
-					expandedList = WekaMineConfigSlurperUtils.expandDollarSign(substitutionMap,expandedList)
+					expandedList = WekaMineConfigUtils.expandDollarSign(substitutionMap,expandedList)
 
           substitutionMap.putAll(sectionKey,expandedList)  
           hasBeenExpanded = true          
@@ -168,13 +168,50 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     }
   }
 
+
+
+	/**
+	* Repeatedly expand dollar sign substitutions until all expansions are complete. 
+	* Returns a list of completely expanded items.  Note: it is up to user to ensure that
+	* configuration file is structured so that dependencies come before the thing that
+	* depends on them. 
+	*/ 
+	def expandDollarSign(substitutionMap,list){
+		def bAnyNewMatches;
+		while(true){
+			bAnyNewMatches = false;
+	  	def newlist = []
+	  	list.each{item->
+	    	if (item.contains("\$")){   
+	        bAnyNewMatches = true;
+	      	item.find(nextKeyword){fullmatch,keyword->         
+	        	def keywordExpansions = substitutionMap.get(keyword)
+	        	keywordExpansions.each{ value ->
+	          	def newItem = item.replaceFirst(nextKeyword,value)
+	          	//println "DOLLAR NEWLIST: $newItem"
+	          	newlist << newItem
+	        	}
+	      	}
+	    	}
+				//println "bAnyNewMatches: $bAnyNewMatches"
+	  	}
+			
+			// No new matches found, so return the list we have...
+			if (!bAnyNewMatches) return(list)
+
+			// otherwise we found some unexpanded keywords, maybe there are more, so continue to 
+			// search for them...
+			list = newlist
+		}
+	} 
+
   /**
   * Recursively expand dollar sign substitutions until all expansions are complete. 
   * Returns a list of completely expanded items.  Note: it is up to user to ensure that
   * configuration file is structured so that dependencies come before the thing that
   * depends on them. 
   */ 
-  def expandDollarSign(substitutionMap,list){
+  def expandDollarSignOld(substitutionMap,list){
 
     def bAnyNewMatches = false;
 
@@ -197,7 +234,7 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     // we found some unexpanded keywords, maybe there are more, so search for 
     // them...
     if (bAnyNewMatches){
-      newlist = expandDollarSign(substitutionMap,newlist)
+      newlist = expandDollarSignOld(substitutionMap,newlist)
 			return(newlist)
     }else{  
       // otherwise, recursion is over, return the list we have

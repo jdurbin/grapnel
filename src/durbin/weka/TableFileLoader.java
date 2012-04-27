@@ -69,6 +69,18 @@ public class TableFileLoader {
 		return(data);
 	}
 	
+	/**
+	* Read table forcing everything to be treated as nominal
+	*/ 
+	public Instances readNominal(String fileName,String relationName,String delimiter,boolean rowsAreInstances,
+	                      Closure c) throws Exception {
+		Table t = new Table(fileName,delimiter,c);
+		Instances data = tableRowsToNominalInstances(t,relationName);
+		return(data);
+	}
+
+
+
 	public Instances read(String fileName,String relationName,String delimiter,boolean rowsAreInstances,
 	                      Closure c) throws Exception {
 		Table t = new Table(fileName,delimiter,c);
@@ -196,6 +208,80 @@ public class TableFileLoader {
 	}
 	
 	
+	/****************************************************
+  *  Convert a table to a set of instances, with <b>rows</b> representing individual </b>instances</b>
+  *  and <b>columns</b> representing <b>attributes</b> 
+  */
+	public Instances tableRowsToNominalInstances(Table t,String relationName) {	
+	  
+		System.err.print("Converting table rows to instances...");
+		
+		// Set up attributes, which for rowInstances will be the colNames...
+		FastVector atts = new FastVector();
+		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
+		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...				
+
+
+		System.err.print("creating attributes...");
+
+		for (int c = 0;c < t.numCols;c++) {	
+				// It's nominal... determine the range of values		
+			isNominal.add(true);
+			FastVector attVals = getColValues(t,c);
+			atts.addElement(new Attribute(t.colNames[c],attVals));
+			// Save it for later
+			allAttVals.add(attVals);
+		}
+			
+		System.err.print("creating instances...");
+
+		// Create Instances object..
+		Instances data = new Instances(relationName,atts,0);
+		data.setRelationName(relationName);
+
+		// Fill the instances with data...
+		// For each instance...
+		for (int r = 0;r < t.numRows;r++) {
+			double[] vals = new double[data.numAttributes()];
+
+			// for each attribute			
+			for (int c = 0;c < t.numCols;c++) {			    
+				String val = (String) t.matrix.getQuick(r,c);
+				if (val == "?") vals[c] = Instance.missingValue();
+				else if (isNominal.get(c)){
+					vals[c] = allAttVals.get(c).indexOf(val);
+				}else{ 
+					vals[c] = Double.parseDouble((String)val);												
+				}
+			}
+			// Add the a newly minted instance with those attribute values...
+			data.add(new Instance(1.0,vals));
+		}
+		
+		System.err.print("add feature names..."); 
+		
+		if (addInstanceNamesAsFeatures){		  		  
+			Instances newData = new Instances(data);
+	    newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
+	    int attrIdx = newData.attribute("ID").index(); // Paranoid... should be 0
+
+	    // We save the instanceNames in a list because it's handy later on...
+	    instanceNames = new ArrayList<String>();
+
+	    for(int r = 0;r < t.rowNames.length;r++){
+				instanceNames.add(t.rowNames[r]);
+				newData.instance(r).setValue(attrIdx,t.rowNames[r]);
+	    }
+			data = newData;
+	  }		
+	
+		System.err.println("done.");
+		
+		return(data);
+	}
+	
+	
+	
   /****************************************************
   *  Convert a table to a set of instances, with <b>rows</b> representing individual </b>instances</b>
   *  and <b>columns</b> representing <b>attributes</b> 
@@ -310,7 +396,7 @@ public class TableFileLoader {
 	* to determine the type of the whole column. 
 	* 
 	*/ 
-	public boolean columnIsNumeric(Table t,int col){		
+	public boolean columnIsNumericQND(Table t,int col){		
 		// Find first non-missing value in row...
 		String testValue = "";
 		for(int r = 0;r < t.numRows;r++){
@@ -318,13 +404,35 @@ public class TableFileLoader {
 			if (testValue !="?") break; 						
 		}
 
-		// See if it's numeric...
+		// See if it's numeric...	
 		Scanner scanner = new Scanner(testValue);
 		if (scanner.hasNextDouble()){
 			return(true);
 		}else{
 			return(false);
 		}
+	}
+	
+	
+	/****
+	* Test if a column is all numeric or if it is a nominal column
+	* This is a QND test that only checks the first non-missing value 
+	* to determine the type of the whole column. 
+	* 
+	*/ 
+	public boolean columnIsNumeric(Table t,int col){		
+		String testValue = "";
+		for(int r = 0;r < t.numRows;r++){
+			testValue = (String) t.matrix.getQuick(r,col);
+			if (testValue =="?") continue;
+			
+			// See if it's numeric...	
+			Scanner scanner = new Scanner(testValue);
+			if (!scanner.hasNextDouble()){
+				return(false); // Finding one non null non number means it's nominal...
+			}
+		}
+		return(true);  // Didn't find any non-numbers. 
 	}
 	
 

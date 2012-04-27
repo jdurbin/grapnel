@@ -122,7 +122,10 @@ class WekaMine{
 	}
 	
 	
-	
+	/*
+	* KJD:  This doesn't seem to be used anywhere.  Also, it only works for numeric
+	* attributes.... need something different for nominal attributes. 
+	*/ 
 	static addAttributeAt(instances,attributeValues,attributeName){
 		instances.insertAttributeAt(new Attribute(attributeName,(FastVector)null),0)
 		int attrIdx = instances.attribute(attributeName).index(); // Paranoid... should be 0
@@ -416,8 +419,10 @@ class WekaMine{
 	}
 	
 
+	// TODO KJD: This should just be discretizeAttribute where attribute is passed in...
+	// not specific to class...
 	def discretizeClassAttribute(instances){
-		discretizeClassAttribute(instances,exp.discretization,exp.classAttribute)
+		return(discretizeClassAttribute(instances,exp.discretization,exp.classAttribute))
 	}
 
 	
@@ -450,6 +455,8 @@ class WekaMine{
 			cutoffString = 'nominal'
 			(instances,cutoffString) = classToNominal(instances,classAttribute)
 			err.println "done."
+		}else if (discretization == 'dichotomize'){
+			err.println "dichotomize"
 		}else{
 			err.println "UNKNOWN discretization: "+discretization
 		}
@@ -581,6 +588,7 @@ class WekaMine{
 		
 		return(eval)		
 	}
+	
 	
 	
 	static def classToNominal(data,classAttribute){
@@ -856,8 +864,33 @@ class WekaMine{
 		err.println "done."
     return(data)
   }
- 
-	
+ 	
+	/**
+  * Read instances from a table, filling in missing value tokens as we go. 
+  */ 
+  static Instances readNominalFromTable(dataFileName,instancesInRows){
+    // Read data in from table.  Handle missing values as we go.
+    err.print "Loading data from $dataFileName..."
+    TableFileLoader loader = new TableFileLoader()
+    loader.setAddInstanceNamesAsFeatures(true)
+
+		def relationName = dataFileName;
+    Instances data = loader.readNominal(dataFileName,relationName,"\t",instancesInRows){  
+
+      // Lots of different missing value notations...
+      if ((it == "") || (it == null) || (it == "NA") || 
+         (it == "null") || (it == 'NULL') || 
+         (it == "?")){
+        return ("?")
+      }else{
+        //return(it as Double)  //KJD 5/16
+			  return(it)
+      }
+    }
+    //err.println "DEBUG ${data.numInstances()} x ${data.numAttributes()} done."
+    return(data)
+  }
+
 	
   /**
   * Read instances from a table, filling in missing value tokens as we go. 

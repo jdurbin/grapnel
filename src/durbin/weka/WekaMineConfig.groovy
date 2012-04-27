@@ -20,6 +20,7 @@ class WekaMineConfig extends ArrayList{
 	
 	def WekaMineConfig(){}
 		
+		
 	/**
 	* Reads the configuration as a flat list of experiments instead of a config file. 
 	*/ 
