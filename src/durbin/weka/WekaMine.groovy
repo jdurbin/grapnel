@@ -319,8 +319,6 @@ class WekaMine{
 	static def writeClusterJobListStdout(args,numExperiments,experimentsPerJob,scriptFile,outRoot){
 		
 		
-		err.println "writeClusterJobListStdout!!!"
-		
 		// Remove the -k option, keep all the rest...
 		def newargs = []
 		def bRemoveNext = false;
@@ -362,7 +360,7 @@ class WekaMine{
 			//System.err.println "last loop: jobStart: $jobStart, jobEnd: $jobEnd"
 			
 			def outName = "${outRoot}_${jobStart}_${jobEnd}"
-			def cmdOut = "${rootCmd} -r $jobStart,$jobEnd > ${outName}"
+			def cmdOut = "${rootCmd} -r $jobStart,$jobEnd  >  ${outName}"
 			println cmdOut
 		}		
 	}
