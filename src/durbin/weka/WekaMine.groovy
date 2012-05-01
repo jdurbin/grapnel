@@ -312,6 +312,63 @@ class WekaMine{
 		return(instances)
 	}
 	
+	
+	/***
+	* Write out a list of lines, one for each cluster job, ready for Parasol or gsub or whatever.
+	*/ 
+	static def writeClusterJobListStdout(args,numExperiments,experimentsPerJob,scriptFile,outRoot){
+		
+		
+		err.println "writeClusterJobListStdout!!!"
+		
+		// Remove the -k option, keep all the rest...
+		def newargs = []
+		def bRemoveNext = false;
+		args.each{arg->
+			if ((!arg.contains("-k")) && !bRemoveNext){
+				newargs << arg
+			}else{
+				bRemoveNext = true;
+			}
+		}
+					
+		def rootCmd = "${scriptFile} ${newargs.join(" ")}"
+		def expPerJob = Double.parseDouble(experimentsPerJob) // convert string value to double
+		def numJobs = (double)numExperiments/(double)expPerJob				
+		//System.err.println("numExperiments: $numExperiments  numJobs: $numJobs")
+				
+		int jobStart = 0
+		int jobEnd = expPerJob -1;
+		(0..<numJobs).each{
+			//System.err.println "0..<$numJobs: jobStart: $jobStart\tjobEnd: $jobEnd"
+			def outName = "${outRoot}_${jobStart}_${jobEnd}"
+			def cmdOut = "${rootCmd} -r $jobStart,$jobEnd > ${outName}"
+		  println cmdOut
+		  jobStart += expPerJob
+		  jobEnd += expPerJob				
+		}
+
+		// Handle remainder experiments..
+
+		def lastExperiment = (jobEnd-expPerJob)
+		
+		//System.err.println "lastExperiment: jobstart: $jobStart, jobend: $jobEnd, $lastExperiment"
+		//System.err.println "lastExperiment $lastExperiment < numExperiments: $numExperiments"
+		if (lastExperiment < numExperiments-1){
+		  jobStart = lastExperiment+1
+		  jobEnd = numExperiments-1
+		
+			if (jobEnd < jobStart) jobEnd = jobStart
+			//System.err.println "last loop: jobStart: $jobStart, jobEnd: $jobEnd"
+			
+			def outName = "${outRoot}_${jobStart}_${jobEnd}"
+			def cmdOut = "${rootCmd} -r $jobStart,$jobEnd > ${outName}"
+			println cmdOut
+		}		
+	}
+	
+	
+	
 	/***
 	* Write out a list of lines, one for each cluster job, ready for Parasol or gsub or whatever.
 	*/ 

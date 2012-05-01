@@ -171,28 +171,62 @@ class TwoDMap extends MultidimensionalMap{
 			return(map)
 		}
 
-    
-    /**
+
+
+		/**
     * Print out a 2D table that has max keys in each direction...
     */ 
-    def printTable(delimiter,nullVal){
+/*  Bizarre... this doesn't work... the mere introduction of new File()
+    breaks it...
+
+    def writeTable(String fileName,delimiter,nullVal){
 
       def rowKeys = rowKeySet()
-
-      // Find the union of all column keys...
-//      def colKeys = [] as Set
- //     rowKeys.each{rowKey->
-  //      colKeys = colKeys + this[rowKey].keySet()
-   //   }
-
 			def colKeys = colKeySet()
+
+			bob = new File(fileName)
 
       // Print the heading...
       print "Features$delimiter"
       println colKeys.join(delimiter)
 
       // Print the table proper...
+      rowKeys.each{rowKey->
+        def rowVals = []
+        colKeys.each{colKey->
+          def val = this[rowKey][colKey]
+          if (val == [:]) rowVals << nullVal
+					else if (val == "null") rowVals << nullVal
+					else if (val == "NULL") rowVals << nullVal
+          else rowVals << val
+        }
+        print  "$rowKey$delimiter"
+        println rowVals.join(delimiter)        
+      }
+    }
+*/
+		
 
+	  def printTable(delimiter,nullVal){
+			printTable(delimiter,nullVal,heading=true)
+		}
+
+    
+    /**
+    * Print out a 2D table that has max keys in each direction...
+    */ 
+    def printTable(delimiter,nullVal,heading){
+
+      def rowKeys = rowKeySet()
+			def colKeys = colKeySet()
+
+			if (heading){
+      	// Print the heading...
+      	print "Features$delimiter"
+      	println colKeys.join(delimiter)
+			}
+
+      // Print the table proper...
       rowKeys.each{rowKey->
         def rowVals = []
         colKeys.each{colKey->
@@ -208,35 +242,41 @@ class TwoDMap extends MultidimensionalMap{
     }
     
 
+		//def writeTable(File out){
+		//	writeTable(out,"\t","NA"){}
+		//}
 
-
-		def writeTable(File out){
-			writeTable(out,"\t","NA"){}
-		}
-
-		def writeTable(File out,Closure c){
-			writeTable(out,"\t","NA",c)
-		}
+		//def writeTable(File out,Closure c){
+		//	writeTable(out,"\t","NA",c)
+		//}
 		
 
-		def writeTable(String fileName){
-			writeTable(fileName,"\t","NA"){}
-		}
+		//def writeTable(String fileName){
+		//	writeTable(fileName,"\t","NA")
+		//}
 		
-		def writeTable(fileName,delimiter,nullVal){
-			out = new File(fileName)
-			writeTable(fileName,delimiter,nullValue){}
-		}
-
-
-
-
-    /**
+		//def writeTable(String fileName,delimiter,nullVal){
+		//	out = new File(fileName)
+		//	writeTable(out,delimiter,nullValue){
+		//		it
+		//	}
+		//}
+		
+		
+	
+		
+		/**
     * Write out a 2D table that has max keys in each direction...
     */ 
-    def writeTable(File out,delimiter,nullVal,Closure c){
+/*
+    def writeTable(String fileName){
 
+			out = new File(fileName)
+			delimiter = "\t"
+			nullVal = "null"
       out.withWriter(){w->
+	
+				err.println "DEBUG***** "+this.class
 
         def rowKeys = this.keySet()
 
@@ -244,7 +284,14 @@ class TwoDMap extends MultidimensionalMap{
         def colKeys = [] as Set
                   
         rowKeys.each{rowKey->
-          colKeys = colKeys + this[rowKey].keySet()
+					err.println "rowKey = $rowKey"
+					err.println "this.clas="+this.class
+					err.println "this.[rowkey]= "+this[rowKey]
+					//err.println "this[rowKey].class"+bob.class
+					rowKeyRow = this[rowKey]
+					err.println "rowKeyRow.class="+rowKeyRow.class
+					
+          colKeys = colKeys + (rowKeyRow.keySet())
         }
 
         // Print the heading...
@@ -258,14 +305,15 @@ class TwoDMap extends MultidimensionalMap{
           colKeys.each{colKey->
             def val = this[rowKey][colKey]
             if (val == [:]) rowVals << nullVal
-            else rowVals << c.call(val)
+            else rowVals << val
           }
           w.write("$rowKey$delimiter")
           w.writeLine(rowVals.join(delimiter))
         }
       }        
     }
-
+*/
+		
 
 
 /**   Clean up and make a merge function...

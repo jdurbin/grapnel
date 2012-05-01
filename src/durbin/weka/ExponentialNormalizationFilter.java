@@ -8,10 +8,6 @@ import weka.filters.*;
 import org.apache.commons.math.stat.ranking.*;
 import org.apache.commons.math.distribution.*;
 
-//***********************************************************************
-//***************  NOT FUNCTIONING YET... BEING WRITTEN *****************
-//***********************************************************************
-
 public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 
 	static{WekaAdditions.enable();}
