@@ -211,6 +211,39 @@ class TwoDMap extends MultidimensionalMap{
 			printTable(delimiter,nullVal,heading=true)
 		}
 
+
+		/**
+    * Crazy hack because can't seem to get write to work!!
+    */ 
+    def getLines(delimiter,nulVal,heading){
+
+      def rowKeys = rowKeySet()
+			def colKeys = colKeySet()
+
+			def lines = []
+
+			if (heading){
+      	// Print the heading...				
+      	def aline =  "Features$delimiter"+colKeys.join(delimiter)
+				lines << aline
+			}
+
+      // Print the table proper...
+      rowKeys.each{rowKey->
+        def rowVals = []
+        colKeys.each{colKey->
+          def val = this[rowKey][colKey]
+          if (val == [:]) rowVals << nullVal
+					else if (val == "null") rowVals << nullVal
+					else if (val == "NULL") rowVals << nullVal
+          else rowVals << val
+        }
+				def aline = "$rowKey$delimiter" + rowVals.join(delimiter) 
+				lines << aline
+      }
+			return(lines)
+    }
+
     
     /**
     * Print out a 2D table that has max keys in each direction...
