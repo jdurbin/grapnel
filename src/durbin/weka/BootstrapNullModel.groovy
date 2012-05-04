@@ -8,6 +8,15 @@ import hep.aida.bin.DynamicBin1D;
 */ 
 class BootstrapNullModel implements Serializable{
 	
+	
+	// Set to the auto value because a big run produced serialized objects with this
+	// value that I don't want to throw away. 
+	static final long serialVersionUID = -7698666011979768695;
+	
+	// BRCA_IPZ run used this serialVersionUID.  Oughf.  
+	//serialVersionUID = 2661308148788524061, local class 
+	
+	
 	static{
 		WekaAdditions.enable()
 	}
