@@ -275,33 +275,30 @@ class TwoDMap extends MultidimensionalMap{
     }
     
 
-		//def writeTable(File out){
-		//	writeTable(out,"\t","NA"){}
-		//}
+		def writeTable(File out){
+			writeTable(out,"\t","NA"){}
+		}
 
-		//def writeTable(File out,Closure c){
-		//	writeTable(out,"\t","NA",c)
-		//}
+		def writeTable(File out,Closure c){
+			writeTable(out,"\t","NA",c)
+		}
 		
 
-		//def writeTable(String fileName){
-		//	writeTable(fileName,"\t","NA")
-		//}
+		def writeTable(String fileName){
+			writeTable(fileName,"\t","NA")
+		}
 		
-		//def writeTable(String fileName,delimiter,nullVal){
-		//	out = new File(fileName)
-		//	writeTable(out,delimiter,nullValue){
-		//		it
-		//	}
-		//}
+		def writeTable(String fileName,delimiter,nullVal){
+			out = new File(fileName)
+			writeTable(out,delimiter,nullValue){
+				it
+			}
+		}
 		
-		
-	
 		
 		/**
     * Write out a 2D table that has max keys in each direction...
     */ 
-/*
     def writeTable(String fileName){
 
 			out = new File(fileName)
@@ -345,7 +342,6 @@ class TwoDMap extends MultidimensionalMap{
         }
       }        
     }
-*/
 		
 
 
