@@ -181,6 +181,17 @@ class WekaMineModel implements Serializable{
 		printResultsAndCompare(System.out,results,dataSampleIDs,clinical)
 	}
 	
+	
+	/***
+	*
+	*/	
+	def accuracy(dataSampleIDs,results,clinical){
+		def tp,tn,fp,fn
+		(tp,tn,fp,fn) = confusionMatrixFor(dataSampleIDs,results,clinical)
+		def accuracy = (tp+tn)/(tp+tn+fp+fn)
+		return(accuracy)
+	}
+	
 	/***
 	*	Evaluate the accuracy of the given results...
 	*/
@@ -215,7 +226,7 @@ class WekaMineModel implements Serializable{
 			def val0 = classSet[0]
 			def val1 = classSet[1]					
 
-			confusionForSample = []
+			def confusionForSample = []
 			
 			// Now compare predictions with actual values...
 			results.eachWithIndex{result,i->

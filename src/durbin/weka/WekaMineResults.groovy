@@ -387,6 +387,20 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
       out<<"\n"      
   } 
 
+ 	/****
+  * Appends a results summary line to the output stream out
+  *
+  */ 
+  static void appendSummaryLineWithHoldout(jobIdx,data,out,experiment,eval,dataName,holdoutAcc){
+	
+			holdoutAcc = holdoutAcc.round(4)
+	
+      // Append a summary line to a file. 
+			out << getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
+			out <<","
+			out << holdoutAcc
+      out<<"\n"      
+  }
 
 
 	/****

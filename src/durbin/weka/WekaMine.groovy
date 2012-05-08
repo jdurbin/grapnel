@@ -416,7 +416,8 @@ class WekaMine{
 		  println cmdOut
 		}		
 	}
-		
+	
+	
 	
 	/****
 	*	Removes censored samples that, due to being censored, can't be placed cleanly in one
@@ -543,6 +544,10 @@ class WekaMine{
 	    asClassifier.setSearch(search);                
 	  }
 		return(asClassifier)
+	}
+	
+	def appendSummaryWithHoldout(out,idx,instances,holdoutAcc){
+		WekaMineResults.appendSummaryLineWithHoldout(idx,instances,out,exp,eval,dataName,holdoutAcc)
 	}
 	
 	def appendSummary(out,idx,instances){		
