@@ -17,6 +17,10 @@ import org.codehaus.groovy.runtime.*;
 
 //import org.codehaus.groovy.runtime.DefaultGroovyMethodsSupport.RangeInfo;
 
+// KJD GroovyLab and the Matrix package might be mature enough that this should be 
+// backed with that.  Basically end up having a Table as a frame for a Matrix like in R. 
+// http://code.google.com/p/groovylab/
+
 
 /***
 * A 2D table of objects with methods to read from file, iterate over
@@ -33,12 +37,13 @@ public class DoubleTable extends GroovyObjectSupport{
 
 	// An somewhat efficient place to store the data...
 	public DoubleMatrix2D matrix;
-	public String[] colNames;
+	public String[] colNames;  // Groovy getters/setters only gen for non-public variables. 
 	public String[] rowNames;
 	public int numCols;
 	public int numRows;
 	
 	public int colOffset = 1; // Default doesn't include first column in table. 
+	boolean bFirstColInTable = false;
 	
   public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
@@ -78,15 +83,21 @@ public class DoubleTable extends GroovyObjectSupport{
   public DoubleTable(String fileName) throws Exception{
     readFile(fileName,"\t");
   }
+
+ 	public DoubleTable(String fileName,boolean bFirstColInTable) throws Exception{
+		setFirstColInTable(bFirstColInTable);
+    readFile(fileName,"\t");
+  }
   
   public DoubleTable(String fileName,Closure c) throws Exception{
     readFile(fileName,"\t",c);
   }
 
-	public void setFirstRowInTable(boolean bFirstRowInTable){		
+	public void setFirstColInTable(boolean firstColInTable){		
+		bFirstColInTable= firstColInTable;
 		// The first row will always populate the rowNames, but sometimes we want
 		// to put the first row in the table itself (e.g. when stuffing into JTable)
-		if(bFirstRowInTable){
+		if(bFirstColInTable){
 			colOffset = 0;			
 		}else{
 			colOffset = 1;
@@ -100,7 +111,7 @@ public class DoubleTable extends GroovyObjectSupport{
   */ 
   public DoubleTable(String fileName,String delimiter,Closure c) throws Exception{
      readFile(fileName,delimiter,c);
-   }
+  }
   
 	public int rows() {
 		return(numRows);
@@ -112,16 +123,20 @@ public class DoubleTable extends GroovyObjectSupport{
 	/***
   * Parse the column names from a line. 
   */ 
-  public static String[] parseColNames(String line,String regex){
+  public String[] parseColNames(String line,String regex){
     // Not quite right, because includes spurious 0,0 column. 
 		String[] fields = line.split(regex,-1); // -1 to include empty cols.
-		String[] colNames = new String[fields.length-1];
+		String[] colNames = new String[fields.length-colOffset];
 		
-		//System.out.println("colNames.length="+colNames.length+" fields.lenght="+fields.length);
+		//System.err.println("colNames.length="+colNames.length+" fields.length="+fields.length);
+		//System.err.println("fields:");
+		//for(int i = 0;i < fields.length;i++){
+		//	System.err.println("\tfields ["+i+"]="+fields[i]);
+		//}
 		
-		for(int i = 1;i < fields.length;i++){
-		  //System.out.println("i-1 : "+(i-1)+" i :"+i);
-		  colNames[i-1] = (fields[i]).trim();
+		for(int i = colOffset;i < fields.length;i++){
+		  //System.err.println("i-colOffset: "+(i-colOffset)+" i :"+i);
+		  colNames[i-colOffset] = (fields[i]).trim();
 		}		
 		return(colNames);
 	}
@@ -227,9 +242,13 @@ public class DoubleTable extends GroovyObjectSupport{
 		int rowIdx = 0;
 		while ((line = reader.readLine()) != null) {
 			String[] tokens = line.split(regex,-1);
-			rowNames[rowIdx] = tokens[0].trim();
+			if (bFirstColInTable){
+				rowNames[rowIdx] = "Row "+rowIdx;
+			}else{
+				rowNames[rowIdx] = tokens[0].trim();
+			}
 									      
-      for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
+      for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
 				//System.err.println("colIdx:"+colIdx+" tokens: "+tokens[colIdx+1]);
         matrix.setQuick(rowIdx,colIdx,Double.parseDouble(tokens[colIdx+colOffset]));                
       }     
@@ -270,10 +289,14 @@ public class DoubleTable extends GroovyObjectSupport{
     // Populate the matrix with values...
   	int rowIdx = 0;
   	while ((line = reader.readLine()) != null) {
-  		String[] tokens = line.split(regex,-1);  		  		
-  		rowNames[rowIdx] = tokens[0].trim();
+  		String[] tokens = line.split(regex,-1);  
+			if (bFirstColInTable){
+				rowNames[rowIdx] = "Row "+rowIdx;
+			}else{
+				rowNames[rowIdx] = tokens[0].trim();
+			}		  		
 
-      for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
+      for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
         matrix.setQuick(rowIdx,colIdx,(Double) c.call(Double.parseDouble(tokens[colIdx+colOffset])));                
       }     
   		rowIdx++;
@@ -281,7 +304,6 @@ public class DoubleTable extends GroovyObjectSupport{
 		createNameMap(rowNames,rowName2Idx);
 		System.err.println("done");
 	}
-	
 	
 
 	public Double get(int row,int col) {
@@ -329,27 +351,61 @@ public class DoubleTable extends GroovyObjectSupport{
   }
 		
   public DoubleVector getAt(String rowName){
+		//System.err.println("rowName: "+rowName);
+	
     int ridx = getRowIdx(rowName);
     return(getRow(ridx));
   }
+
+	
+	// KJD This is part of a change that isn't done...
+	//public DoubleVector getAt(IntRange r){ 
+		
+	//}
+
+	
+	/****************************************************
+  * Returns a view corresponding to the given range. 
+  */ 
+/*
+  public DoubleVector getAt(IntRange r){       
+		int from = r.getFromInt();
+		int to = r.getToInt();
+		// when one value is negative, to and from will be reversed...
+		if (from < 0) {
+			int oldto = to;
+			to =(int) data.size()+from; // 5 -1 = 4
+			from = oldto;						
+			if (from < 0){
+				from = (int)data.size()+from;
+			}
+		}
+    int start = from;
+    int width = to-start+1; 
+    return(new DoubleVector(data.viewPart(start,width)));
+  }*/
 	
 	
 	public DoubleVector getRow(int row){
-	   return(new DoubleVector(matrix.viewRow(row)));
+			// When return a row, want to have names for columns within the row...
+	   return(new DoubleVector(matrix.viewRow(row),colNames,colName2Idx));
 	}
 	
 	public DoubleVector getCol(int col){
-	   return(new DoubleVector(matrix.viewColumn(col)));
+	   return(new DoubleVector(matrix.viewColumn(col),rowNames,rowName2Idx));
 	}
 	
 	public DoubleVector getCol(String colStr){
 		int col = getColIdx(colStr);
-		return(new DoubleVector(matrix.viewColumn(col)));
+		return(new DoubleVector(matrix.viewColumn(col),rowNames,rowName2Idx));
 	}
+	
+	
+	
 	
 	public DoubleVector getRow(String rowStr){
 		int row = getRowIdx(rowStr);
-		return(new DoubleVector(matrix.viewRow(row)));
+		return(new DoubleVector(matrix.viewRow(row),colNames,colName2Idx));
 	}
 	
 	

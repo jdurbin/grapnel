@@ -27,10 +27,7 @@ class Charts{
 	
 /**************************************************************************************************
 	                                           Display Charts
-***************************************************************************************************/
-	
-	
-	
+***************************************************************************************************/			
 	
 	static saveChart(chart,fileName){
 		err.println "Saving chart to $fileName..."
@@ -50,7 +47,7 @@ class Charts{
 	*/ 
 	static showChart(chart,chartTitle){
 		def swing = new SwingBuilder()
-		def frame = swing.frame(title:'Histogram Test',
+		def frame = swing.frame(title:chartTitle,
 														defaultCloseOperation:WC.EXIT_ON_CLOSE,
 														pack:true,show:true) {
 			borderLayout()
@@ -67,16 +64,39 @@ class Charts{
   * Creates an XY series from a Groovy [:], aka LinkedHashMap
   */ 
   static createXYFromMap(LinkedHashMap data,String seriesName){
-    XYSeries series1 = new XYSeries(seriesName);
-    
+    XYSeries series1 = new XYSeries(seriesName);    
     for(x in data.keySet()){
       def y = data.get(x);
       series1.add(x,y);
-    }
-        
+    }        
     XYSeriesCollection dataset = new XYSeriesCollection();
     dataset.addSeries(series1);
     
+    return(dataset);
+  }
+
+
+	static createXYFromCollections(Collection X,Collection Y,String seriesName){
+		XYSeries series1 = new XYSeries(seriesName);    
+		for(int i = 0;i < X.size();i++){
+			def x = X[i];
+			def y = Y[i];
+			series1.add(x,y);
+		}
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		dataset.addSeries(series1);
+		return(dataset);
+	}
+
+	static createXYFromDoubleVectors(DoubleVector X,DoubleVector Y,String seriesName){
+    XYSeries series1 = new XYSeries(seriesName);    
+		for(int i = 0;i < X.size();i++){
+			def x = X[i];
+			def y = Y[i];			
+      series1.add(x,y);
+    }        
+    XYSeriesCollection dataset = new XYSeriesCollection();
+    dataset.addSeries(series1);    
     return(dataset);
   }
   
@@ -127,13 +147,27 @@ class Charts{
 	                                           Scatter
 	***************************************************************************************************/
 
+	static xyplot(String title,String xlabel,String ylabel,DoubleVector x,DoubleVector y){
+		def xydata = createXYFromDoubleVectors(x,y,"Series 1")
+		return(xyplot(title,xlabel,ylabel,xydata))
+	}
 
 
-  static scatterPlot(String title,XYSeriesCollection xydata){
-    return(scatterPlot(title,"X","Y",xydata))
+	static xyplot(String title,DoubleVector x,DoubleVector y){
+		def xydata = createXYFromDoubleVectors(x,y,"Series 1")
+		return(xyplot(title,"X","Y",xydata))
+	}
+
+	static xyplot(String title,LinkedHashMap data){
+		def xydata = createXYFromMap(data,"Series 1")
+		return(xyplot(title,"X","Y",xydata))
+	}
+
+  static xyplot(String title,XYSeriesCollection xydata){
+    return(xyplot(title,"X","Y",xydata))
   }
   
-  static scatterPlot(String title,String xlabel,String ylabel, 
+  static xyplot(String title,String xlabel,String ylabel, 
     XYSeriesCollection xydata){
     
     // Only show legend if there is more than one series. 
@@ -177,7 +211,7 @@ class Charts{
 	/***
 	* Create a histogram from values in an arbitrary collection...
 	*/ 						
-	static hist(values,cName){
+	static hist(cName,values){
 		
 		def binmax = values.max()
 		def binmin = values.min()

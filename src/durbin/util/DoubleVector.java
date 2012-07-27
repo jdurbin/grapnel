@@ -31,10 +31,40 @@ import org.codehaus.groovy.runtime.*;
 * 
 */
 //class DoubleVector extends DefaultGroovyMethodsSupport implements Iterable{
-public class DoubleVector implements Iterable{
+public class DoubleVector extends GroovyObjectSupport implements Iterable{
   
   DenseDoubleMatrix1D data;
-  
+	public String[] names;  	
+	public HashMap<String,Integer> name2Idx = new HashMap<String,Integer>();
+
+	public DoubleVector(int n,String[] theNames,HashMap<String,Integer> nameMap){
+		data = new DenseDoubleMatrix1D(n);
+		names = theNames;
+		name2Idx = nameMap;		
+	}
+
+  public DoubleVector(DoubleMatrix1D dom,String[] theNames,HashMap<String,Integer> nameMap){
+    data = (DenseDoubleMatrix1D) dom;
+		names = theNames;
+		name2Idx = nameMap;
+  }
+
+	public DoubleVector(ArrayList<Double> vec,String[] theNames,HashMap<String,Integer> nameMap){
+		data = new DenseDoubleMatrix1D(vec.size());
+		for(int i = 0;i < vec.size();i++){
+			data.setQuick(i,vec.get(i));
+		}
+		names = theNames;
+		name2Idx = nameMap;
+	}
+	
+	public DoubleVector(double[] values,String[] theNames,HashMap<String,Integer> nameMap){
+		data = new DenseDoubleMatrix1D(values);
+		names = theNames;
+		name2Idx = nameMap;
+	}
+
+
 	public DoubleVector(int n){
 		data = new DenseDoubleMatrix1D(n);
 	}
@@ -42,6 +72,17 @@ public class DoubleVector implements Iterable{
   public DoubleVector(DoubleMatrix1D dom){
     data = (DenseDoubleMatrix1D) dom;
   }
+
+	public DoubleVector(ArrayList<Double> vec){
+		data = new DenseDoubleMatrix1D(vec.size());
+		for(int i = 0;i < vec.size();i++){
+			data.setQuick(i,vec.get(i));
+		}
+	}
+	
+	public DoubleVector(double[] values){
+		data = new DenseDoubleMatrix1D(values);
+	}
   
   public long size(){ return(data.size()); }
   public Double get(int idx){ return(data.get(idx)); }  
@@ -67,6 +108,24 @@ public class DoubleVector implements Iterable{
 		return(rval);
 	}
 	
+	public double max(){
+		double max = Double.NEGATIVE_INFINITY;
+		for(int i = 0;i < data.size();i++){
+			double val = data.getQuick(i);
+			if (val > max) max = val;
+		}
+		return(max);
+	}
+	
+	public double min(){
+		double min = Double.POSITIVE_INFINITY;
+		for(int i = 0;i < data.size();i++){
+			double val = data.getQuick(i);
+			if (val < min) min = val;
+		}
+		return(min);
+	}
+	
 	public double mean(){
 		return(data.zSum()/(double)data.size());
 	}
@@ -80,6 +139,12 @@ public class DoubleVector implements Iterable{
     if (idx < 0) idx =(int) data.size()+idx; // 5 -1 = 4
     return(data.getQuick(idx));
   }
+
+ 	public Double getAt(String name){
+		int idx = name2Idx.get(name);
+    return(data.getQuick(idx));
+  }
+
 
 	public double[] asArray(){
 		double[] rval = new double[(int)size()];
@@ -133,4 +198,12 @@ public class DoubleVector implements Iterable{
 
     return(new DoubleVector(data.viewPart(start,width)));
   }  
+
+
+	public static void createNameMap(String[] names,HashMap<String,Integer> name2IdxMap){	  
+	  for(int i = 0;i < names.length;i++){
+	    name2IdxMap.put(names[i],i);
+	  }
+	}
+
 }
