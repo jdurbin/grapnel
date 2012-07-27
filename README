@@ -1,4 +1,5 @@
 durbinlib.jar 
+==============
 
 The idea is simple.  This is the Kitchen Sink.   Whenever I develop some 
 highly useful utility class, I'll put in here so that I can just grab 
@@ -9,16 +10,16 @@ want to write the java code and forget about it.
 
 Mainly this is for Groovy.  Groovy is great, but there are some things that 
 I need to do frequently that I need to do either more cleanly or with faster 
-code than I can in Groovy. For example, consider the Perl tr() functionality. 
-That's handy for a DNA guy who frequently needs to change characters in a string 
-from one set into those in another set.  Groovy-only versions of this I have 
-written are too slow by a factor of 10. 
+code than I can in Groovy. 
 
-Doing "ant install" here will copy durbinlib.jar into ~/.groovy/lib where it will immediately 
-be available to any Groovy scripts. 
+Doing "ant install" here will copy durbinlib.jar into ~/.groovy/lib 
+where it will immediately be available to any Groovy scripts. 
 
-03/06/08
+scripts
+==============
+Handy scripts that use durbinlib.jar.  
+
+
 ========================
-
 NOTE:  The current install script needs Ant 1.7 or later.  
 Ant 1.6.5 in particular will not work correctly with this build.xml. 
