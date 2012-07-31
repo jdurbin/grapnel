@@ -90,7 +90,12 @@ public class WekaAdditions{
 			return [hasNext: { i < delegate.numInstances() }, next: { delegate.instance(i++) }] as Iterator 
 		}
 		
+		// Enable [] notation for instances.  data[5] returns 5th instance. 
 		Instances.metaClass.getAt = {int i-> return(delegate.instance(i))}
+		
+		// Enable [] notation for instance attributes.  data['price'] returns values for 'price' attribute. 
+		Instances.metaClass.getAt = {String attrName->return(delegate.attributeValues(attrName))}
+	
 	
     /***
     *  Return an array of the values for a named attribute. 

@@ -146,6 +146,12 @@ class Charts{
 	/**************************************************************************************************
 	                                           Scatter
 	***************************************************************************************************/
+	
+	static xyplot(String title,String xlabel,String ylabel,Collection x,Collection y){
+		def xydata = createXYFromCollections(x,y,"Series 1")
+		return(xyplot(title,xlabel,ylabel,xydata))
+	}
+
 
 	static xyplot(String title,String xlabel,String ylabel,DoubleVector x,DoubleVector y){
 		def xydata = createXYFromDoubleVectors(x,y,"Series 1")

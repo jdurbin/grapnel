@@ -64,10 +64,39 @@ class TableMatrix1DIterator implements Iterator{
 class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
   
   ObjectMatrix1D data;
+	public String[] names;  
+	public String name;
   
-  public TableMatrix1D(ObjectMatrix1D dom){
+  //public TableMatrix1D(ObjectMatrix1D dom){
+  //  data = dom;
+  //}
+
+	public TableMatrix1D(ObjectMatrix1D dom,String[] theNames,String theName){
+		names = theNames;
+		name = theName;
     data = dom;
   }
+
+	public Object asType(Class clazz) {
+		if (clazz.equals(java.util.ArrayList.class)) {			
+			ArrayList rval = new ArrayList();
+			for(int i = 0;i < data.size();i++){
+				rval.add(data.get(i));
+			}
+			return(rval);			
+		}else if ((clazz.equals(java.util.Set.class) ||
+							 clazz.equals(java.util.HashSet.class))){
+			HashSet rval = new HashSet();
+			for(int i = 0;i < data.size();i++){
+				rval.add(data.get(i));
+			}
+			return(rval);
+		}else{
+			String msg = "Can't cast TableMatrix1D to "+clazz;
+			throw new ClassCastException(msg);
+		}
+	}
+
   
   public long size(){ return(data.size()); }
   public Object get(int idx){ return(data.get(idx)); }  
@@ -120,7 +149,7 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
     RangeInfo ri = DefaultGroovyMethodsSupport.subListBorders((int)this.size(),r2);        
     int start = ri.from;
     int width = ri.to-start; 
-    return(new TableMatrix1D(data.viewPart(start,width)));
+    return(new TableMatrix1D(data.viewPart(start,width),names,name));
   }  
 }
 
@@ -466,7 +495,7 @@ public class Table extends GroovyObjectSupport{
 	}
 		
 	public TableMatrix1D getRow(int row){
-	   return(new TableMatrix1D(matrix.viewRow(row)));
+	   return(new TableMatrix1D(matrix.viewRow(row),colNames,rowNames[row]));
 	}
 	
 	public TableMatrix1D getAt(int ridx){
@@ -480,17 +509,17 @@ public class Table extends GroovyObjectSupport{
 	
 	
 	public TableMatrix1D getCol(int col){
-	   return(new TableMatrix1D(matrix.viewColumn(col)));
+	   return(new TableMatrix1D(matrix.viewColumn(col),rowNames,colNames[col]));
 	}
 	
 	public TableMatrix1D getCol(String colStr){
 		int col = getColIdx(colStr);
-		return(new TableMatrix1D(matrix.viewColumn(col)));
+		return(new TableMatrix1D(matrix.viewColumn(col),rowNames,colNames[col]));
 	}
 	
 	public TableMatrix1D getRow(String rowStr){
 		int row = getRowIdx(rowStr);
-		return(new TableMatrix1D(matrix.viewRow(row)));
+		return(new TableMatrix1D(matrix.viewRow(row),colNames,rowNames[row]));
 	}
 
 	/***
@@ -544,7 +573,7 @@ public class Table extends GroovyObjectSupport{
 	public Table eachColumn(Closure closure) {
 		for (int c = 0;c < numCols;c++) {
 			//Object[] column = matrix.viewColumn(c).toArray();			
-			TableMatrix1D column = new TableMatrix1D(matrix.viewColumn(c));			
+			TableMatrix1D column = new TableMatrix1D(matrix.viewColumn(c),rowNames,colNames[c]);			
 			closure.call(new Object[] {column});
 		}
 		return this;
@@ -556,7 +585,7 @@ public class Table extends GroovyObjectSupport{
 	public Table eachRow(Closure closure) {
 		for (int r = 0;r < numRows;r++) {
 			//Object[] row = matrix.viewRow(r).toArray();  bit costly to make a copy...
-			TableMatrix1D row = new TableMatrix1D(matrix.viewRow(r));
+			TableMatrix1D row = new TableMatrix1D(matrix.viewRow(r),colNames,rowNames[r]);
 			closure.call(new Object[] {row});
 		}
 		return this;

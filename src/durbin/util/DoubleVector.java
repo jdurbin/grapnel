@@ -163,6 +163,30 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
 		*/
 	}
 	
+		
+	public Object asType(Class clazz) {
+		if (clazz.equals(java.util.ArrayList.class)) {			
+			ArrayList rval = new ArrayList();
+			for(int i = 0;i < data.size();i++){
+				rval.add(data.get(i));
+			}
+			return(rval);			
+		}else if ((clazz.equals(java.util.Set.class) ||
+							 clazz.equals(java.util.HashSet.class))){
+			HashSet rval = new HashSet();
+			for(int i = 0;i < data.size();i++){
+				rval.add(data.get(i));
+			}
+			return(rval);
+		}else{
+			String msg = "Can't cast TableMatrix1D to "+clazz;
+			throw new ClassCastException(msg);
+		}
+	}
+
+	
+	
+	
 	public DoubleVector getRange(int start,int end){
 		return(getAt(new IntRange(start,end)));
 	}
