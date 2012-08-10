@@ -13,7 +13,6 @@ import java.io.InputStream;
 */ 
 class RunBash{
   
-  // Is there another way to do this?
   // Add a bash() method to GString and String 
   static def enable(){
     GString.metaClass.bash = {->

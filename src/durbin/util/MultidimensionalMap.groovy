@@ -1,10 +1,26 @@
 #!/usr/bin/env groovy 
 package durbin.util;
 
+// Coding WARNING:
+// 
+// In these classes, an assignment inside a method to a variable that is not defined 
+// with def or a type will be interpreted by Groovy as putting that pair in the map.  
+// Thus:
+//
+// def myfunction(){
+//  a = 5
+// }
+// 
+// will not throw the compile-time error that a is not defined for the class
+// but will blithely interpret this as putting this[a] = 5 into the map.  
+// This strikes me as a bug in Groovy and it generates pernicious errors during
+// runtime. 
+
+
 /**
 * A multi-dimensional map.  Commandeered from this post: <br>
 * 
-* http://old.nabble.com/Multidimensional-maps-td19615874.html <br><br>
+* http://groovy.329449.n5.nabble.com/Multidimensional-maps-td362232.html <br><br>
 * 
 * Through Groovy magic you can access elements of map with 
 * dot notation or with [] notation.  
@@ -32,10 +48,12 @@ package durbin.util;
 * <b>WARNING:</b>  The map bracket syntax <b>**CREATES**</b> an entry if one doesn't 
 * exist.  Care must be taken when checking for existence of a value for 
 * a particular cell that you do not inadvertently create a new entry. 
-*
+* 
 * KJD: This is so mind bogglingly useful that I really should translate it into Java so that
 * it can be faster too.
 * 
+* 
+
 */
 class MultidimensionalMap extends LinkedHashMap {
     @Override
@@ -54,6 +72,7 @@ class MultidimensionalMap extends LinkedHashMap {
 *  Differs from Table mainly in that it's completely dynamic, whereas 
 *  Table requires explicit dimensions up front. 
 * 
+* 
 */
 class TwoDMap extends MultidimensionalMap{
     
@@ -68,10 +87,10 @@ class TwoDMap extends MultidimensionalMap{
 			// Find the union of all column keys...
       def colKeys = [] as Set
 			def rowKeys = rowKeySet()
+			
       rowKeys.each{rowKey->				
-				def rowSet = this[rowKey].keySet()
-				//System.err.println "rowKey: $rowKey  rowSet: $rowSet"
-        colKeys = colKeys + this[rowKey].keySet()
+				def rowSet = this[rowKey]?.keySet()
+        colKeys = colKeys + this[rowKey]?.keySet()
       }
 			return(colKeys)
 		}
@@ -83,6 +102,41 @@ class TwoDMap extends MultidimensionalMap{
 		def cols(){			
 			return(colKeySet().size())
 		}
+		
+		def getCol(colKey){
+			def rowKeys = rowKeySet()
+			def colVals = []
+			def nullVal = 'null'
+      rowKeys.each{rowKey->
+        def val = this[rowKey][colKey]
+        if (val == [:]) colVals << nullVal
+        else colVals << val		
+			}
+			return(colVals)
+		}
+		
+		def getRow(rowKey){
+			def rval = []
+			def nullVal = 'null'			
+			colKeySet().each{colKey->
+				def val = this[rowKey][colKey]
+				if (val == [:]) rval << nullVal
+				else rval << val
+			}
+			return(rval)
+		}
+		
+
+		// Increment item, initializing to zero if not already set. 
+		public void count(key1,key2){
+			if (this.contains(key1,key2)){
+				def val = this[key1][key2]
+				val = val+1
+				this[key1][key2] = val
+			}else{
+				this[key1][key2] = 1;
+			}						
+		}
 
     /**
     * Test to see if 2D map (the most common case) already contais
@@ -91,10 +145,12 @@ class TwoDMap extends MultidimensionalMap{
     public boolean contains(key1,key2){      
       if (!keySet().contains(key1)) return(false);
       else{
-        secondMap = this[key1]
-        if (!secondMap.keySet().contains(key2)) return(false);
+        def secondMap = this[key1]
+				def secondKeySet = secondMap.keySet()
+        if (!secondKeySet.contains(key2)) return(false);
         else return(true);
-      }      
+      }  
+			return(false);
     }
     
 		/**
@@ -208,8 +264,6 @@ class TwoDMap extends MultidimensionalMap{
     }
     
 
-
-
 		def writeTable(File out){
 			writeTable(out,"\t","NA"){}
 		}
@@ -223,10 +277,41 @@ class TwoDMap extends MultidimensionalMap{
 			writeTable(fileName,"\t","NA"){}
 		}
 		
-		def writeTable(fileName,delimiter,nullVal){
-			out = new File(fileName)
-			writeTable(fileName,delimiter,nullValue){}
+		def writeTable(String fileName,String delimiter,String nullVal){
+			def out = new File(fileName)
+			writeTable(out,delimiter,nullVal){it}
 		}
+
+
+		  /**
+	    * Print out a 2D table that has max keys in each direction...
+	    */ 
+	    def writeTable(File out,delimiter,nullVal,Closure c){
+
+	      def rowKeys = rowKeySet()
+				def colKeys = colKeySet()
+
+				out.withWriter(){w->
+	      	// Print the heading...
+	      	w.write "Features$delimiter"
+	      	w.writeLine colKeys.join(delimiter)
+
+	      	// Print the table proper...
+
+	      	rowKeys.each{rowKey->
+	        	def rowVals = []
+	        	colKeys.each{colKey->
+	          	def val = this[rowKey][colKey]
+	          	if (val == [:]) rowVals << nullVal
+							else if (val == "null") rowVals << nullVal
+							else if (val == "NULL") rowVals << nullVal
+	          	else rowVals << val
+	        	}
+	        	w.write  "$rowKey$delimiter"
+	        	w.writeLine rowVals.join(delimiter)        
+	      	}
+	    	}
+			}
 
 
 
@@ -234,6 +319,7 @@ class TwoDMap extends MultidimensionalMap{
     /**
     * Write out a 2D table that has max keys in each direction...
     */ 
+/*
     def writeTable(File out,delimiter,nullVal,Closure c){
 
       out.withWriter(){w->
@@ -265,7 +351,7 @@ class TwoDMap extends MultidimensionalMap{
         }
       }        
     }
-
+*/
 
 
 /**   Clean up and make a merge function...

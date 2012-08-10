@@ -645,11 +645,18 @@ throws Exception {
   }
 
   // Do the folds	
-  for (int i = 0; i < numFolds; i++) {	
-		System.err.println("\tFold: "+i);
-    Instances train = data.trainCV(numFolds, i, random);
-    Instances test = data.testCV(numFolds, i);
-		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
+  for (int i = 0; i < numFolds; i++) {		
+			System.err.println("\tFold: "+i);
+    	Instances train = data.trainCV(numFolds, i, random);
+    	Instances test = data.testCV(numFolds, i);
+
+	//	System.err.println("TRAIN:");
+	//	System.err.println(train);
+	//	System.err.println("TEST:");
+	//	System.err.println(test);
+
+			evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
+
   }
   m_NumFolds = numFolds;
 }
@@ -662,10 +669,21 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	
 	// Create a list to store classifiers (Evaluation2)
 	m_cvAttributeSelections = new ArrayList<ThinAttributes>();
+
+//	System.err.println("DEBUG1");
 	
 	setPriors(train);
-	Classifier copiedClassifier = Classifier.makeCopy(classifier);
-	copiedClassifier.buildClassifier(train);
+	
+//	System.err.println("DEBUG2");
+	Classifier copiedClassifier=null;
+	//try{
+		copiedClassifier = Classifier.makeCopy(classifier);
+		copiedClassifier.buildClassifier(train);
+	//}catch(Exception e){
+	//	System.err.println("DEBUG2 Exception occurred:\n"+e);
+	//	System.err.println(train);
+	//}	
+	//System.err.println("DEBUG3");
 
 	// copiedClassifier is a FilteredClassifier...
 	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
@@ -676,7 +694,11 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
   m_cvAttributeSelections.add(thinAttributes);
 	
+	//System.err.println("DEBUG4");
+		
 	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+	
+	//System.err.println("DEBUG5");
 	
 	// If there is a non-null fourth element, it is assumed to be a second buffer to store the evaluations on the 
 	// training samples.  This is a bit of a hack, but allows me to touch as little of the code as possible...

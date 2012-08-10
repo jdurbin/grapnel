@@ -64,15 +64,15 @@ class TableMatrix1DIterator implements Iterator{
 class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
   
   ObjectMatrix1D data;
-	public String[] names;  
+	public HashMap<String,Integer> names2Idx;
 	public String name;
   
   //public TableMatrix1D(ObjectMatrix1D dom){
   //  data = dom;
   //}
 
-	public TableMatrix1D(ObjectMatrix1D dom,String[] theNames,String theName){
-		names = theNames;
+	public TableMatrix1D(ObjectMatrix1D dom,HashMap<String,Integer> n2I,String theName){
+		names2Idx = n2I;
 		name = theName;
     data = dom;
   }
@@ -102,21 +102,21 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
   public Object get(int idx){ return(data.get(idx)); }  
   public void set(int idx,Object value){ data.set(idx,value); }
   
+
   public TableMatrix1DIterator iterator(){
     return(new TableMatrix1DIterator(this));
+  }
+
+	public Object getAt(String colName){
+    int cidx = names2Idx.get(colName);
+		//System.err.println("colName:"+colName+" index: "+cidx);
+    return(data.get(cidx));
   }
   
   public Object getAt(int idx){
     if (idx < 0) idx =(int) data.size()+idx; // 5 -1 = 4
     return(data.get(idx));
   }
-
-
-//	public TableMatrix1D getAt(String colName){
- //   int cidx = getRowIdx(rowName);
- //   return(getRow(ridx));
- // }
-
 
 	public double[] toDoubleArray(){
 		double[] rval = new double[(int)size()];
@@ -149,7 +149,7 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
     RangeInfo ri = DefaultGroovyMethodsSupport.subListBorders((int)this.size(),r2);        
     int start = ri.from;
     int width = ri.to-start; 
-    return(new TableMatrix1D(data.viewPart(start,width),names,name));
+    return(new TableMatrix1D(data.viewPart(start,width),names2Idx,name));
   }  
 }
 
@@ -437,6 +437,14 @@ public class Table extends GroovyObjectSupport{
 	  matrix.setQuick(row,col,data);
 	}
 	
+	public boolean containsCol(String colName){
+		return(colName2Idx.keySet().contains(colName));
+	}
+	
+	public boolean containsRow(String rowName){
+		return(rowName2Idx.keySet().contains(rowName));
+	}
+	
 	
 	public List<Integer> getRowIndicesContaining(String substring){
 	  ArrayList<Integer> rvals = new ArrayList<Integer>();
@@ -495,7 +503,7 @@ public class Table extends GroovyObjectSupport{
 	}
 		
 	public TableMatrix1D getRow(int row){
-	   return(new TableMatrix1D(matrix.viewRow(row),colNames,rowNames[row]));
+	   return(new TableMatrix1D(matrix.viewRow(row),colName2Idx,rowNames[row]));
 	}
 	
 	public TableMatrix1D getAt(int ridx){
@@ -509,17 +517,17 @@ public class Table extends GroovyObjectSupport{
 	
 	
 	public TableMatrix1D getCol(int col){
-	   return(new TableMatrix1D(matrix.viewColumn(col),rowNames,colNames[col]));
+	   return(new TableMatrix1D(matrix.viewColumn(col),rowName2Idx,colNames[col]));
 	}
 	
 	public TableMatrix1D getCol(String colStr){
 		int col = getColIdx(colStr);
-		return(new TableMatrix1D(matrix.viewColumn(col),rowNames,colNames[col]));
+		return(new TableMatrix1D(matrix.viewColumn(col),rowName2Idx,colNames[col]));
 	}
 	
 	public TableMatrix1D getRow(String rowStr){
 		int row = getRowIdx(rowStr);
-		return(new TableMatrix1D(matrix.viewRow(row),colNames,rowNames[row]));
+		return(new TableMatrix1D(matrix.viewRow(row),colName2Idx,rowNames[row]));
 	}
 
 	/***
@@ -573,7 +581,7 @@ public class Table extends GroovyObjectSupport{
 	public Table eachColumn(Closure closure) {
 		for (int c = 0;c < numCols;c++) {
 			//Object[] column = matrix.viewColumn(c).toArray();			
-			TableMatrix1D column = new TableMatrix1D(matrix.viewColumn(c),rowNames,colNames[c]);			
+			TableMatrix1D column = new TableMatrix1D(matrix.viewColumn(c),rowName2Idx,colNames[c]);			
 			closure.call(new Object[] {column});
 		}
 		return this;
@@ -585,7 +593,7 @@ public class Table extends GroovyObjectSupport{
 	public Table eachRow(Closure closure) {
 		for (int r = 0;r < numRows;r++) {
 			//Object[] row = matrix.viewRow(r).toArray();  bit costly to make a copy...
-			TableMatrix1D row = new TableMatrix1D(matrix.viewRow(r),colNames,rowNames[r]);
+			TableMatrix1D row = new TableMatrix1D(matrix.viewRow(r),colName2Idx,rowNames[r]);
 			closure.call(new Object[] {row});
 		}
 		return this;

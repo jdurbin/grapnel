@@ -60,8 +60,7 @@ class WekaMineConfigSlurper extends ConfigSlurper{
   
   def WekaMineConfigSlurper(){
     super()
-  }
-  
+  }  
   
   ConfigObject parseDB(db,configID){
     def sql = "select * from mlexperiments where id = $configID"
@@ -69,8 +68,7 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     if (rows == null) throw new RuntimeException("ML Experiment $id does not appear to be in database.")
     
     row = rows[0]
-  }
-  
+  }  
 
   /***
   * Slurp in the configuration with ConfigSlurper, then expand all the expandable things. 
@@ -97,7 +95,6 @@ class WekaMineConfigSlurper extends ConfigSlurper{
         }else{
           expandedList << item
         }
-
 
         if (item.contains("\$")){            
           // Since item may already be brace expanded, need to pass in the entire

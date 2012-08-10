@@ -412,6 +412,13 @@ public class DoubleTable extends GroovyObjectSupport{
 	
 	//==========================================================
 	
+	public boolean containsCol(String colName){
+		return(colName2Idx.keySet().contains(colName));
+	}
+	
+	public boolean containsRow(String rowName){
+		return(rowName2Idx.keySet().contains(rowName));
+	}
 	
 	public List<Integer> getRowIndicesContaining(String substring){
 	  ArrayList<Integer> rvals = new ArrayList<Integer>();
