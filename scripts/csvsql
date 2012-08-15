@@ -1,0 +1,232 @@
+#!/usr/bin/env groovy 
+
+import groovy.sql.Sql
+import org.h2.Driver
+import durbin.util.*
+
+
+parser = new Parser(description: '''
+ Treates csv files as database tables and allows you to perform arbitrary queries
+ on those files/tables, including multi-file/table joins.  In general, here 
+ are the requirements:
+ 
+ 1. The query must be in format "select X from Y where Z"
+ 2. The table(s) in the Y term must be the csv file name, which must end in .csv
+ 3. Everywhere except for the Y term, the table name is used without the .csv extension or path. 
+ 
+ Other than that, arbitrary X, Y, and Z terms that form valid sql should work.  This
+ is probably best shown by examples. 
+ 
+ Examples:
+
+ csvsql "select * from people.csv where age > 40"
+ csvsql "select name,score from people.csv where age >40"
+ csvsql "select name,score from people.csv where age <50 and score > 100"
+ 
+ Full path names should work fine: 
+ 
+ csvsql "select * from /users/data/people.csv where age > 40"
+ csvsql "select people.name from /users/data/people.csv where age > 40"
+
+ You can even do queries with sum and average and so on like:
+ 
+ csvsql "select sum(score) from people.csv where age < 40"
+
+ If children.csv is a file with same key name as people, then you can join 
+ query like: 
+  
+ csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
+
+ You can also enter the query on multiple lines like:
+ 
+ csvsql "
+ > select people.name,children.child
+ > from people.csv,children.csv
+ > where people.name=children.name and people.age < 40"
+ 
+ Author:  James Durbin  
+''')
+
+parser.with{  
+  flag 'h','help',[default:false,description: 'Print script help.']
+}
+
+// Check that there is a query... 
+// KJD: Need to clean up Parser so no error when no required options.
+parser.validate{parameters->
+  if (parser.remainder.size() == 0){
+    throw new Exception("Must specify a query.")
+  }
+}
+
+try{ 
+  options = parser.parse(args)
+}catch(Exception e){
+  System.err << parser.usage
+  System.exit(1)
+}
+
+params = parser.remainder.join(" ")
+(what,from,where) = getFields(params)
+
+// Extract the list of table names in the from clause...
+csvfiles = from.split(",") 
+
+tablenameMap = [:]
+csvfiles.each{csvfile->
+  start = csvfile.lastIndexOf("/")+1
+  end = csvfile.indexOf(".csv")
+  tablename = csvfile[start..<end]
+  tablename = tablename.trim()
+  tablenameMap[tablename] = csvfile.trim()
+}
+
+
+// Create an h2 in-memory db, calling it what you like, here db1
+def sql = Sql.newInstance("jdbc:h2:mem:db1","org.h2.Driver")
+
+// Create tables for each csv file named...
+tablenameMap.each{tablename,csvfile->
+  typeString = inferColumnTypes(csvfile,20)
+  stmt = "create table $tablename($typeString) as select * from csvread('$csvfile')" as String
+  //println "stmt: $stmt"
+  sql.execute(stmt)
+}
+
+// Create our stereotyped select statement from the pieces...
+tablenames = tablenameMap.keySet().join(",")
+selstmt = "select $what from $tablenames where $where" as String
+
+// Write out column headings..
+println what
+
+// Perform the query... 
+sql.eachRow(selstmt){result->
+  meta = result.getMetaData()
+  cols = meta.getColumnCount()
+  vals = (0..<cols).collect{result[it]}
+  println vals.join(",")
+}
+
+
+/****************************************************************************
+*                              Methods
+****************************************************************************/
+
+
+/**
+* Parse the query into it's component clauses.  All
+* queries are assumed to be in the form:
+* 
+* select X from Y where Z 
+* 
+* This function returns X,Y,Z. 
+*/
+def getFields(params){
+  bits = params.split(/\s+/)
+  def selectIdx,fromIdx,whereIdx = 0
+  bits.eachWithIndex{b,i->
+    if (b =~ /(?i)select/) selectIdx = i
+    if (b =~ /(?i)from/) fromIdx = i
+    if (b =~ /(?i)where/) whereIdx = i
+  }
+  X = bits[selectIdx+1..fromIdx-1].join(" ")
+  Y = bits[fromIdx+1..whereIdx-1].join(" ")
+  Z = bits[whereIdx+1..-1].join(" ")
+  
+  return([X.trim(),Y.trim(),Z.trim()])
+}
+
+
+/**
+* Infer the type of each column in the file by sampling the first sampleRows
+* rows of data.  The three types supported are:  INT, DOUBLE, VARCHAR. 
+* It tries to assign types in order INT, DOUBLE, VARCHAR, assigning each 
+* column the strictest type that has uninamous vote in the sample. 
+* 
+* A negative sampleRows indicates to use whole file as sample.  This is 
+* the default, but may want to sample smaller for performance, especially 
+* if you know that first few lines are representative.  
+* 
+* Handling empty fields is a problem that needs to be thought through. 
+* 
+* Ironic that this is the largest part of the code. 
+*/ 
+def inferColumnTypes(fileName,sampleRows = -1){
+  
+  columnType = [:]
+  
+  numLines = countLines(fileName)
+  if (sampleRows < 0) sampleRows = numLines // Use whole file. 
+  if (sampleRows > numLines) sampleRows = numLines
+  
+  new File(fileName).withReader{r->
+    headings = r.readLine().split(",")
+    intcounts = new int[headings.size()]
+    doublecounts = new int[headings.size()]
+        
+    (0..<sampleRows-1).each{
+      line = r.readLine()
+      fields = line.split(",",-1) // -1 to handle empty fields. 
+      
+      //Sanity test..
+      if (fields.size() != headings.size()){
+        println "headings: $headings"
+        println "fields: $fields"
+        throw new Exception("ERROR:  headings size ${headings.size()} != fields.size ${fields.size()}." as String)
+        
+      }
+      
+      fields.eachWithIndex{f,i->
+        if (f.isDouble()) doublecounts[i]++
+        if (f.isInteger()) intcounts[i]++
+      }
+    }
+    
+    headings.eachWithIndex{h,i->      
+      if (intcounts[i] == (sampleRows-1)) columnType[h]='INT'
+      else if (doublecounts[i] == (sampleRows -1)) columnType[h] = 'DOUBLE'
+      else columnType[h] = 'VARCHAR'
+    }  
+  }
+  
+  // Convert into a string...
+  pairs = []
+  columnType.each{key,value-> pairs<<"$key $value"}
+  str = pairs.join(",")
+  return(str)
+}
+  
+
+int countLines(fileName){
+  InputStream bis = new BufferedInputStream(new FileInputStream(fileName));
+  int numRows = fastCountLines(bis);
+  bis.close();
+  return(numRows);
+}
+
+/*****************************************
+* An optimized function to quickly count the number of lines remaining
+* in the given input stream
+*/
+public int fastCountLines(InputStream is) throws IOException {
+	byte[] c = new byte[1024];
+	int count = 0;
+	int readChars = 0;
+	boolean lastCR=true;
+	while ((readChars = is.read(c)) != -1) {
+		for (int i = 0; i < readChars; ++i) {
+			if (c[i] == '\n') ++count;
+		}
+		// If the last thing we read was a CR, note the fact...
+		if (c[(readChars-1)] == '\n') lastCR = true;
+		else lastCR = false; 
+	}
+	
+	// If the very last thing we read wasn't a CR, then the last line doesn't
+	// end in a CR and we've undercounted the lines by one...
+	if (!lastCR) count++;
+	
+	return count;
+}
+
