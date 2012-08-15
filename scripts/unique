@@ -1,0 +1,13 @@
+#!/usr/bin/env groovy
+
+System.in.withReader{r->
+	s = [] as Set
+	r.eachLine(){
+		s << it
+	}	
+	System.err.println "Number of unique items: "+s.size()
+	sorteds = s.sort()
+	
+	sorteds.each{println it}
+}
+

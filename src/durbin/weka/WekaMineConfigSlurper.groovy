@@ -39,6 +39,8 @@ class ConfigRange{
 * </pre>
 */
 class WekaMineConfigSlurper extends ConfigSlurper{
+	
+	def err = System.err
   
   // Compile a regex to match strings that contain paired braces.
   // Some people, when confronted with a problem, think “I know, I’ll use regular expressions!”
@@ -81,11 +83,11 @@ class WekaMineConfigSlurper extends ConfigSlurper{
     // User defined fields...
     //println cfg.algorithms.keySet()
     cfg.expand.keySet().each{sectionKey->
+	
       def sectionContents = cfg.expand."$sectionKey"  
     
       sectionContents.each{item->        
         def hasBeenExpanded = false // flag to note if something has been expanded in any way. 
-
         // Expand all braces in the item...
         def expandedList = []
         if (item.matches(containsPairedBraces)){    

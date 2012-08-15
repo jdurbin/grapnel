@@ -1,0 +1,70 @@
+#!/usr/bin/env groovy 
+
+import groovy.swing.SwingBuilder
+import javax.swing.JTable
+import javax.swing.*
+import javax.swing.table.AbstractTableModel;
+import durbin.util.*
+
+err = System.err
+
+class TableModel extends AbstractTableModel{		
+	def err = System.err
+	Table dt;
+	
+	TableModel(Table table){dt = table;}
+	
+	public String getColumnName(int col) {
+		//err.println "ColumnName: $col "+dt.colNames[col]
+		return(dt.colNames[col]);
+	}
+	
+	public String getRowName(int row){
+		//err.println "rowName: $row "+dt.rowNames[row]
+		return(dt.rowNames[row]);
+	}	
+	public int getRowCount() { 
+		//err.println "rowCount: "+dt.rows()
+		return(dt.rows())
+	}
+	public int getColumnCount() { 
+		//err.println "columnCount:"+dt.cols()
+		return(dt.cols()) 
+	}
+
+	public String getValueAt(int row, int col) {return(dt.get(row,col))}	
+	public Class getColumnClass(int c) {return(dt.get(0,c).getClass())}  	
+	public boolean isCellEditable(int row, int col){return false;}	
+	public void setValueAt(Object value, int row, int col) {}
+}
+
+fileName = args[0]
+
+// Crudely determine if it's a tab or csv file
+new File(fileName).withReader{r->
+	line = r.readLine()
+	if (line.contains(",")) sep = ","
+	else if (line.contains("\t")) sep = "\t"
+	else {err.println "File does not appear to be a csv or tab file.";System.exit(1)}
+}
+
+dt = new Table(fileName,sep,bFirstColInTable=true)
+//dt = new Table(fileName,sep)
+
+//err.println dt
+
+err.print "Creating gui table..."
+dtm = new TableModel(dt)
+
+swing = new SwingBuilder()
+def mytable
+frame = swing.frame(title:fileName,defaultCloseOperation:JFrame.EXIT_ON_CLOSE){
+  scrollpane = scrollPane {						
+		thetab = table(autoResizeMode:JTable.AUTO_RESIZE_OFF, autoCreateRowSorter:true){
+			tableModel(dtm)	
+		}							
+  }
+}
+err.println "done."
+frame.pack()
+frame.show()

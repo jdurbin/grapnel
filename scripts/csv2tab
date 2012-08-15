@@ -1,0 +1,9 @@
+#!/usr/bin/env groovy 
+
+new File(args[0]).withReader{r->
+	heading = r.readLine()
+	println heading.replaceAll(",","\t")
+	r.splitEachLine(","){line->
+		println line.replaceAll(",","\t")
+	}
+}

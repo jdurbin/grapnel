@@ -1,0 +1,23 @@
+#!/usr/bin/env groovy 
+
+import durbin.util.*
+
+err = System.err
+
+fileName = args[0]
+
+numRows = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
+
+def numCols
+// Crudely determine if it's a tab or csv file and cound columns
+new File(fileName).withReader{r->
+	line = r.readLine()
+	if (line.contains(",")) sep = ","
+	else if (line.contains("\t")) sep = "\t"
+	else {err.println "$fileName does not appear to be a csv or tab file.";System.exit(1)}
+	
+	fields = line.split(sep)
+	numCols = fields.size() -1	
+}
+
+println "$fileName is $numRows x $numCols table."

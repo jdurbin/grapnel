@@ -11,7 +11,7 @@ import weka.attributeSelection.*
 */ 
 class ExperimentSpec{
    def classifier
-	 def filter
+	 def filter          // unsupervised filter...
    def attributeEval
    def attributeSearch
    def numAttributes
@@ -24,7 +24,7 @@ class ExperimentSpec{
    // Just to have something handy to print
    def classifierStr
    def attrEvalStr
-   def attrSearchStr
+   def attrSearchStr88
    
     //time estimate:   {so batching can divide it up reasonably}
 

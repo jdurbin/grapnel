@@ -1,0 +1,20 @@
+#!/usr/bin/env groovy
+
+import durbin.util.*
+
+fileName = args[0]
+cutName = args[1]
+sep = FileUtils.determineSeparator(fileName) as String
+
+new File(fileName).withReader{r->
+	headerStr = r.readLine()
+	headings = headerStr.split(sep)
+	name2IdxMap = [:]
+	headings.eachWithIndex{h,i->name2IdxMap[h] = i}
+	
+	cutIdx = name2IdxMap[cutName]
+	println headings[cutIdx]
+	r.splitEachLine(sep){fields->
+		println fields[cutIdx]
+	}	
+}
