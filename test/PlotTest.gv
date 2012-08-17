@@ -1,0 +1,16 @@
+#!/usr/bin/env groovy
+
+import durbin.util.*
+import static durbin.charts.Charts.*
+
+beer = new DoubleTable("beer.tab")
+
+alcohol = beer.getCol("alcohol")
+price = beer.getCol("price")
+
+
+hist = hist("Alcohol",alcohol)
+showChart(hist)
+
+chart = xyplot("Alcohol","price","alcohol",price,alcohol)
+showChart(chart)

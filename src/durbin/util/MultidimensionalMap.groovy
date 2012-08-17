@@ -1,6 +1,11 @@
 #!/usr/bin/env groovy 
 package durbin.util;
 
+//!!!! DEPRECATED !!!!
+// Use GTable instead. 
+// 
+
+
 // Coding WARNING:
 // 
 // In these classes, an assignment inside a method to a variable that is not defined 
@@ -72,6 +77,8 @@ class MultidimensionalMap extends LinkedHashMap {
 *  Differs from Table mainly in that it's completely dynamic, whereas 
 *  Table requires explicit dimensions up front. 
 * 
+*  !! DEPRECATED !! in favor of GTable.  GTable is based on google Guava 
+*  library and is more efficient and has fewer issues than TwoDMap. 
 * 
 */
 class TwoDMap extends MultidimensionalMap{
@@ -152,6 +159,17 @@ class TwoDMap extends MultidimensionalMap{
       }  
 			return(false);
     }
+
+		def getIfExists(key1,key2){
+			if (!keySet().contains(key1)) return(null);
+			else{
+				def secondMap = this[key1]
+				def secondKeySet = secondMap.keySet()
+				if (!secondKeySet.contains(key2)) return(null);
+	      else return(secondMap[key2])
+			}  
+			return(null)
+		}
     
 		/**
     * Print out a 2D table that has max keys in each direction...
@@ -282,6 +300,16 @@ class TwoDMap extends MultidimensionalMap{
 			writeTable(out,delimiter,nullVal){it}
 		}
 
+		def writeTableQuick(String fileName,String delimiter,String nullVal){
+			def out = new File(fileName)
+			writeTableQuick(out,delimiter,nullVal)
+		}
+		
+		def writeTableQuick2(String fileName,String delimiter,String nullVal){
+			def out = new File(fileName)
+			writeTableQuick2(out,delimiter,nullVal)
+		}
+		
 
 		  /**
 	    * Print out a 2D table that has max keys in each direction...
@@ -301,7 +329,7 @@ class TwoDMap extends MultidimensionalMap{
 	      	rowKeys.each{rowKey->
 	        	def rowVals = []
 	        	colKeys.each{colKey->
-	          	def val = this[rowKey][colKey]
+	          	def val = this[rowKey][colKey] // 'doh... this will create an entry, filling out a sparse matrix
 	          	if (val == [:]) rowVals << nullVal
 							else if (val == "null") rowVals << nullVal
 							else if (val == "NULL") rowVals << nullVal
@@ -312,7 +340,70 @@ class TwoDMap extends MultidimensionalMap{
 	      	}
 	    	}
 			}
+		 
+			def writeTableQuick(File out,delimiter,nullVal){
+				def rowKeys = rowKeySet()
+				def colKeys = colKeySet()
 
+				err.println "rowKeys.size="+rowKeys.size()
+				err.println "colKeys.size="+colKeys.size()
+
+				out.withWriter(){w->
+					// Print the heading...
+					w.write "Features$delimiter"
+					w.writeLine colKeys.join(delimiter)
+					
+					int rowCount = 0;
+					rowKeys.each{rowKey->
+						
+						if ((rowCount++ % 500)==0) err.println "$rowCount rows written"
+						
+						def rowVals = []
+						colKeys.each{colKey->
+							if (this.contains(rowKey,colKey)){
+								rowVals << val
+							}else{
+								rowVals << nullVal
+							}
+						}
+						w.write  "$rowKey$delimiter"
+						w.writeLine rowVals.join(delimiter)
+						rowVals = null
+					}
+				}
+			}
+			
+			
+			def writeTableQuick2(File out,delimiter,nullVal){
+				def rowKeys = rowKeySet()
+				def colKeys = colKeySet()
+
+				err.println "rowKeys.size="+rowKeys.size()
+				err.println "colKeys.size="+colKeys.size()
+
+				out.withWriter(){w->
+					// Print the heading...
+					w.write "Features$delimiter"
+					w.writeLine colKeys.join(delimiter)
+
+					int rowCount = 0;
+					rowKeys.each{rowKey->
+						if ((rowCount++ % 500)==0) err.println "$rowCount rows written"
+						def rowVals = []
+						colKeys.each{colKey->								
+							rowmap = this[rowKey]
+							if (rowmap.keySet().contains(colKey)){
+								rowVals << rowmap[colKey]
+							}else{
+								rowVals << nullVal
+							}
+						}
+						w.write  "$rowKey$delimiter"
+						w.writeLine rowVals.join(delimiter)
+						rowVals = null
+					}
+				}
+			}
 
 
 

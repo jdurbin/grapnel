@@ -1,0 +1,159 @@
+#!/usr/bin/env groovy 
+
+import durbin.util.*
+err = System.err
+
+err.println "Test DoubleTable"
+beer = new DoubleTable("beer.tab")
+
+assert beer.rows() == 69
+assert beer.cols() == 5
+
+colNames = ["price", "calories", "alcohol", "type", "domestic"] as String[]
+assert beer.colNames == colNames
+
+rowNames = ["BrooklynBrand","LeinenkugelsRed","SamuelAdamsBoston","GeorgeKilliansIrishRed","RedWolf","HenryWeinhardsPrivateRes.","Sterling","Legacy","Dominion","LoneStar","AbitaAmber","YuenglingPremium","BerghoffOriginal","SamuelAdamsBoston","SierraNevadaPale","FullSailAmber","Liberty","ElkMountainAmber","CelisPaleBock","PetesWicked","AnchorSteam","DockStreetAmber","Bass","RedhookESB","NewAmsterdamNewYork","CatamountAmber","RedNectar","OldDetroitAmber","BridgePortBlueHeronPale","GearysPale","MolsonGolden","LabattBlue","Fosters","Kirin","DosEquis","Heineken","CoronaExtra","St.PauliGirl","Becks","PilsnerUrquell","OldMilwaukee","Strohs","RedDog","Budweiser","Icehouse","MolsonIce","Michelob","BudIce","Busch","CoorsOriginal","GeneseeCreamAle","MillerHighLife","PabstBlueRibbon","MilwaukeesBest","MillerGenuineDraft","RollingRock","MichelobLight","BudLight","NaturalLight","CoorsLight","MillerLite","AmstelLight","Sharps","CoorsCutter","Kingsbury","OldMilwaukee","ODouls","Kaliber","Clausthaler"] as String[]
+assert beer.rowNames == rowNames
+
+alcohol = beer.getCol("alcohol") 
+assert alcohol.size() == 69
+assert alcohol[0] == 5.2
+assert alcohol[68]==0
+assert alcohol.mean() == 4.420289855072465
+
+brooklyn = beer["BrooklynBrand"]
+assert brooklyn instanceof durbin.util.DoubleVector
+trueBrooklyn = new DoubleVector([6.24,159,5.2,1,1] as double[])
+trueBrooklyn.eachWithIndex{b,i-> assert b == brooklyn[i]}
+
+assert beer['BrooklynBrand'][0] == 6.24
+assert brooklyn["price"] == 6.24
+assert beer['BrooklynBrand']["price"] == 6.24
+
+// So I'm going to have to handle case of null getAt() as special case... next...
+// beer[]['price']  should return a column vector
+//
+// Can do
+// beer['']
+// beer[-1]
+// beer[0..-1] 
+
+
+// To get this to work, will probably have to do away with DoubleVector and just 
+// have DoubleTable work as vector also and use the trick in GroovyLab Matrix class. 
+// Why did I bother with DoubleVector?  Was it to get math operations like sum, mean, 
+// and so on?   In fact, it might make sense to just back DoubleTable with Matrix
+// cass.  Is it really a lot slower than colt for my use?  
+//println beer[1..-1]['price']
+
+
+/***********************************************
+*       Table including first column in table
+************************************************/
+
+err.println "Test DoubleTable FirstColInTable"
+beer = new DoubleTable("beer_nobrand.tab",bIncludeFirstColInTable = true)
+assert beer.colNames==colNames
+rowNames2 = ["Row 0","Row 1","Row 2","Row 3","Row 4","Row 5","Row 6","Row 7","Row 8","Row 9","Row 10","Row 11","Row 12","Row 13","Row 14","Row 15","Row 16","Row 17","Row 18","Row 19","Row 20","Row 21","Row 22","Row 23","Row 24","Row 25","Row 26","Row 27","Row 28","Row 29","Row 30","Row 31","Row 32","Row 33","Row 34","Row 35","Row 36","Row 37","Row 38","Row 39","Row 40","Row 41","Row 42","Row 43","Row 44","Row 45","Row 46","Row 47","Row 48","Row 49","Row 50","Row 51","Row 52","Row 53","Row 54","Row 55","Row 56","Row 57","Row 58","Row 59","Row 60","Row 61","Row 62","Row 63","Row 64","Row 65","Row 66","Row 67","Row 68"]
+assert beer.rowNames==rowNames2
+alcoholTrue = [5.2,5,4.9,4.9,5.5,4.9,4.7,5.1,5.4,4.8,4.4,4.3,5.1,5,5.8,5.9,6,5.6,4.7,5.3,4.9,5.4,5.1,5.6,3.7,4.9,5.3,5.9,5.9,4.7,5,5,5,5,4.8,5,4.6,4.9,4.3,4.1,4.5,4.4,5,4.9,5.5,5.6,5,5.5,4.9,4.6,4.6,5,4.7,4.6,5,4.6,4.3,4.2,4.2,4.2,4.5,3.6,0,0,0,0,0,0,0] as DoubleVector
+alcohol = beer.getCol("alcohol") 
+assert alcohol.size() == 69
+assert alcohol[0] == 5.2
+assert alcohol[68]==0
+assert alcohol.mean() == 4.420289855072465
+type = beer.getCol("type")
+assert type[68] == 5.0 
+assert type[55] == 4.0
+domestic = beer.getCol("domestic")
+assert domestic[68] == 0
+assert domestic[66] == 1
+
+/*
+err.println "Test TwoDMap"
+beer = new TwoDMap("beer.tab","\t")
+assert beer.rows() == 67
+assert beer.cols() == 5
+
+assert beer['BrooklynBrand']['price'] as double == 6.24
+assert beer['BrooklynBrand']['domestic'] as double == 1
+
+assert beer['Sterling']['price'] as double == 2.52
+assert beer['Sterling']['calories'] as double == 155
+assert beer['Sterling']['alcohol'] as double == 4.7
+assert beer['Sterling']['type'] as double == 1
+assert beer['Sterling']['domestic'] as double == 1
+
+assert beer['Clausthaler']['price'] as double == 5.63
+assert beer['Clausthaler']['type'] as double == 5
+assert beer['Clausthaler']['domestic'] as double == 0
+
+//beer.printTable("\t","null")
+
+// Note there is more than one type of SamuelAdamsBoston.  For a Table, duplicate row names is
+// no problem.  For a 2DMap, duplicate row names mean only the last occurrence will appear. 
+// So reading a TwoDMap of a tab file may yield something different than the file unless 
+// you specify that the first column is NOT a row name. 
+testAlcohol = beer.getCol('alcohol')
+testAlcohol = testAlcohol.collect{it as double}
+assert testAlcohol.size() == 67
+assert testAlcohol[0] == 5.2
+assert testAlcohol[4] == 5.5
+assert testAlcohol[66] ==0
+
+testRedDog = beer.getRow('RedDog')
+testRedDog = testRedDog.collect{it as double}
+assert testRedDog[0] == 3.83
+assert testRedDog[1] == 147
+assert testRedDog[2] == 5.0
+assert testRedDog[3] == 4
+assert testRedDog[4] == 1
+
+//new OnlineTable("beer.tab").eachRow{row->
+//	println "brand: "+row.brand
+//	println "calories:"+row.calories
+//}
+
+m = new TwoDMap()
+m.count('Bob','Track')
+m.count('Bob','Soccer')
+m.count('Bob','Tennis')
+m.count('Alice','Track')
+m.count('Alice','Tennis')
+m.count("Jill",'Soccer')
+m.count('Bob','Track')
+
+m.printTable("\t","null")
+*/
+
+//m.writeTable("writetest.out","\t","null")
+//m.writeTableQuick("writetest.out","\t","null")
+//m.writeTableQuick2("writetest.out","\t","null")
+
+//=================================================================
+
+// New table class based on Google Guava HashBasedTable
+err.println "Test DynamicTable"
+beer = new DynamicTable("beer.tab","\t")
+assert beer.numCols() == 5
+assert beer.numRows() == 67
+assert beer['BrooklynBrand']['price'] as double == 6.24
+assert beer['BrooklynBrand']['domestic'] as double == 1
+
+assert beer['Sterling']['price'] as double == 2.52
+assert beer['Sterling']['calories'] as double == 155
+assert beer['Sterling']['alcohol'] as double == 4.7
+assert beer['Sterling']['type'] as double == 1
+assert beer['Sterling']['domestic'] as double == 1
+
+assert beer['Clausthaler']['price'] as double == 5.63
+assert beer['Clausthaler']['type'] as double == 5
+assert beer['Clausthaler']['domestic'] as double == 0
+
+assert beer["Michelob"]["calories"] == "159"
+beer["Michelob"]["calories"] = 20
+assert beer["Michelob"]["calories"] == 20
+
+//beer.print()
+
+
