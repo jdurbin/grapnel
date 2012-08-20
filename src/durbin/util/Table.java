@@ -224,6 +224,25 @@ public class Table extends GroovyObjectSupport{
   public Table(String fileName,String delimiter,Closure c) throws Exception{
      readFile(fileName,delimiter,c);
    }
+
+	public Table(ArrayList<String> rNames,ArrayList<String> cNames){
+		numRows = rNames.size();
+		numCols = cNames.size();
+		matrix = new DenseObjectMatrix2D(numRows,numCols);
+
+		rowNames = new String[numRows];
+		for(int i = 0;i < rNames.size();i++){
+			rowNames[i] = rNames.get(i);
+		}
+
+		colNames = new String[numCols];
+		for(int i = 0;i < cNames.size();i++){
+			colNames[i] = cNames.get(i);
+		}
+
+		createNameMap(colNames,colName2Idx);
+		createNameMap(rowNames,rowName2Idx);
+	}
   
 	public int rows() {
 		return(numRows);

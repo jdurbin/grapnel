@@ -82,6 +82,7 @@ class DynamicTable {
 		}
 	}		
 	
+	
 	/***
 	* Write the table to a file
 	*/ 

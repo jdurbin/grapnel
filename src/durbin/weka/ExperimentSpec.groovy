@@ -24,7 +24,7 @@ class ExperimentSpec{
    // Just to have something handy to print
    def classifierStr
    def attrEvalStr
-   def attrSearchStr88
+   def attrSearchStr
    
     //time estimate:   {so batching can divide it up reasonably}
 

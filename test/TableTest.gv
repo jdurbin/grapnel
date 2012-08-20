@@ -134,7 +134,7 @@ m.printTable("\t","null")
 
 // New table class based on Google Guava HashBasedTable
 err.println "Test DynamicTable"
-beer = new DynamicTable("beer.tab","\t")
+beer = new DynamicTable("beer_missingdata.tab","\t")
 assert beer.numCols() == 5
 assert beer.numRows() == 67
 assert beer['BrooklynBrand']['price'] as double == 6.24
@@ -154,6 +154,6 @@ assert beer["Michelob"]["calories"] == "159"
 beer["Michelob"]["calories"] = 20
 assert beer["Michelob"]["calories"] == 20
 
-//beer.print()
+beer.print()
 
 
