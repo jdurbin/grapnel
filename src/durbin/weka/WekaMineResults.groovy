@@ -250,6 +250,28 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 
 
 	/***
+	* Returns a string containing the selected features and their feature selection scores. 
+	* Score returned is -1 if features were not actually ranked.  Scores are returned by 
+	* Cross-validation fold to be combined in post processing in different ways
+	* 
+	* Output is like:
+	* 
+	* Fold:CENPN~0.4029;MASTL~0.3543;MELK~0.3397;BLM~0.3388;Fold:C13orf3~0.3068;CEP55~0.3001;SHCBP1~0.2918
+	* 
+	*/
+	static String cvFeatureSelections(data,ArrayList<LightWeightAttributeSelection> cvAttributeSelections,maxToReport){
+
+		// There is a set of attribute selections for each Cross-validation fold...
+		def outStrs = []
+		cvAttributeSelections.eachWithIndex{lightWeightAttributes,i->
+			def selectedAttributesForFold = lightWeightAttributes.getSelectedAttributes()
+			def attrStr = selectedAttributesForFold.collect{"$it.key~$it.value"}.join(";")
+			outStrs << "Fold:${attrStr}"
+		}
+		return(outStrs.join(";"))
+	}
+
+	/***
   * Returns a string containing the ordered and selected features and their 
   * feature selection scores.  The output will be like: 
   * 
@@ -257,7 +279,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   * 
   * 
   */ 
-  static String cvFeatureSelections(data,attributeSelections,maxToReport){  
+  static String cvFeatureSelectionsOld(data,attributeSelections,maxToReport){  
     
     def attList = [] 
     

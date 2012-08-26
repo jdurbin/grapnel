@@ -69,6 +69,7 @@ import weka.estimators.Estimator;
 import weka.estimators.KernelEstimator;
 import weka.classifiers.*;
 
+import weka.attributeSelection.*;
 import weka.attributeSelection.AttributeSelection;
 import durbin.weka.AttributeSelectedClassifier2;
 import weka.classifiers.meta.FilteredClassifier;
@@ -336,14 +337,13 @@ import java.util.ArrayList;
 		// pain to change them all, roughly a rewrite of this whole class, which will be good someday, just not 
 		// today... KJD
 		public Evaluation2 trainingEval;
-
     
     // The classifiers actually created during cross-validation. 
     // KJD
-    public ArrayList<ThinAttributes> m_cvAttributeSelections;  // Evaluation2
+    public ArrayList<LightWeightAttributeSelection> m_cvAttributeSelections = new ArrayList<LightWeightAttributeSelection>(); // Evaluation2
     
     // Evaluation2
-    public ArrayList<ThinAttributes> getCVAttributeSelections(){
+    public ArrayList<LightWeightAttributeSelection> getCVAttributeSelections(){
       return(m_cvAttributeSelections);
     }
     
@@ -668,7 +668,6 @@ throws Exception {
 public void evaluateSingleFold(Instances data, Instances train,Instances test,Classifier classifier,Object... forPredictionsPrinting) throws Exception{
 	
 	// Create a list to store classifiers (Evaluation2)
-	m_cvAttributeSelections = new ArrayList<ThinAttributes>();
 
 //	System.err.println("DEBUG1");
 	
@@ -687,12 +686,28 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 
 	// copiedClassifier is a FilteredClassifier...
 	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
+	//System.err.println("asClassifier.toStroing():"+asClassifier.toString());	
 	AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
-	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2
-	double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
-	ThinAttributes thinAttributes = new ThinAttributes(rankedAttrs);
+	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2	
+	ASEvaluation eval = asClassifier.getEvaluator();
+	ASSearch search = asClassifier.getSearch();
+	
+	// attributeSelection is too heavy-weight, saving instances and so on, to save many copies of it
+	// so we extract just what we need to know from each attributeSelection and save that...
+	// Attribute selection is performed on training set so provide training set as reference for 
+	// the meaning of attribute selection indices...
+	LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
+	
+	//System.err.println("DEBUG=============== toResultsString: ");
+	//System.err.println(attributeSelection.toResultsString());
+	
+	//System.err.println("DEBUG Selected attributes: "+attributeSelection.selectedAttributes());
+	//System.err.println("DEBUG===============");
+
+	//double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
+	//LightWeightAttributeSelection thinAttributes = new LightWeightAttributeSelection(rankedAttrs);
 	//System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
-  m_cvAttributeSelections.add(thinAttributes);
+  m_cvAttributeSelections.add(lwAttributes);
 	
 	//System.err.println("DEBUG4");
 		
