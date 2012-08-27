@@ -4,7 +4,6 @@ package durbin.weka;
 
 import com.google.common.collect.*
 
-
 class ConfigRange{
 	def ConfigRange(start,stop,inc){
 		this.start = start

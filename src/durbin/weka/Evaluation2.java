@@ -512,7 +512,7 @@ throws Exception {
 	m_NumFolds = 0;	
 	for(int fsIdx = 0;fsIdx < foldSets.size();fsIdx++){
 		FoldSet foldSet = foldSets.get(fsIdx);
-		int numFolds = foldSet.numFolds();
+		int numFolds = foldSet.numFolds(); // should already have presence/absence of holdout baked in. 
 		System.err.println("\n\tFoldSet: "+fsIdx);		
 		m_NumFolds+= numFolds;
 		System.err.println("\tnumFolds: "+numFolds);
@@ -691,6 +691,9 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2	
 	ASEvaluation eval = asClassifier.getEvaluator();
 	ASSearch search = asClassifier.getSearch();
+	
+	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
+	//System.err.println("transformedHeader:"+pceval.transformedHeader());
 	
 	// attributeSelection is too heavy-weight, saving instances and so on, to save many copies of it
 	// so we extract just what we need to know from each attributeSelection and save that...

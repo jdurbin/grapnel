@@ -17,28 +17,45 @@ class FoldSet{
 	def idx2sampleList = [:]		
 	int numFolds=0;
 	def samples;
+	def bHasHoldout = true;
 	
 	def FoldSet(samples,foldValues){
 		
 		this.samples = samples
 		
 		def foldValueSet = foldValues as Set
-		numFolds = foldValueSet.size()
 		
-		// Each index will map to a list of sample names...				
-		for(i in 0..<numFolds){
-			idx2sampleList[i] = []
+		// numFolds is number of folds for CV purposes.  Foldset may have extra 
+		// values for holdout but those don't count as a fold for CV purposes. 
+		if (foldValueSet.contains(0)) {
+			bHasHoldout = true;
+			numFolds = foldValueSet.size() -1; 
+		}else {
+			bHasHoldout = false;
+			numFolds = foldValueSet.size()
 		}
-						
-		foldValues.eachWithIndex{foldNum,i->
+
+		// Each index will map to a list of sample names...				
+		for(i in -1..<foldValueSet.size()){ idx2sampleList[i] = [] }
+							
+		foldValues.eachWithIndex{foldNum,i->			
 			def foldIdx = foldNum-1 // fold values are 1-based, so convert to 0-based. 
-			def sample = samples[i] // i is walking through samples...
+			def sample = samples[i] // i is walking through samples...			
+			//System.err.println "foldNum: $foldNum  i: $i numFolds:$numFolds foldIdx:$foldIdx"
 			idx2sampleList[foldIdx].add(sample) // add the next sample to the specified fold list.
 		}
 	}
 	
+	
+	def getHoldoutSamples(){
+		if (bHasHoldout) return(idx2sampleList[-1]);
+		else{
+			throw new Exception("ERROR Holdout requested but none defined.");
+		}
+	}
+	
 	// 0-based. 
-	def getTestSamples(int foldNum){
+	def getTestSamples(int foldNum){		
 		return(idx2sampleList[foldNum]);
 	}	
 	
@@ -57,10 +74,17 @@ class FoldSet{
 
 /***
 * A collection of fold sets. 
+* 
+* Hacking it up a bit now ... adding a map version so that can get foldset by 
+* name.  This to enable saving a foldset for each class attribute, one for TP53, another for TTN, etc. 
+* The original purpose of multiple foldsets was to implement 5 times 5x cross validation, each line
+* was one of the replicates.  But I want just one 10x fold per class attribute.  For now, use will 
+* determine which it means, but need to iron this out in some sensible way...
 */ 
 class FoldSets{
 	
 	ArrayList<FoldSet> data;
+	HashMap<String,FoldSet> map;
 	
 	def samples;
 	
@@ -70,7 +94,7 @@ class FoldSets{
 		WekaAdditions.enable();
 	}	
 	
-	def FoldSets(){data = new ArrayList()}				
+	def FoldSets(){map = new HashMap<String,FoldSet>();data= new ArrayList()}				
 	def FoldSets(fileName){
 		read(fileName)
 	}
@@ -79,6 +103,7 @@ class FoldSets{
 	* Read a foldset file. 
 	*/ 
 	def read(fileName){
+		map = new HashMap<String,FoldSet>();
 		data = new ArrayList();
 		
 		new File(fileName).withReader{r->
@@ -86,8 +111,10 @@ class FoldSets{
 			samples = headings[1..-1] // First column is not a sample
 			
 			r.splitEachLine("\t"){fields->
+				def foldName = fields[0]
 				def foldValues = fields[1..-1].collect{it as int}	
 				def fs = new FoldSet(samples,foldValues);											
+				map[foldName] = fs
 				data.add(fs)
 			}
 		}		
@@ -96,7 +123,9 @@ class FoldSets{
 	
 	int size(){return(data.size())}
 	
-	FoldSet get(i){return((FoldSet) data.get(i))}
+	FoldSet get(i){
+		return((FoldSet) data.get(i))
+	}
 	
 	// Enables [] notation
 	FoldSet getAt(i){return((FoldSet) data.get(i))}

@@ -32,23 +32,18 @@ public class LightWeightAttributeSelection{
         def score = attrRank[1] as Double
 				score = score.round(6)
 				selectedAttributes[attName] = score
-				System.err.println "DEBUG ranked: $attIdx $attName:$score"
 			}
 			
 			//System.err.println "DEBUG: rankedAttrs.length=${rankedAttrs.length}  rankedAttrs.size=${selectedAttributes.size()}. selectedAttributes.size=${selAttrs.size()} "
 		}else{
 			def selectedAttrs = attributeSelection.selectedAttributes() as ArrayList
-			System.err.println "DEBUG all selectedAttrs: "+selectedAttrs
-			System.err.println "DEBUG omit last selectedAttrs: "+selectedAttrs[0..-2]
-			
+
 			// Last selectedAttrs is the classAttribute, which we do not want to report here...
 			selectedAttrs[0..-2].each{attrIdx->
 			  def attName = data.attribute(attrIdx+1).name()
-				System.err.println "DEBUG $attrIdx $attName"
 				selectedAttributes[attName] = -1 // There is no score/rank.  
 			}
 		}
-		System.err.println "DEBUG: Selected attributes:"+selectedAttributes
 	}
 }
 
