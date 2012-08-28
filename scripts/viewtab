@@ -8,57 +8,24 @@ import durbin.util.*
 
 err = System.err
 
-class TableModel extends AbstractTableModel{		
-	def err = System.err
-	Table dt;
-	
-	TableModel(Table table){dt = table;}
-	
-	public String getColumnName(int col) {
-		//err.println "ColumnName: $col "+dt.colNames[col]
-		return(dt.colNames[col]);
-	}
-	
-	public String getRowName(int row){
-		//err.println "rowName: $row "+dt.rowNames[row]
-		return(dt.rowNames[row]);
-	}	
-	public int getRowCount() { 
-		//err.println "rowCount: "+dt.rows()
-		return(dt.rows())
-	}
-	public int getColumnCount() { 
-		//err.println "columnCount:"+dt.cols()
-		return(dt.cols()) 
-	}
+options = ParseOptions(args)
 
-	public String getValueAt(int row, int col) {return(dt.get(row,col))}	
-	public Class getColumnClass(int c) {return(dt.get(0,c).getClass())}  	
-	public boolean isCellEditable(int row, int col){return false;}	
-	public void setValueAt(Object value, int row, int col) {}
-}
+println options
 
-fileName = args[0]
+// Determine separator to use...
+if (options.separator) sep = options.separator
+else sep = FileUtils.determineSeparator(options.fileName)
 
-// Crudely determine if it's a tab or csv file
-new File(fileName).withReader{r->
-	line = r.readLine()
-	if (line.contains(",")) sep = ","
-	else if (line.contains("\t")) sep = "\t"
-	else {err.println "File does not appear to be a csv or tab file.";System.exit(1)}
-}
+// Read the data in as a Table...
+dt = new Table(options.fileName,sep,bFirstColInTable=true)
 
-dt = new Table(fileName,sep,bFirstColInTable=true)
-//dt = new Table(fileName,sep)
-
-//err.println dt
-
+// Use that Table to back a JTable instance..
 err.print "Creating gui table..."
 dtm = new TableModel(dt)
 
 swing = new SwingBuilder()
 def mytable
-frame = swing.frame(title:fileName,defaultCloseOperation:JFrame.EXIT_ON_CLOSE){
+frame = swing.frame(title:options.fileName,defaultCloseOperation:JFrame.EXIT_ON_CLOSE){
   scrollpane = scrollPane {						
 		thetab = table(autoResizeMode:JTable.AUTO_RESIZE_OFF, autoCreateRowSorter:true){
 			tableModel(dtm)	
@@ -68,3 +35,57 @@ frame = swing.frame(title:fileName,defaultCloseOperation:JFrame.EXIT_ON_CLOSE){
 err.println "done."
 frame.pack()
 frame.show()
+
+
+/****************************************************
+* Parse the command line options, checking validity, printing help if needed. 
+*/ 
+def ParseOptions(args){
+	parser = new Parser(description: '''	
+	Produces a spreedsheet-like display of a table of data (csv, tab).  Works like a regular
+	spreadsheet, columns can be sorted, etc.  Allows the display of tables of data much too 
+	large for normal spreadsheets, though. Auto-detects tab or csv files.  Can overtly specify
+	separator in case of other separator or mixed tab/, headings. 
+	
+	Written by: James Durbin (kdurbin@ucsc.edu)
+	
+	Use like:
+	
+	viewtab data.tab
+	
+	viewtab -s "\t" data.tab
+
+	''');
+
+	parser.with{
+		optional 's','separator',[description: 'Force separator to be this character.']
+	  flag 'h','help',[default:false,description: 'Print script help.']
+		remainder{if(!it) throw new IllegalArgumentException("Must specify a file.");it}
+	}
+	try{ 
+		options = parser.parse(args); 
+		options.fileName = parser.remainder[0]
+	}catch(Exception e){System.err << parser.usage;System.exit(1)}	
+	
+	return(options)
+}
+
+
+//*************************************
+// Supporting classes
+//*************************************
+
+class TableModel extends AbstractTableModel{		
+	Table dt;
+	
+	TableModel(Table table){dt = table;}
+
+	public String getColumnName(int col) {return(dt.colNames[col]);}	
+	public String getRowName(int row){return(dt.rowNames[row]);}	
+	public int getRowCount() { return(dt.rows())}
+	public int getColumnCount() { return(dt.cols())}
+	public String getValueAt(int row, int col) {return(dt.get(row,col))}	
+	public Class getColumnClass(int c) {return(dt.get(0,c).getClass())}  	
+	public boolean isCellEditable(int row, int col){return false;}	
+	public void setValueAt(Object value, int row, int col) {}
+}
