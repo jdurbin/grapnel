@@ -74,7 +74,6 @@ class WekaMineConfigSlurper extends ConfigSlurper{
   /***
   * Slurp in the configuration with ConfigSlurper, then expand all the expandable things. 
   * Returns the ConfigObject from ConfigSlurper
-  * 
   **/ 
   ConfigObject parse(java.net.URL url){
     cfg = super.parse(url)        

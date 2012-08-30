@@ -668,7 +668,7 @@ class WekaMine{
     def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
      
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
-    err.print "Discretizing class attribute..."
+    err.print "DISCRETIZE: Discretizing class attribute..."
     def quartile = new NumericToQuartileNominal()
     quartile.setAttributeIndices("${classIdx+1}".toString())
     quartile.setUseMedian(false)
@@ -692,7 +692,7 @@ class WekaMine{
     def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
 
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
-    err.print "Discretizing class attribute..."
+    err.print "DISCRETIZE: Discretizing class attribute..."
     def quartile = new NumericToQuartileNominal()
     quartile.setAttributeIndices("${classIdx+1}".toString())
     quartile.setCutoffs(cutoffLow,cutoffHigh)
@@ -714,7 +714,7 @@ class WekaMine{
     def classIdx = data.setClassName(classAttribute) // Necessary to get idx, since idx changes 
 
     // Discretize class (select whether to discretize median, quartile, or with chosen value)
-    err.print "Discretizing class attribute..."
+    err.print "DISCRETIZE: Discretizing class attribute..."
     def quartile = new NumericToQuartileNominal()
     quartile.setAttributeIndices("${classIdx+1}".toString())
     quartile.setUseMedian(true)
@@ -729,10 +729,40 @@ class WekaMine{
     return([discretizedData,cutoffString])
   }
 
+	def applyUnsupervisedFilter(instances){
+		return(applyUnsupervisedFilter(instances,exp.filter))
+	}
+
+	static Instances applyUnsupervisedFilter(instances,Filter filter){		
+
+		if (filter == null){ 
+			err.println "FILTER: Apply unsupervised filter: None"
+			return(instances)
+		}
+		
+		err.print "FILTER: Apply unsupervised filter: ${filter.toString()}..."
+		// Remove ID attribute, since attribute evaluators and classifiers choke on it...
+		def instNames = instances.attributeValues("ID")
+		def noIDinstances = WekaMine.removeInstanceID(instances)
+
+		// Apply the filter to instances...
+		//noIDinstances = WekaMine.applyUnsupervisedFilter(noIDinstances,options.filter)
+		filter.setInputFormat(noIDinstances);	
+		noIDinstances = Filter.useFilter(noIDinstances,filter)
+
+		// Put the ID back into the instances...
+		// KJD: Note that addID below assumes same number of instances in same order. 
+		// KJD: This assumption may not always hold for filters... need to think of how to handle this.
+		def filteredInstances = WekaMine.addID(noIDinstances,instNames)
+		
+		err.println("done.")
+		
+		return(filteredInstances)
+	}
 	
 	
-	static Instances applyFilter(instances,filterName){
-		err.print("Apply filter $filterName...")
+	static Instances applyFilter(instances,String filterName){
+		err.print("Apply unsupervised filter $filterName...")
 		def filter = filterFromSpec(filterName)
 		filter.setInputFormat(instances);	
 		def filteredInstances = Filter.useFilter(instances,filter)
@@ -745,7 +775,7 @@ class WekaMine{
 	* instances and return the reduced set of attributes. 
 	*/ 
 	Instances selectAttributes(instances){
-		err.print("Select attributes with ${exp.attrEvalStr}.  Before: ${instances.numAttributes()} ...")
+		err.print("ATTRIBUTE SELECTION: Select attributes with ${exp.attrEvalStr}.  Before: ${instances.numAttributes()} ...")
 		AttributeSelection atSel = new weka.filters.supervised.attribute.AttributeSelection(); 
 		atSel.setEvaluator(exp.attributeEval);
 		def search = exp.attributeSearch
@@ -769,7 +799,7 @@ class WekaMine{
   *  Remove attributes that don't vary. 
   */ 
   static Instances removeUselessAttributes(data){
-    err.print "Removing useless attributes. Before: ${data.numAttributes()}..."
+    err.print "REMOVE: Removing useless attributes. Before: ${data.numAttributes()}..."
   
     def remove = new RemoveUseless(); 
     remove.setInputFormat(data)
@@ -784,7 +814,7 @@ class WekaMine{
    Instances removeInstancesWithNegativeClassValues(Instances data){
      // Remove any instances whose class value is missingValue(). This
      // will include attributes for which -1 is a bogus value and has been marked as such.  
-     err.print "Removing instances with negative class value. Before: ${data.numInstances()}..."
+     err.print "REMOVE: Removing instances with negative class value. Before: ${data.numInstances()}..."
      def classIdx = data.setClassName(exp.classAttribute)
      def remove = new RemoveWithValues()
      remove.setAttributeIndex("${classIdx+1}".toString())
@@ -1026,6 +1056,7 @@ class WekaMine{
 		return(filteredClassifier)
 	}
 
+	
   /**
   *  Create a attribute evaluation from the command-line evaluation specification
   *  string.  For example:<br><br>

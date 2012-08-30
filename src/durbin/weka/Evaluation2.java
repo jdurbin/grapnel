@@ -495,7 +495,7 @@ public double[][] confusionMatrix() {
 public void crossValidateModelWithGivenFolds(Classifier classifier,
 Instances data, FoldSets foldSets,Object... forPredictionsPrinting) 
 throws Exception {
-
+	
   // We assume that the first element is a StringBuffer, the second a Range (attributes
   // to output) and the third a Boolean (whether or not to output a distribution instead
   // of just a classification)

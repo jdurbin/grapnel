@@ -8,6 +8,10 @@ import weka.attributeSelection.*;
 
 import durbin.util.*;
 
+// WekaMineResult should contain an ExperimentSpec, and ExperimentSpec should be the one to 
+// know what the experiment fields are. 
+
+
 class WekaMineResult{
 	
 	static err = System.err
@@ -25,6 +29,12 @@ class WekaMineResult{
 	int fn1
 	float rms
 	float roc
+
+	// Refactor so that this contains:  ExperimentSpec experiment
+	// Key thing to work out, currently ExperimentSpecs are created from WekaMineResults.  Need to handle that 
+	// differently... 
+	
+	String filter
 	String classifier
 	String attrEval
 	String attrSearch
@@ -33,12 +43,13 @@ class WekaMineResult{
 	String discretization
 	String dataFile
 	
-	static def headingStr = "attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,dataFile,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    		
-	static def expHeadingStr = "attrEval,attrSearch,numAttrs,classifier,classAttr,discretization"
+	static def headingStr = "filter,attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,dataFile,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    		
+	static def expHeadingStr = "filter,attrEval,attrSearch,numAttrs,classifier,classAttr,discretization"
 	
 	
 	String toString(){
 		def sb = []
+		sb << filter
 		sb << attrEval
 		sb << attrSearch
 		sb << numAttrs
@@ -91,6 +102,7 @@ class WekaMineResult{
 		//err.println "DEBUG fields: "+fields
 		//err.println "DEBUG headings2Cols"+headings2Cols				
 						
+		filter = fields[headings2Cols['filter']] as String				
 		attrEval = fields[headings2Cols['attrEval']] as String
 		attrSearch = fields[headings2Cols['attrSearch']] as String
 		numAttrs = fields[headings2Cols['numAttrs']] as int
@@ -135,7 +147,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 	*/
 	static String getFullSummaryLine(jobIdx,data,experiment,eval,dataName){
 		def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
-    def fullSummaryLine="${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classifierStr},${experiment.classAttribute},${experiment.discretization},${dataName},*,$jobIdx,$summaryLine"		
+    def fullSummaryLine="${experiment.filterStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classifierStr},${experiment.classAttribute},${experiment.discretization},${dataName},*,$jobIdx,$summaryLine"		
 		return(fullSummaryLine)
 	}
 
@@ -271,90 +283,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 		return(outStrs.join(";"))
 	}
 
-	/***
-  * Returns a string containing the ordered and selected features and their 
-  * feature selection scores.  The output will be like: 
-  * 
-  * 68_IHH N/PTCH1~0.6930,105_BMP2-4/CHRDL1~0.64456,132_CELL_MIGRATION~0.4630,...
-  * 
-  * 
-  */ 
-  static String cvFeatureSelectionsOld(data,attributeSelections,maxToReport){  
-    
-    def attList = [] 
-    
-
-//		err.println "DEBUG: cvFeatureSelections"
-
-    // The classifiers that reach the cross validation code will be 
-    // twice wrapped.   Once as an attribute selected classifier, and 
-    // again as a filtered classifier (to remove String ID)
-    //
-    
-    def attribute2Score = [:]
-    def intersection = [] as Set
-     
-    def bFirstTime = true; 
-		
-		attributeSelections.each{thinAttributes->                 
-            
-			//def rankedAttrs = attributeSelection.rankedAttributes() // this is a double[][]
-			def rankedAttrs = thinAttributes.getAttributes()  // Returns the double[][] we tucked away in this thin wrapper. 
-
-      def reportCount = 0;
-      
-      def keySet = [] as Set
-      rankedAttrs.each{attrRank->
-        
-        // Only record maxToReport then skip over rest...
-				//System.err.println "maxToReport: $maxToReport\treportCount: $reportCount"
-        if (reportCount >= maxToReport) return;
-        reportCount++
-        
-        // +1 because the CV was done on Filtered instances that have removed 
-        // the 0th (ID) attribute.  KJD: While in practice I have always been 
-        // making the ID the first (0) attribute, I worry slightly that assuming 
-        // so is risky... but what a mess if ID is 5th attribute and you remove it...
-        def attIdx = (attrRank[0] as int)+1        
-        def attName = data.attribute(attIdx).name()
-        def score = attrRank[1] as Double
-        //score = score.round(4)
-      
-        // Save every pair attributes and scores... save only the max score 
-        // for each attribute...
-        if (attribute2Score.keySet().contains(attName)){
-          def oldScore = attribute2Score[attName]
-          if (score > oldScore) {          
-            attribute2Score[attName] = score;
-          }
-        }else{
-          attribute2Score.put(attName,score)
-        }
-        
-        // keySet for just this one cv fold...        
-        keySet << attName        
-      }
-      
-      if (bFirstTime){
-        intersection = keySet
-        bFirstTime=false;
-      }else{      
-        intersection = intersection.intersect(keySet)
-      }      
-    }
-
-
-    // Scores 
-    def valueSortedKeys = attribute2Score.keySet().sort{-attribute2Score[it]}
-
-    def pairs = []
-    valueSortedKeys.eachWithIndex{attr,i -> 
-      if (i < maxToReport){
-        pairs << "$attr~${attribute2Score[attr]}" 
-      }
-    }    
-    return(pairs.join(","))  
-  }
+	
   
   /****
   * Appends a results summary line for AttributeSelection ONLY experiments 
@@ -505,3 +434,93 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
     saver.writeBatch();
   }
 }
+
+
+//****************** DEPRECATED FUNCTIONS ***********************
+
+/***
+* Returns a string containing the ordered and selected features and their 
+* feature selection scores.  The output will be like: 
+* 
+* 68_IHH N/PTCH1~0.6930,105_BMP2-4/CHRDL1~0.64456,132_CELL_MIGRATION~0.4630,...
+* 
+* 
+*/ 
+/*
+static String cvFeatureSelectionsOld(data,attributeSelections,maxToReport){  
+  
+  def attList = [] 
+  
+
+//		err.println "DEBUG: cvFeatureSelections"
+
+  // The classifiers that reach the cross validation code will be 
+  // twice wrapped.   Once as an attribute selected classifier, and 
+  // again as a filtered classifier (to remove String ID)
+  //
+  
+  def attribute2Score = [:]
+  def intersection = [] as Set
+   
+  def bFirstTime = true; 
+	
+	attributeSelections.each{thinAttributes->                 
+          
+		//def rankedAttrs = attributeSelection.rankedAttributes() // this is a double[][]
+		def rankedAttrs = thinAttributes.getAttributes()  // Returns the double[][] we tucked away in this thin wrapper. 
+
+    def reportCount = 0;
+    
+    def keySet = [] as Set
+    rankedAttrs.each{attrRank->
+      
+      // Only record maxToReport then skip over rest...
+			//System.err.println "maxToReport: $maxToReport\treportCount: $reportCount"
+      if (reportCount >= maxToReport) return;
+      reportCount++
+      
+      // +1 because the CV was done on Filtered instances that have removed 
+      // the 0th (ID) attribute.  KJD: While in practice I have always been 
+      // making the ID the first (0) attribute, I worry slightly that assuming 
+      // so is risky... but what a mess if ID is 5th attribute and you remove it...
+      def attIdx = (attrRank[0] as int)+1        
+      def attName = data.attribute(attIdx).name()
+      def score = attrRank[1] as Double
+      //score = score.round(4)
+    
+      // Save every pair attributes and scores... save only the max score 
+      // for each attribute...
+      if (attribute2Score.keySet().contains(attName)){
+        def oldScore = attribute2Score[attName]
+        if (score > oldScore) {          
+          attribute2Score[attName] = score;
+        }
+      }else{
+        attribute2Score.put(attName,score)
+      }
+      
+      // keySet for just this one cv fold...        
+      keySet << attName        
+    }
+    
+    if (bFirstTime){
+      intersection = keySet
+      bFirstTime=false;
+    }else{      
+      intersection = intersection.intersect(keySet)
+    }      
+  }
+
+
+  // Scores 
+  def valueSortedKeys = attribute2Score.keySet().sort{-attribute2Score[it]}
+
+  def pairs = []
+  valueSortedKeys.eachWithIndex{attr,i -> 
+    if (i < maxToReport){
+      pairs << "$attr~${attribute2Score[attr]}" 
+    }
+  }    
+  return(pairs.join(","))  
+}
+*/

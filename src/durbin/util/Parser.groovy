@@ -3,6 +3,8 @@ package durbin.util
 
 /***
 * Durbin fork (!!) of Groovy Option Parser <br><br> 
+*
+* http://code.google.com/p/groovy-option-parser/
 * 
 * GOP is nice, but I didn't like the fact that it didn't handle a help option 
 * (that is, it'd always print out the required missing list, which was distracting)<br>

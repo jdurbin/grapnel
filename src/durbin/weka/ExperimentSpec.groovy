@@ -10,8 +10,8 @@ import weka.attributeSelection.*
 * Should replace with a map from these feature names to their values. 
 */ 
 class ExperimentSpec{
-   def classifier
 	 def filter          // unsupervised filter...
+   def classifier
    def attributeEval
    def attributeSearch
    def numAttributes
@@ -22,11 +22,13 @@ class ExperimentSpec{
 	 def dataFile
 
    // Just to have something handy to print
+	 def filterStr
    def classifierStr
    def attrEvalStr
    def attrSearchStr
    
     //time estimate:   {so batching can divide it up reasonably}
+
 
 	 def ExperimentSpec(WekaMineResult wmr){
 		classifierStr = wmr.classifier
@@ -35,6 +37,13 @@ class ExperimentSpec{
 				classifier = WekaMine.classifierFromSpec(classifierStr)
 		  }else{
 				classifier = null;
+			}
+			
+			filterStr = wmr.filter
+			if (filterStr != "None"){
+				filter = WekaMine.filterFromSpec(filterStr)  // Why is this in WekaMine and not here? 
+			}else{
+				filter = null
 			}
 			
 			attrEvalStr = wmr.attrEval 
@@ -54,8 +63,6 @@ class ExperimentSpec{
 			throw(e)
 		}						
 	}
-
-
 
     
 		/***
@@ -83,6 +90,13 @@ class ExperimentSpec{
       throw(e)
     }
     
+		filterStr = fields[headings2Cols['filter']]
+		if (filterStr != "None"){
+			filter = WekaMine.filterFromSpec(filterStr)  // Why is this in WekaMine and not here? 
+		}else{
+			filter = null
+		}
+
     attrEvalStr = fields[headings2Cols['attrEval']] 
     attributeEval = WekaMine.evalFromSpec(attrEvalStr)  
         
@@ -95,12 +109,12 @@ class ExperimentSpec{
    }   
    
    String toString(){
-     def rstr = attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization+","+dataFile
+     def rstr = filterStr+","+attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization+","+dataFile
      return(rstr);
    } 
 
 	 String toOutputString(){
-     def rstr = attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization
+     def rstr = filterStr+","+attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization
      return(rstr);
    }   
 }

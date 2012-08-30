@@ -52,7 +52,8 @@ public class CVUtils{
 	static Instances testCV(Instances data,FoldSet foldset,int fold){
 		def testSampleNames = foldset.getTestSamples(fold)					
 		// Look up the instance indexes for this list of names...
-		def testSampleIdxs = data.nameListToIndexList(testSampleNames)		
+		def testSampleIdxs = data.nameListToIndexList(testSampleNames)			
+		//err.println "DEBUG: testSampleIdxs: "+testSampleIdxs	
 		
 		// Copy each instance to the test set...
 		Instances test = new Instances(data,testSampleNames.size())
