@@ -845,6 +845,9 @@ class WekaMine{
     return(selectedAttributeData)
   }
 
+
+
+
 	/***
 	* Will return the first holdoutFraction instances as a set of instances. 
 	* Will remove those instances from data. 
@@ -929,7 +932,25 @@ class WekaMine{
 		return(selectedInstanceData)
 	}
 	
+	/***
+	* Remove the named instances from data. 
+	*/ 
+	static Instances removeInstances(Instances data,ArrayList selectedInstances){
+		WekaAdditions.enable() // Just in case
+		
+		def remove = new RemoveRange()
+		
+		def idxList = data.nameSetToIndexList(selectedInstances)	
+		idxList = idxList.collect{it+1} // convert to one based	
+		def rangeStr = idxList.join(",")
+		remove.setInstancesIndices(rangeStr)
+		remove.setInvertSelection(false) // Remove everything in this list
+		remove.setInputFormat(data)
+		def remainingInstanceData = Filter.useFilter(data,remove)
+		return(remainingInstanceData)
+	}
 	
+		
 	/**
   * Read instances from a table, filling in missing value tokens as we go. 
   */ 

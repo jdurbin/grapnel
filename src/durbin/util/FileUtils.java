@@ -12,15 +12,15 @@ import java.lang.*;
 public class FileUtils {
 	
 	
-	public static char determineSeparator(String fileName) throws Exception{
+	public static String determineSeparator(String fileName) throws Exception{
 		// Crudely determine if it's a tab or csv file
 		BufferedReader in = new BufferedReader(new FileReader(fileName));
 		String headerStr = in.readLine();
 		in.close();
 		
-		char sep;
-		if (headerStr.contains(",")) sep = ',';
-		else if (headerStr.contains("\t")) sep = '\t';
+		String sep;
+		if (headerStr.contains(",")) sep = ",";
+		else if (headerStr.contains("\t")) sep = "\t";
 		else {
 			String exceptionStr = "File does not appear to be a csv or tab file.";
 			throw new RuntimeException(exceptionStr);

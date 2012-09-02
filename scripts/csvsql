@@ -85,10 +85,13 @@ csvfiles.each{csvfile->
 // Create an h2 in-memory db, calling it what you like, here db1
 def sql = Sql.newInstance("jdbc:h2:mem:db1","org.h2.Driver")
 
+
+
 // Create tables for each csv file named...
 tablenameMap.each{tablename,csvfile->
   typeString = inferColumnTypes(csvfile,20)
   stmt = "create table $tablename($typeString) as select * from csvread('$csvfile')" as String
+	//stmt=  "create table $tablename($typeString) as select * from CSVREAD('data/test.tsv', null, 'rowSeparator=' || CHAR(9));" as String
   //println "stmt: $stmt"
   sql.execute(stmt)
 }

@@ -10,8 +10,6 @@ err = System.err
 
 options = ParseOptions(args)
 
-println options
-
 // Determine separator to use...
 if (options.separator) sep = options.separator
 else sep = FileUtils.determineSeparator(options.fileName)
@@ -35,7 +33,6 @@ frame = swing.frame(title:options.fileName,defaultCloseOperation:JFrame.EXIT_ON_
 err.println "done."
 frame.pack()
 frame.show()
-
 
 /****************************************************
 * Parse the command line options, checking validity, printing help if needed. 
@@ -65,16 +62,13 @@ def ParseOptions(args){
 	try{ 
 		options = parser.parse(args); 
 		options.fileName = parser.remainder[0]
-	}catch(Exception e){System.err << parser.usage;System.exit(1)}	
-	
+	}catch(Exception e){System.err << parser.usage;System.exit(1)}		
 	return(options)
 }
-
 
 //*************************************
 // Supporting classes
 //*************************************
-
 class TableModel extends AbstractTableModel{		
 	Table dt;
 	

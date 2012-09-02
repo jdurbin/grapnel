@@ -2,9 +2,16 @@
 
 import durbin.util.*
 
+err = System.err
+
+err.println "CUTBYNAME DEBUG GALAXY TEST"
+
+
 fileName = args[0]
 cutName = args[1]
 sep = FileUtils.determineSeparator(fileName) as String
+
+
 
 new File(fileName).withReader{r->
 	headerStr = r.readLine()
