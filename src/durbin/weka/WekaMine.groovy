@@ -935,7 +935,7 @@ class WekaMine{
 	/***
 	* Remove the named instances from data. 
 	*/ 
-	static Instances removeInstances(Instances data,ArrayList selectedInstances){
+	static Instances removeInstances(Instances data,selectedInstances){
 		WekaAdditions.enable() // Just in case
 		
 		def remove = new RemoveRange()
