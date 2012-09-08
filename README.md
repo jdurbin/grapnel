@@ -26,7 +26,7 @@
     * **[csvsql](https://github.com/jdurbin/durbinlib/wiki/csvsql)**  Fairly polished script that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
  
         ```sql
-        csvsql "select sum(score) from people.csv where age < 40"
+        csvsql "select score from people.csv where age < 40"
         csvsql "select name,score from people.csv where age <50 and score > 100"
         csvsql "select sum(score) from people.csv where age < 40"
         csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
