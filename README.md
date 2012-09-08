@@ -23,13 +23,15 @@
 * **durbin.weka** Support for working with Weka.  Lots of support for making an automated pipeline and for making trained classifiers into production-usable self-contained objects.  Perhaps most happily for weka library users, includes extensive support for instance IDs, including ability to access instances by ID.  Lots of functionality for accessing attributes and instances by name with [] notation in Groovy. Implements additional attribute selection and filter methods.  Forms the core of my machine learning automation package [wekaMine](http://jdurbin.github.com/wekaMine/) 
 
 * **scripts** Collection of command-line scripts (groovy). 
-    * **[[csvsql]]**  Fairly polished script that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:
-		```sql
-		        csvsql "select sum(score) from people.csv where age < 40"  
-		        csvsql "select name,score from people.csv where age <50 and score > 100"
-		        csvsql "select sum(score) from people.csv where age < 40"
-		        csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
-		```   
+    * **[csvsql](https://github.com/jdurbin/durbinlib/wiki/csvsql)**  Fairly polished script that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
+ 
+        ```sql
+        csvsql "select sum(score) from people.csv where age < 40"
+        csvsql "select name,score from people.csv where age <50 and score > 100"
+        csvsql "select sum(score) from people.csv where age < 40"
+        csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
+        ```   
+
     * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on 30,000 rows and 2,000 columns?  Then viewtab is for you! Just for viewing and sorting data now, but stay tuned!  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html viewtab)
     ![viewtab](https://raw.github.com/jdurbin/durbinlib/master/img/viewtab.jpg)         
     * **cutbyname** Like cut, but cuts columns by column name. 
