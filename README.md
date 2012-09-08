@@ -23,8 +23,9 @@
 * **durbin.weka** Support for working with Weka.  Lots of support for making an automated pipeline and for making trained classifiers into production-usable self-contained objects.  Perhaps most happily for weka library users, includes extensive support for instance IDs, including ability to access instances by ID.  Lots of functionality for accessing attributes and instances by name with [] notation in Groovy. Implements additional attribute selection and filter methods.  Forms the core of my machine learning automation package [wekaMine](http://jdurbin.github.com/wekaMine/) 
 
 * **scripts** Collection of command-line scripts (groovy). 
-    * **[[csvsql]]**  Fairly polished script that lets you perform full SQL queries on csv table files (including joins on multiple files).  Note: has an old Google Projects page here: [old csvsql] (http://code.google.com/p/gcsvsql/) that is no longer maintained.  Git is now the latest official version.   
-    * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on 30,000 rows and 2,000 columns?  Then viewtab is for you! Just for viewing and sorting data now, but stay tuned!  Read about it on my website here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html viewtab)
+    * **[csvsql]**  Fairly polished script that lets you perform full SQL queries on csv table files (including joins on multiple files).  Note: has an old Google Projects page here: [old csvsql] (http://code.google.com/p/gcsvsql/) that is no longer maintained.  Git is now the latest official version.   
+    * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on 30,000 rows and 2,000 columns?  Then viewtab is for you! Just for viewing and sorting data now, but stay tuned!  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html viewtab)
+    ![viewtab](https://raw.github.com/jdurbin/durbinlib/master/img/viewtab.jpg)         
     * **cutbyname** Like cut, but cuts columns by column name. 
     * **rename** Rename batch of files based on regular expression find and replace. 
     * **tablesize**  How big is that csv/tab file in rows/columns? 
