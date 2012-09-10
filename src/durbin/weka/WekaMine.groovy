@@ -135,8 +135,6 @@ class WekaMine{
 		}
 		return(instances);
 	}
-	
-	
 
 	/***
 	* takes a set of instances and creates a tab file from them...

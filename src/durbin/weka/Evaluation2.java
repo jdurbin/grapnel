@@ -650,11 +650,13 @@ throws Exception {
     	Instances train = data.trainCV(numFolds, i, random);
     	Instances test = data.testCV(numFolds, i);
 
-	//	System.err.println("TRAIN:");
-	//	System.err.println(train);
-	//	System.err.println("TEST:");
-	//	System.err.println(test);
+			//System.err.println("TRAIN attributes:"+train.numAttributes());
+			//System.err.println("TEST attributes:"+test.numAttributes());
 
+			//System.err.println("TRAIN:");
+			//System.err.println(train);
+			//System.err.println("TEST:");
+			//System.err.println(test);
 			evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
 
   }
