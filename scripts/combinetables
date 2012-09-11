@@ -1,0 +1,29 @@
+#!/usr/bin/env groovy
+
+import durbin.util.*
+
+// combinetables outfile table1 table2 table3...
+
+// Creates a table that is the union of orthogonal tables table1,table2,table3
+
+err = System.err
+
+combined = new DynamicTable()
+
+outfile = args[0]
+files = args[1..-1]
+files.each{file->
+	err.print "Merging $file .."
+	table = new DynamicTable(file,"\t")
+	err.print "${table.rowKeySet().size()} x ${table.columnKeySet().size()} .."
+	table.rowKeySet().each{rowkey->
+		table.columnKeySet().each{colkey->
+			combined[rowkey][colkey] = table[rowkey][colkey]
+		}
+	}
+	err.println "done. Combined: ${combined.rowKeySet().size()} x ${combined.columnKeySet().size()}"
+}
+
+err.print "Writing combined..."
+combined.write(outfile,"\t")
+err.println "done."

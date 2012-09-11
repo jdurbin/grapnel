@@ -19,7 +19,7 @@ class WekaMineModel implements Serializable{
 	def atrSelMethod  // Just for records sake
 
 	def	discretization
-
+	def filter
 	def classifier
 	def attributes
 	def className
@@ -44,8 +44,7 @@ class WekaMineModel implements Serializable{
 	def setNullModel(BootstrapNullModel nullmodel){
 		bnm = nullmodel;
 	}
-	
-			
+				
 	def WekaMineModel(instances,classifier){		
 		this.classifier = classifier		
 		this.discretization = "none"
@@ -79,6 +78,25 @@ class WekaMineModel implements Serializable{
 		}				
 	}	
 	
+	
+	def WekaMineModel(instances,classifier,discretization,filter){
+		this.filter = filter		
+		this.classifier = classifier		
+		this.discretization = discretization
+		attributes = instances.attributeNames()	
+		attributes = attributes - "ID" // don't save ID if there is one. 
+		
+		// Want to keep class attribute separate from attributes.
+		className = instances.className()
+		attributes = attributes - className	
+
+		classValues = []
+		def classAttr = instances.attribute(className)
+		for(i in (0..<classAttr.numValues())){
+			classValues.add(classAttr.value(i))
+		}				
+	}
+	
 	def classAttribute(){
 		return(className)
 		//return(attributes[-1])
@@ -87,7 +105,8 @@ class WekaMineModel implements Serializable{
 	/****
 	*
 	*/ 
-	def classify(instances){
+	def classify(instances){		
+		
 		def rval = []
 		def numInstances = instances.numInstances()		
 		
@@ -286,7 +305,7 @@ class WekaMineModel implements Serializable{
 		
 		if (classSet.size() > 2){
 			err.println "Sorry, but model comparison currently doesn't support more than two class values."
-			err.println "This is planned for an update soon."
+			err.println "This is planned for an update."
 			err.println "ClassValues:"
 			err.println classSet
 			return;
