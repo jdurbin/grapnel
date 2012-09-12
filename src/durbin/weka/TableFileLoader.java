@@ -10,6 +10,8 @@ import weka.core.*;
 import weka.filters.*;
 import weka.filters.unsupervised.attribute.*;
 
+import com.google.common.primitives.*;
+
 import groovy.lang.Closure;
 
 
@@ -115,6 +117,16 @@ public class TableFileLoader {
 		}		
 		return(colNames);
 	}
+	
+	public static boolean isDouble(String s){
+		try{  
+		  double d = Double.parseDouble(s);  
+		}catch(NumberFormatException nfe){  
+		  return false;  
+		}  
+		return true;
+	}
+	
 	
 	/**
 	* If we know in advance that the table is numeric, can optimize a lot...
@@ -379,15 +391,21 @@ public class TableFileLoader {
 		}
 
 		// See if it's numeric...
-		Scanner scanner = new Scanner(testValue);
+		//Scanner scanner = new Scanner(testValue);
 		//System.err.print("scanner testValue:"+testValue);
-		if (scanner.hasNextDouble()){
-			//System.err.println("\thasNextDouble TRUE");
-			return(true);
-		}else{
+		//if (scanner.hasNextDouble()){
+			// OK, it has a double, but is there any other text after that?
+
+
+			// not out until release 14
+		//if (com.google.common.primitives.Doubles.tryParse(testValue) != null){
+		//	return(true);
+		//}else{
 			//System.err.println("\thasNextDouble FALSE");
-			return(false);
-		}
+		//	return(false);
+		//}
+	  	
+	  return(isDouble(testValue));
 	}
 	
 	/****
@@ -405,12 +423,15 @@ public class TableFileLoader {
 		}
 
 		// See if it's numeric...	
-		Scanner scanner = new Scanner(testValue);
-		if (scanner.hasNextDouble()){
-			return(true);
-		}else{
-			return(false);
-		}
+		
+		//Scanner scanner = new Scanner(testValue);
+		//if (scanner.hasNextDouble()){
+		//if (com.google.common.primitives.Doubles.tryParse(testValue) != null){
+		//	return(true);
+		//}else{
+		//	return(false);
+		//}
+		return(isDouble(testValue));
 	}
 	
 	
@@ -427,10 +448,16 @@ public class TableFileLoader {
 			if (testValue =="?") continue;
 			
 			// See if it's numeric...	
-			Scanner scanner = new Scanner(testValue);
-			if (!scanner.hasNextDouble()){
-				return(false); // Finding one non null non number means it's nominal...
-			}
+			//Scanner scanner = new Scanner(testValue);
+			//if (!scanner.hasNextDouble()){
+				
+			if (!isDouble(testValue)){
+				return(false);
+			}	
+				
+			//if(Doubles.tryParse(testValue) != null){
+			//	return(false); // Finding one non null non number means it's nominal...
+			//}
 		}
 		return(true);  // Didn't find any non-numbers. 
 	}

@@ -22,13 +22,13 @@ class OnlineTable{
 	}
 
 	def OnlineTable(String f){
+		sep = FileUtils.determineSeparator(f)
 		fileName = f
 	}			
 
 	def eachRow(Closure c){
 		new File(fileName).withReader{r->
 			def headingStr = r.readLine()
-			if (!sep) sep = FileUtils.determineSeparator(headingStr)
 			def headings = headingStr.split(sep,-1)
 			r.eachLine{rowStr->
 				def rfields = rowStr.split(sep,-1)
