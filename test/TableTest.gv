@@ -109,10 +109,10 @@ assert testRedDog[2] == 5.0
 assert testRedDog[3] == 4
 assert testRedDog[4] == 1
 
-//new OnlineTable("beer.tab").eachRow{row->
-//	println "brand: "+row.brand
-//	println "calories:"+row.calories
-//}
+new OnlineTable("beer.tab").eachRow{row->
+	println "brand: "+row.brand
+	println "calories:"+row.calories
+}
 
 m = new TwoDMap()
 m.count('Bob','Track')
@@ -129,6 +129,11 @@ m.printTable("\t","null")
 //m.writeTable("writetest.out","\t","null")
 //m.writeTableQuick("writetest.out","\t","null")
 //m.writeTableQuick2("writetest.out","\t","null")
+
+new OnlineTable("beer.tab").eachRow{row->
+	println "brand: "+row.brand
+	println "calories:"+row.calories
+}
 
 //=================================================================
 

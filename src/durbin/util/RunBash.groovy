@@ -12,6 +12,8 @@ import java.io.InputStream;
 * expansion and so on.  This class is an attempt to get around some of the rough edges of execute().  
 */ 
 class RunBash{
+	
+	static boolean bEchoCommand = false;
   
   // Add a bash() method to GString and String 
   static def enable(){
@@ -24,9 +26,13 @@ class RunBash{
     }    
   }
   
+	def echoCommand(){bEchoCommand = true}
+
   static def bash(cmd){
 
     cmd = cmd as String
+
+		if (bEchoCommand) System.err.println cmd
 
     // create a process for the shell
     ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);

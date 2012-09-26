@@ -1,29 +1,4 @@
-package durbin.util;
-
-/*
-Maybe eventually something like this:
-
-prepareMutFiles = [
-	removeCommentsFromFiles : [files:MUTATION_FILES,inprefix:FREEZE,outprefix:TEMP],
-	fixMafHeaders : [files:MUTATION_FILES,inprefix:TEMP,outprefix:PROCESSED]
-]
-
-
-prepareXMFFiles = [
-	fixBobHeaders : [files:MUTATION_FILES,inprefix:TEMP,outprefix:PROCESSED]
-]
-
-
-all = [
-	prepareMutFiles,
-	prepareXMFFiles
-]
-
-So you invoke a target and it finds the target and executes all of the steps, 
-verifying if output exists and/or timestamp differs... 
-
-*/
-
+ package durbin.util;
 
 
 /***************************
@@ -50,6 +25,8 @@ public class Make{
 			}
 		}		
 	}
+	
+	
 	
 	// Applies a closure to each input file writing the output
 	// to a corresponding output file...
