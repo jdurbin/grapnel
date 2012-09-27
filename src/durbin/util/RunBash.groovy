@@ -19,20 +19,19 @@ class RunBash{
   static def enable(){
     GString.metaClass.bash = {->
       RunBash.bash(delegate)
-    }
-    
+    }    
     String.metaClass.bash = {->
         RunBash.bash(delegate)
     }    
   }
   
-	def echoCommand(){bEchoCommand = true}
-
-  static def bash(cmd){
+	static def bash(cmd){
 
     cmd = cmd as String
 
-		if (bEchoCommand) System.err.println cmd
+		if (bEchoCommand) {
+			System.err.println cmd.replaceAll("\t","")
+		}
 
     // create a process for the shell
     ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
@@ -49,6 +48,10 @@ class RunBash{
     }
 
     // close the stream
-    try {shellIn.close();} catch (IOException ignoreMe) {}
+    try {
+			shellIn.close();
+			pb = null;
+			shell = null;
+		} catch (IOException ignoreMe) {}
   }
 }
