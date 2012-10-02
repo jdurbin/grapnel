@@ -1,0 +1,16 @@
+#!/usr/bin/env groovy
+
+import durbin.util.*
+
+
+// A counter map.  inc increments count of map at that value
+c = new CounterMap()
+n1 = 'bob'
+n2 = 'mary'
+
+c.inc(n1)
+c.inc(n1)
+c.inc(n1)
+
+assert c[n1] == 3
+assert c[n2] == 0

@@ -19,24 +19,37 @@
 */
 
 
-class CounterMap extends HashMap{	
+class CounterMap extends HashMap{
+	
 	def inc(key){
 		if (this.containsKey(key)){
-			int value = this[key]
+			int value = this.get(key)
 			value = value+1
-			this[key] = value
+			this.put(key,value)
 		}else{
-			this[key] = 1
+			this.put(key,1)
 		}
 	}		
 	
 	// return a default value if none given...
 	def getAt(key){
 		if (this.containsKey(key)){ 
-			return(this[key])
+			return(this.get(key))
 		}else{
 			return(0)
 		}
 	}
+	
+	// There's already a properties based getAt, so this
+	// overrides that specifically for strings. 
+	def getAt(String key){
+		if (this.containsKey(key)){ 
+			return(this.get(key))
+		}else{
+			return(0)
+		}
+	}
+	
+	
 }
 
