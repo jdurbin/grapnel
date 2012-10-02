@@ -29,5 +29,14 @@ class CounterMap extends HashMap{
 			this[key] = 1
 		}
 	}		
+	
+	// return a default value if none given...
+	def getAt(key){
+		if (this.containsKey(key)){ 
+			return(this[key])
+		}else{
+			return(0)
+		}
+	}
 }
 
