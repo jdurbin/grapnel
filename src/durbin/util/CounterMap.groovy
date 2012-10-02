@@ -22,9 +22,9 @@
 class CounterMap extends HashMap{	
 	def inc(key){
 		if (this.containsKey(key)){
-			count = this[key]
-			count++
-			this[key] = count
+			int value = this[key]
+			value = value+1
+			this[key] = value
 		}else{
 			this[key] = 1
 		}
