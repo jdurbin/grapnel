@@ -99,6 +99,8 @@ import java.util.zip.GZIPOutputStream;
 
 import java.util.ArrayList;
 
+import java.lang.management.*;
+
 /**
 * Class for evaluating machine learning models. <p/>
 *
@@ -527,15 +529,32 @@ throws Exception {
 		System.err.println("\tnumFolds: "+numFolds);
 		
   	for (int i = 0; i < numFolds; i++) {
+			System.err.println("\t\tDEBUG Initial:");
+			printHeapSpace();
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
 			Instances train = CVUtils.trainCV(data,foldSet,i);
 			Instances test = CVUtils.testCV(data,foldSet,i);		
-    	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
+			System.err.println("\t\tDEBUG Test/Train instances created:");
+			printHeapSpace();
+    	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
+			System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
+			printHeapSpace();
   	}
 	}
 }
 
+void printHeapSpace(){
+	// Get current size of heap in bytes
+	System.err.println("\t\tHeapSize: "+(Runtime.getRuntime().totalMemory() / 1000000000.0));
 
+	// Get maximum size of heap in bytes. The heap cannot grow beyond this size.
+	// Any attempt will result in an OutOfMemoryException.
+	System.err.println("\t\tMax Heap Size:"+(Runtime.getRuntime().maxMemory() / 1000000000.0));
+	
+	// Get amount of free memory within the heap in bytes. This size will increase
+	// after garbage collection and decrease as new objects are created.
+	System.err.println("\t\tFree Memory:"+(Runtime.getRuntime().freeMemory() / 1000000000.0));
+}
 
 
 /**
