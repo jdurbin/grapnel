@@ -26,6 +26,9 @@ public class LightWeightAttributeSelection{
 			// Already sorted, but includes all attributes...
 			def numAttributes = attributeSelection.numberAttributesSelected() 
 			rankedAttrs.eachWithIndex{attrRank,i->
+				
+				
+				
 				if (i >= numAttributes) return; // skip all but the requested ones.   								      
         def attIdx = (attrRank[0] as int) +1
         def attName = data.attribute(attIdx).name()
@@ -38,6 +41,13 @@ public class LightWeightAttributeSelection{
 		}else{
 			def selectedAttrs = attributeSelection.selectedAttributes() as ArrayList
 
+			println "data.numAttrs: "+data.numAttributes()
+			println "selectedAttrs:"+selectedAttrs
+		  def classAttr = data.classAttribute()
+			def classIdx = classAttr.index()
+			println "classAttr: "+classAttr
+			println "classIdx: "+classIdx
+			
 			// Last selectedAttrs is the classAttribute, which we do not want to report here...
 			selectedAttrs[0..-2].each{attrIdx->
 			  def attName = data.attribute(attrIdx+1).name()

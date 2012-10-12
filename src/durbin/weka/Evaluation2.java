@@ -493,7 +493,7 @@ public double[][] confusionMatrix() {
 * Instances data, ArrayList< ArrayList<Integer> > foldSets,Object... forPredictionsPrinting) 
 */
 public void crossValidateModelWithGivenFolds(Classifier classifier,
-Instances data, FoldSets foldSets,Object... forPredictionsPrinting) 
+Instances data, FoldSets allFoldSets,Object... forPredictionsPrinting) 
 throws Exception {
 	
   // We assume that the first element is a StringBuffer, the second a Range (attributes
@@ -506,6 +506,15 @@ throws Exception {
     boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
     printClassificationsHeader(data, attsToOutput, printDist, buff);
   }
+
+	// I also use named foldsets with folds associated with given class attributes. 
+	// So this should be preceeded by a step that retrieves only the foldsets corresponding to 
+	// a named class attribute or fold0, fold1,etc. if it is ment to apply to all attributes.  A 
+	// simple implementation would be just to union foldsets[fold_i] and foldsets[classAttribute]  
+	// In normal usage one or the other should be an empty set... either you're specifying the folds 
+	// for all attributes with fold_i  or you are specifying them for a particular attribute with the
+	// attribute name.)	
+	FoldSets foldSets = allFoldSets.getFoldSetsForAttribute(data.classAttribute());
 
 	// Fold sets let you specify the folds.  Each foldSet is one Nx cross-validation. 
 	// To do 5 5x cross validations, you'd have 5 foldSets each 5 numbers long. 
@@ -520,11 +529,14 @@ throws Exception {
   	for (int i = 0; i < numFolds; i++) {
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
 			Instances train = CVUtils.trainCV(data,foldSet,i);
-			Instances test = CVUtils.testCV(data,foldSet,i);									
+			Instances test = CVUtils.testCV(data,foldSet,i);		
     	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
   	}
 	}
 }
+
+
+
 
 /**
 * Cross validates model across independent datasets.  That is, 
@@ -684,16 +696,18 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//	System.err.println("DEBUG2 Exception occurred:\n"+e);
 	//	System.err.println(train);
 	//}	
-	//System.err.println("DEBUG3");
+
 
 	// copiedClassifier is a FilteredClassifier...
 	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
+	
 	//System.err.println("asClassifier.toStroing():"+asClassifier.toString());	
 	AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
 	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2	
 	ASEvaluation eval = asClassifier.getEvaluator();
 	ASSearch search = asClassifier.getSearch();
 	
+	System.err.println("DEBUG0A");
 	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
 	//System.err.println("transformedHeader:"+pceval.transformedHeader());
 	
@@ -702,7 +716,7 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	// Attribute selection is performed on training set so provide training set as reference for 
 	// the meaning of attribute selection indices...
 	LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
-	
+	System.err.println("DEBUG1");
 	//System.err.println("DEBUG=============== toResultsString: ");
 	//System.err.println(attributeSelection.toResultsString());
 	
@@ -714,16 +728,12 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
   m_cvAttributeSelections.add(lwAttributes);
 	
-	//System.err.println("DEBUG4");
-		
 	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
-	
-	//System.err.println("DEBUG5");
 	
 	// If there is a non-null fourth element, it is assumed to be a second buffer to store the evaluations on the 
 	// training samples.  This is a bit of a hack, but allows me to touch as little of the code as possible...
 	if (forPredictionsPrinting[3] != null){
-		
+
 		trainingEval = new Evaluation2(data);
 		
 		StringBuffer saveTestBuf = (StringBuffer)forPredictionsPrinting[0]; // Save the test buffer...

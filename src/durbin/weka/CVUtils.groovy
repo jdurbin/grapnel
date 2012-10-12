@@ -72,12 +72,14 @@ public class CVUtils{
 		// Look up the instance indexes for this list of names...
 		def trainSampleIdxs = data.nameListToIndexList(trainSampleNames)		
 
+		err.println trainSampleIdxs
+
 		// Copy each instance to the test set...
 		Instances train = new Instances(data,trainSampleNames.size())
-			trainSampleIdxs.each{idx->
-				if (idx != -1) data.copyInstances(idx,train,1);	// -1 means no instance with that name
-			}		
-			return(train)
+		trainSampleIdxs.each{idx->
+			if (idx != -1) data.copyInstances(idx,train,1);	// -1 means no instance with that name
+		}		
+		return(train)
 	}
 	
 

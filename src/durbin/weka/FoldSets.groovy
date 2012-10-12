@@ -94,6 +94,11 @@ class FoldSets{
 		WekaAdditions.enable();
 	}	
 	
+	def FoldSets(HashMap<String,FoldSet> map,ArrayList<FoldSet> data){
+		this.data = data
+		this.map = map
+	}
+	
 	def FoldSets(){map = new HashMap<String,FoldSet>();data= new ArrayList()}				
 	def FoldSets(fileName){
 		read(fileName)
@@ -135,6 +140,27 @@ class FoldSets{
 	       return data.iterator()
 	}
 	
+	
+	/***
+	* Finds the subset of foldsets that apply to this attribute
+	* combined with the generic foldsets. 
+	*/ 
+	FoldSets getFoldSetsForAttribute(Attribute a){
+		// Get foldsets matching fold\d+
+		def foldKeys = map.keySet().grep(~/fold\d+/)
+		def foldMap = map.subMap(foldKeys)
+		
+		// Get foldsets matching attribute name
+		def attributeName = a.name()
+		def attributeKeys = map.keySet().grep(attributeName)
+		def attributeMap = map.subMap(attributeKeys)
+		
+		// Merge the two maps...
+		def newMap = attributeMap + foldMap
+		def newData = newMap.values() as ArrayList				
+		def newFoldSet = new FoldSets(newMap,newData)
+		return(newFoldSet)
+	}
 	
 	// Total number of folds across all foldsets
 	int countFolds(){
