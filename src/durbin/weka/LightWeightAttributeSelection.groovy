@@ -41,12 +41,12 @@ public class LightWeightAttributeSelection{
 		}else{
 			def selectedAttrs = attributeSelection.selectedAttributes() as ArrayList
 
-			println "data.numAttrs: "+data.numAttributes()
-			println "selectedAttrs:"+selectedAttrs
+			//println "data.numAttrs: "+data.numAttributes()
+			//println "selectedAttrs:"+selectedAttrs
 		  def classAttr = data.classAttribute()
 			def classIdx = classAttr.index()
-			println "classAttr: "+classAttr
-			println "classIdx: "+classIdx
+			//println "classAttr: "+classAttr
+			//println "classIdx: "+classIdx
 			
 			// Last selectedAttrs is the classAttribute, which we do not want to report here...
 			selectedAttrs[0..-2].each{attrIdx->
