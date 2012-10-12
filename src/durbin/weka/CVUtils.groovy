@@ -52,9 +52,7 @@ public class CVUtils{
 	static Instances testCV(Instances data,FoldSet foldset,int fold){
 		def testSampleNames = foldset.getTestSamples(fold)					
 		// Look up the instance indexes for this list of names...
-		def testSampleIdxs = data.nameListToIndexList(testSampleNames)			
-		//err.println "DEBUG: testSampleIdxs: "+testSampleIdxs	
-		
+		def testSampleIdxs = data.nameListToIndexList(testSampleNames)					
 		// Copy each instance to the test set...
 		Instances test = new Instances(data,testSampleNames.size())
 		testSampleIdxs.each{idx->
@@ -71,8 +69,6 @@ public class CVUtils{
 		
 		// Look up the instance indexes for this list of names...
 		def trainSampleIdxs = data.nameListToIndexList(trainSampleNames)		
-
-		err.println trainSampleIdxs
 
 		// Copy each instance to the test set...
 		Instances train = new Instances(data,trainSampleNames.size())

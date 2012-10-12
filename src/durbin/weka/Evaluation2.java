@@ -660,15 +660,7 @@ throws Exception {
   for (int i = 0; i < numFolds; i++) {		
 			System.err.println("\tFold: "+i);
     	Instances train = data.trainCV(numFolds, i, random);
-    	Instances test = data.testCV(numFolds, i);
-
-			//System.err.println("TRAIN attributes:"+train.numAttributes());
-			//System.err.println("TEST attributes:"+test.numAttributes());
-
-			//System.err.println("TRAIN:");
-			//System.err.println(train);
-			//System.err.println("TEST:");
-			//System.err.println(test);
+    	Instances test = data.testCV(numFolds, i);		
 			evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
 
   }
@@ -682,12 +674,8 @@ throws Exception {
 public void evaluateSingleFold(Instances data, Instances train,Instances test,Classifier classifier,Object... forPredictionsPrinting) throws Exception{
 	
 	// Create a list to store classifiers (Evaluation2)
-
-//	System.err.println("DEBUG1");
-	
 	setPriors(train);
 	
-//	System.err.println("DEBUG2");
 	Classifier copiedClassifier=null;
 	//try{
 		copiedClassifier = Classifier.makeCopy(classifier);
@@ -707,7 +695,6 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	ASEvaluation eval = asClassifier.getEvaluator();
 	ASSearch search = asClassifier.getSearch();
 	
-	System.err.println("DEBUG0A");
 	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
 	//System.err.println("transformedHeader:"+pceval.transformedHeader());
 	
@@ -716,12 +703,6 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	// Attribute selection is performed on training set so provide training set as reference for 
 	// the meaning of attribute selection indices...
 	LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
-	System.err.println("DEBUG1");
-	//System.err.println("DEBUG=============== toResultsString: ");
-	//System.err.println(attributeSelection.toResultsString());
-	
-	//System.err.println("DEBUG Selected attributes: "+attributeSelection.selectedAttributes());
-	//System.err.println("DEBUG===============");
 
 	//double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
 	//LightWeightAttributeSelection thinAttributes = new LightWeightAttributeSelection(rankedAttrs);
