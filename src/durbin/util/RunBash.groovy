@@ -37,6 +37,7 @@ class RunBash{
     ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
     pb.redirectErrorStream(true); // use this to capture messages sent to stderr
     Process shell = pb.start();
+		shell.getOutputStream().close();
     InputStream shellIn = shell.getInputStream(); // this captures the output from the command
 
     // at this point you can process the output issued by the command

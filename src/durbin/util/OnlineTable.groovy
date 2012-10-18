@@ -15,6 +15,8 @@ class OnlineTable{
 
 	String fileName
 	String sep = null;
+	
+	def row
 
 	def OnlineTable(String f,String delimiter){
 		fileName = f
@@ -32,10 +34,15 @@ class OnlineTable{
 			def headings = headingStr.split(sep,-1)
 			r.eachLine{rowStr->
 				def rfields = rowStr.split(sep,-1)
-				def row = [:]
+				row = [:]
 				rfields.eachWithIndex{f,i->row[headings[i]]=f}
 				c(row)
 			}
 		}
 	}	
+	
+	def headings(){
+		return(row.keySet())
+	}
+	
 }
