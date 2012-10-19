@@ -156,8 +156,10 @@ public class TableFileLoader {
 			attrNames[rowIdx] = tokens[0].trim();
 		  for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
 				String valToken = tokens[colIdx+1];
-				double value;				
-				if (valToken.equals("?")){
+				double value;	
+				if (valToken.equals("null")){
+					value = Instance.missingValue();
+				} else if (valToken.equals("?")){
 					value = Instance.missingValue();
 				}else if (valToken.equals("NA")){
 					value = Instance.missingValue();
