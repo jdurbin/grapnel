@@ -8,13 +8,13 @@ import durbin.util.*
 
 err = System.err
 
-outFile = args[0]
-files = args[1..-1]
+options = ParseOptions(args)
 
 // Figure out the size of the output table we're going to need by 
 // scanning the input files...	
 allGenes = [] as Set
 allPatients = [] as Set
+files = options.fileNames
 files.each{file->
 	err.println "Pre-scanning $file..."
 	new File(file).withReader{r->
@@ -28,10 +28,14 @@ files.each{file->
 		}
 	}		
 }	
-err.println "Total patients: ${allPatients.size()}.  Total genes: ${allGenes.size()}"
+err.println "Total columns: ${allPatients.size()}.  Total rows: ${allGenes.size()}"
 	
 // Now fill in the table with the information from these files...	
 combinedTable = new Table(allGenes as ArrayList,allPatients as ArrayList)
+
+// Initialize table to contain the specified null value. 
+combinedTable.assign(options.defaultValue)
+
 files.each{file->
 	err.println "Processing $file..."
 	new File(file).withReader{r->
@@ -49,7 +53,7 @@ files.each{file->
 }
 	
 err.println "Writing table to $outFile ..."
-combinedTable.write(outFile,"\t")		
+combinedTable.write(options.outFile,"\t")		
 
 
 def parsePatientsFromHeading(heading){
@@ -57,7 +61,6 @@ def parsePatientsFromHeading(heading){
 	patients = patients[1..-1] // omit first column
 	return(patients)
 }
-
 
 def parseGeneValuesFromLine(line){
 	fields = line.split("\t",-1) // -1 ensures that trailing delimiters are split
@@ -77,3 +80,33 @@ def parseGeneValuesFromLine(line){
 	return([gene,vals])
 }
 
+
+/****************************************************
+* Parse the command line options, checking validity, printing help if needed. 
+*/ 
+def ParseOptions(args){
+	parser = new Parser(description: '''	
+	combinetables combines multiple tab delimited tables into one larger table, doing a
+	union of the rows and columns. (row,col) pairs that do not appear in any file are 
+	assigned a defaultValue which can be specified with the -v option.   
+	
+	Written by: James Durbin (kdurbin@ucsc.edu)
+	
+	Use like:
+	
+	combinetables -o combined.tab -v "null" brca.tab coad.tab ucec.tab	
+
+	''');
+
+	parser.with{
+		required 'o','outFile',[description: 'Name of file for combined output.']
+		optional 'v','defaultValue',[default:"",description: 'Value to use for cells that do not appear in input.']
+	  flag 'h','help',[default:false,description: 'Print script help.']
+		remainder{if(!it) throw new IllegalArgumentException("Must specify a list of files");it}
+	}
+	try{ 
+		options = parser.parse(args); 
+		options.fileNames = parser.remainder
+	}catch(Exception e){System.err << parser.usage;System.exit(1)}		
+	return(options)
+}

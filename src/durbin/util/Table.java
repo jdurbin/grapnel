@@ -243,6 +243,10 @@ public class Table extends GroovyObjectSupport{
 		createNameMap(colNames,colName2Idx);
 		createNameMap(rowNames,rowName2Idx);
 	}
+	
+	public void assign(Object o){
+		matrix.assign(o);
+	}
   
 	public int rows() {
 		return(numRows);
