@@ -52,7 +52,7 @@ files.each{file->
 	}		
 }
 	
-err.println "Writing table to $outFile ..."
+err.println "Writing table to ${options.outFile} ..."
 combinedTable.write(options.outFile,"\t")		
 
 
