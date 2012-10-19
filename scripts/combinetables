@@ -8,22 +8,65 @@ import durbin.util.*
 
 err = System.err
 
-combined = new DynamicTable()
-
-outfile = args[0]
+outFile = args[0]
 files = args[1..-1]
+
+// Figure out the size of the output table we're going to need by 
+// scanning the input files...	
+allGenes = [] as Set
+allPatients = [] as Set
 files.each{file->
-	err.print "Merging $file .."
-	table = new DynamicTable(file,"\t")
-	err.print "${table.rowKeySet().size()} x ${table.columnKeySet().size()} .."
-	table.rowKeySet().each{rowkey->
-		table.columnKeySet().each{colkey->
-			combined[rowkey][colkey] = table[rowkey][colkey]
+	err.println "Pre-scanning $file..."
+	new File(file).withReader{r->
+		patients = parsePatientsFromHeading(r.readLine())
+		allPatients.addAll(patients)
+		r.eachLine{line->
+		(gene,vals) = parseGeneValuesFromLine(line)
+			if (gene.contains("?")) return; // Skip genes with ? in name...
+			//gene = "${gene}_nonsyn" as String// hack to fix gene names...
+			allGenes << gene
 		}
+	}		
+}	
+err.println "Total patients: ${allPatients.size()}.  Total genes: ${allGenes.size()}"
+	
+// Now fill in the table with the information from these files...	
+combinedTable = new Table(allGenes as ArrayList,allPatients as ArrayList)
+files.each{file->
+	err.println "Processing $file..."
+	new File(file).withReader{r->
+		patients = parsePatientsFromHeading(r.readLine())
+		r.eachLine{line->
+			(gene,vals) = parseGeneValuesFromLine(line)
+			if (gene.contains("?")) return; // Skip genes with ? in name...
+			//gene = "${gene}_nonsyn" as String// hack to fix gene names...
+			vals.eachWithIndex{v,i->
+				if ((v == null) || (v == "null")) v="NA"
+				combinedTable.set(gene,patients[i],v)
+			}
+		}
+	}		
+}
+	
+err.println "Writing table to $outFile ..."
+combinedTable.write(outFile,"\t")		
+
+
+def parseGeneValuesFromLine(line){
+	fields = line.split("\t",-1) // -1 ensures that trailing delimiters are split
+	gene = fields[0]
+	
+	// Some genes have format gene|number.  If so, clean those up...
+	if (gene.contains("|")){
+		fld = gene.split(/\|/)
+		gene = fld[0]
 	}
-	err.println "done. Combined: ${combined.rowKeySet().size()} x ${combined.columnKeySet().size()}"
+		
+	vals = fields[1..-1] // 
+	if (vals.size() != patients.size()){
+		err.println "Values size (${vals.size()} != patients size (${patients.size()}))"
+		System.exit(1)
+	}
+	return([gene,vals])
 }
 
-err.print "Writing combined..."
-combined.write(outfile,"\t")
-err.println "done."
