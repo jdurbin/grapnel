@@ -1,5 +1,6 @@
 package durbin.weka;
 
+import weka.core.*
 
 // Package up distForInstance with the associated class names
 class Classification{						
@@ -199,7 +200,7 @@ class WekaMineModel implements Serializable{
 	*/ 
 	def printResults(out,	ArrayList<Classification> results,sampleIDs){
 		if (bnm != null){
-			out<<"ID,confidence1,confidence2,call,nullConfidence1,nullConfidence2\n"
+			out<<"ID,confidence1,confidence2,call,nullConfidence0,nullConfidence1\n"
 		}else{
 			out<<"ID,confidence1,confidence2,call\n"
 		}
@@ -230,7 +231,9 @@ class WekaMineModel implements Serializable{
 	
 	
 	/***
-	*
+	* QUESTIONABLE
+	* 
+	* Used by buildAndEvaluateOnHoldout in WekaMine.groovy
 	*/	
 	def accuracy(dataSampleIDs,results,clinical){
 		def tp,tn,fp,fn
@@ -240,9 +243,14 @@ class WekaMineModel implements Serializable{
 	}
 	
 	/***
+	* QUESTIONABLE
+	* Only seems to be used by accuracy() method above. 
 	*	Evaluate the accuracy of the given results...
 	*/
 	def confusionMatrixFor(dataSampleIDs,results,clinical){
+		
+			err.println "confusionMatrixFor THIS CODE IS FLAGGED FOR REVIEW"
+		
 			// Build a map of clinical samples to results...
 			def id2ClassMap = [:]						
 			def classValues = clinical.attributeValues(clinical.classAttribute().name()) as ArrayList
@@ -277,10 +285,11 @@ class WekaMineModel implements Serializable{
 			
 			// Now compare predictions with actual values...
 			results.eachWithIndex{result,i->
-				def r = result as ArrayList	// distribution for instance...			
-				def maxIdx = getMaxIdx(r)
+				def prForValues = result.prForValues as ArrayList
+				//def r = result as ArrayList	// distribution for instance...			
+				def maxIdx = getMaxIdx(prForValues)
 				def call = classValues[maxIdx] // look up the name of this.
-				def rstr = r.join(",")	
+				def rstr = prForValues.join(",")	
 
 				def id = dataSampleIDs[i]
 				// If this sample is in the clinical data set, output it's comparison.. 
@@ -307,81 +316,67 @@ class WekaMineModel implements Serializable{
 	* clinical == clinical data
 	* 
 	*/ 
-	def printResultsAndCompare(out,results,dataSampleIDs,clinical){
+	def printResultsAndCompare(out,ArrayList<Classification> results,dataSampleIDs,Instances clinical){
 		out<< "ID,lowConfidence,highConfidence,call,actual\n"
 		
 		WekaAdditions.enable();
 		
 		// Build a map of clinical samples to results...
-		def id2ClassMap = [:]						
-		def classValues = clinical.attributeValues(clinical.classAttribute().name()) as ArrayList
-		def classSet = classValues as Set
-		classSet = classSet as ArrayList // convert the set back to an array so we can index it later...
-		
-		if (classSet.size() > 2){
-			err.println "Sorry, but model comparison currently doesn't support more than two class values."
-			err.println "This is planned for an update."
-			err.println "ClassValues:"
-			err.println classSet
-			return;
+		def id2ClassMap = [:]		
+		def allClassValues = clinical.attributeValues(clinical.classAttribute().name()) 
+		dataSampleIDs.eachWithIndex{id,i->
+			id2ClassMap[id] = allClassValues[i]
 		}
-		
-		
-		def clinicalSampleIDs = clinical.attributeValues("ID") as ArrayList
-		(0..classValues.size()).each{i->
-			def id = clinicalSampleIDs[i]
-			def classVal = classValues[i]
-			id2ClassMap[id] = classVal
-		}
-		
+
+		// fill in id2ClassMap from clinical...		
 		def tp = 0.0;
 		def tn = 0.0;
 		def fp = 0.0;
 		def fn = 0.0;
-							
-		// Will break in a hurry if there are more than two...
-		def val0 = classSet[0]
-		def val1 = classSet[1]					
-							
+		
+		// The positive value is the value of classValues[1]. It is "positive" only 
+		// in the sense that that's the value we report a confusion matrix for in 
+		// the summary.csv output.  It could mean anything.  
+		// MULTICLASS DEFECT:  formulation doesn't work with multiple class values. 
+		def posVal = classValues[1]
+		def negVal = classValues[0]				
+		
+		// Sanity check that the results are produced with the same class values as the instances we are 
+		// looking at. 
+		def diff1 = classValues-allClassValues
+		def diff2 = allClassValues-classValues
+		if (!(diff1==[] && diff2==[])){
+			err.println "ERROR: The class values in the given input data do not match the classValues from the classification."
+			err.println classValues
+			err.println allClassValues
+		}
+																
 		// Now compare predictions with actual values...
 		results.eachWithIndex{result,i->
-			def r = result as ArrayList	// distribution for instance...			
-			def maxIdx = getMaxIdx(r)
+			def prForValues = result.prForValues as ArrayList  // distribution for instance
+			def maxIdx = getMaxIdx(prForValues)
 			def call = classValues[maxIdx] // look up the name of this.
-			def rstr = r.join(",")	
+			def rstr = prForValues.join(",")	
 			
+			// ASSUMPTION: dataSampleIDs are in same order as results... 			
 			def id = dataSampleIDs[i]
 			
-		/*	
-			def r = result as ArrayList	
-			def rstr = r.join(",")
-
-			
-			def lowVal = r[0] as double
-			def highVal = r[1] as double
-			def call
-			if (highVal > lowVal) call = "high"
-			else call = "low"
-			*/
 			out<< "${id},$rstr,$call"
 			
 			// If this sample is in the clinical data set, output it's comparison.. 
 			if (id2ClassMap.containsKey(id)){
 				def actualVal = id2ClassMap[id]
-				out<< ",$actualVal"
-				
-				// KJD Need to re-think the comparison stats for multi-class and user specified nominal
-			//print "\t$lowVal,$highVal,${lowVal < highVal},${actualVal == 'low'}\t"
-				if ((actualVal == val1) && (call == val1)){
+				out<< ",$actualVal"																							
+				if ((actualVal == posVal) && (call == posVal)){
 					tp++;
 					out<<",+\n"
-				}else if ((actualVal == val1) && (call == val0)){
+				}else if ((actualVal == posVal) && (call == negVal)){
 					fp++
 					out<<"\n"					
-				}else if ((actualVal == val0) && (call == val0)){
+				}else if ((actualVal == negVal) && (call == negVal)){
 					tn++;
 					out<<",+\n"
-				}else if ((actualVal == val0) && (call == val1)){
+				}else if ((actualVal == negVal) && (call == posVal)){
 					fn++;
 					out<<"\n"
 				}				
@@ -391,8 +386,8 @@ class WekaMineModel implements Serializable{
 		} // results.each				
 		
 	 	out<< "====================\n"
-	  out<< "Positive: $val1\n"
-	  out<< "Negative: $val0\n"
+	  out<< "Positive: $posVal\n"
+	  out<< "Negative: $negVal\n"
 		out<< "TP\t$tp\n"
 		out<< "FP\t$fp\n"
 		out<< "TN\t$tn\n"
