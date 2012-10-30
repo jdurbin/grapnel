@@ -3,6 +3,11 @@ package durbin.weka;
 
 // Package up distForInstance with the associated class names
 class Classification{						
+	def Classification(prForValues,classNames){
+		this.prForValues = prForValues
+		this.classNames = classNames
+	}
+	
 	def prForValues = []
 	def classNames = []
 }

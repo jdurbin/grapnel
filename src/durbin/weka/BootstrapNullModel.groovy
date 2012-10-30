@@ -24,6 +24,7 @@ class BootstrapNullModel implements Serializable{
 	static def err = System.err // sugar
 
 	ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()		
+	ArrayList<String> classValues = new ArrayList<String>()
 
 	def BootstrapNullModel(classValues){
 		this.classValues = classValues		
