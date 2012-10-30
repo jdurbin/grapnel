@@ -29,6 +29,7 @@ class WekaMineResult{
 	int fn1
 	float rms
 	float roc
+	String classValue1   // The class value corresponding to value 1
 
 	// Refactor so that this contains:  ExperimentSpec experiment
 	// Key thing to work out, currently ExperimentSpecs are created from WekaMineResults.  Need to handle that 
@@ -43,7 +44,7 @@ class WekaMineResult{
 	String discretization
 	String dataFile
 	
-	static def headingStr = "filter,attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,dataFile,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc"    		
+	static def headingStr = "filter,attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,dataFile,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,classValue1,tp1,fp1,tn1,fn1,rms,roc"    		
 	static def expHeadingStr = "filter,attrEval,attrSearch,numAttrs,classifier,classAttr,discretization"
 	
 	
@@ -65,6 +66,7 @@ class WekaMineResult{
 		sb << recall0 
 		sb << precision1
 		sb << recall1
+		sb << classValue1
 		sb << tp1
 		sb << fp1
 		sb << tn1
@@ -116,6 +118,7 @@ class WekaMineResult{
 		recall0	= fields[headings2Cols['recall0']] as float
 		precision1 = fields[headings2Cols['precision1']] as float
 		recall1 = fields[headings2Cols['recall1']] as float
+		classValue1 = fields[headings2Cols['classValue1']] as String
 		tp1 = fields[headings2Cols['tp1']] as int
 		fp1 = fields[headings2Cols['fp1']] as int
 		tn1 = fields[headings2Cols['tn1']] as int
@@ -168,7 +171,6 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 		}		
 	}
 	
-	
 	/***
 	* Convert results into a list of experiments
 	*/ 
@@ -181,8 +183,6 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 		return(rlist)
 	}
 	
-
-
   /***
   * Returns a heading for the csv file.  MUST match exactly what is output by 
   * getFormattedEvaluationSummary. 
@@ -218,20 +218,24 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   *
   */ 
   static String getFormattedEvaluationSummary(numInstances,eval){
+	
+		err.println eval.toMatrixString("DEBUG")
+		
     def samples = numInstances
     def pctCorrect = eval.pctCorrect() 
     def precision1 = eval.precision(1)
     def recall1 = eval.recall(1)    
     def precision0 = eval.precision(0)
     def recall0 = eval.recall(0)
+		def classValue1 = eval.getClassName(1)
     def tp1 = eval.numTruePositives(1) as Integer
     def fp1 = eval.numFalsePositives(1) as Integer
     def tn1 = eval.numTrueNegatives(1) as Integer
     def fn1 = eval.numFalseNegatives(1) as Integer
     def rms = eval.rootMeanSquaredError()
     def roc = eval.weightedAreaUnderROC()    
-    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%d,%d,%d,%d,%.4g,%.4g",
-              samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc)
+    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%s,%d,%d,%d,%d,%.4g,%.4g",
+              samples,pctCorrect,precision0,recall0,precision1,recall1,classValue1,tp1,fp1,tn1,fn1,rms,roc)
   
     return(rval)    
   }
@@ -248,14 +252,15 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
     def recall1 = 0 as double
     def precision0 = 0 as double
     def recall0 = 0 as double
+		def classValue1 = "AttrSelOnly"
     def tp1 = 0 as int
     def fp1 = 0 as int
     def tn1 = 0 as int
     def fn1 = 0 as int
     def rms = 0 as double
     def roc = 0 as double
-    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%d,%d,%d,%d,%.4g,%.4g",
-              samples,pctCorrect,precision0,recall0,precision1,recall1,tp1,fp1,tn1,fn1,rms,roc)
+    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%s,%d,%d,%d,%d,%.4g,%.4g",
+              samples,pctCorrect,precision0,recall0,precision1,recall1,classValue1,tp1,fp1,tn1,fn1,rms,roc)
   
     return(rval)    
   }
@@ -381,11 +386,10 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
       // Append a summary line to a file. 
       def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval2)
 			def classAttribute = data.classAttribute()
-			def  predictions = eval2.m_Predictions
 			
-			//err.println "predictions.size: "+predictions.size()
-			//err.println "results.size: "+results.size()
-			
+			// FastVector of NominalPredictionsPlus
+			FastVector  predictions = eval2.m_Predictions
+						
 			out << getFullSummaryLine(jobIdx,data,experiment,eval2,dataName)
 			for(i in 0..<predictions.size()){
 				out<<","
@@ -393,11 +397,16 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 				def p = (NominalPredictionPlus) predictions.elementAt(i)
 				def sampleName = p.instanceName
 				def actual = classAttribute.value((int)p.actual())
+				def storedActual = p.actualClassValue
+				if (actual != storedActual){
+					err.println "WARNING: inferred actual class value does not match stored name of actual class!  ${actual} != ${storedActual}"					
+				}
+								
 				def predicted = classAttribute.value((int)p.predicted())	
 				def dist = p.distribution() as ArrayList
 				def distStr = dist.join(":")
 				def margin = p.margin()
-				out<< "$sampleName~$actual;$predicted;$distStr"
+				out<< "$sampleName~$storedActual;$predicted;$distStr"
 			}
 			out<<"\n"
 			

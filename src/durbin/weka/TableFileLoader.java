@@ -85,7 +85,8 @@ public class TableFileLoader {
 
 	public Instances read(String fileName,String relationName,String delimiter,boolean rowsAreInstances,
 	                      Closure c) throws Exception {
-		Table t = new Table(fileName,delimiter,c);
+		Table t = new Table(fileName,delimiter,c);		
+		//System.err.println("TABLE DEBUG\n"+t.toString());		
 		Instances data = tableToInstances(t,relationName,rowsAreInstances);
 		return(data);
 	}
@@ -569,9 +570,21 @@ public class TableFileLoader {
 
 	/***
 	* Create a FastVector containing the set of values found in the given row...
+	* 
+	* NOTE: As it happens, this function determines the order of the attribute values, 
+	* an order that will percolate throughout wekaMine and influence all subsequent 
+	* displays.  
+	* 
+	* Originally the valSet was a HashSet and the iteration order of that will 
+	* depend on the hash code for the key, and may seem random.  While we would
+	* not like to rely on the order of attributes, it seems desirable to make
+	* the attribute order somehow comprehensible, either sort order or insertion
+	* order.  Insertion order will seem random also because it is determined
+	* by the arbitrary order of the instances.  So it has been changed to 
+	* a TreeSet which will be ordered by the natural ordering of it's elements. 
 	*/ 
 	public FastVector getRowValues(Table t,int rowIdx){				
-		HashSet<String> valSet = new HashSet<String>();
+		TreeSet<String> valSet = new TreeSet<String>();
 		for(int c = 0;c < t.cols();c++){
 			String val = (String) t.matrix.getQuick(rowIdx,c);
 			

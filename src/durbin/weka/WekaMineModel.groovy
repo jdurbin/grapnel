@@ -1,6 +1,13 @@
 package durbin.weka;
 
 
+// NEW
+class Classification{					
+	def dist = []
+	def classNames = []
+}
+
+
 /***
 * Saves a trained classifier and any additional information needed to apply that classifier to a 
 * new dataset.  I thought that the weka.classifier itself contained the instance names, but this seems
@@ -45,6 +52,7 @@ class WekaMineModel implements Serializable{
 		bnm = nullmodel;
 	}
 				
+/*				
 	def WekaMineModel(instances,classifier){		
 		this.classifier = classifier		
 		this.discretization = "none"
@@ -77,9 +85,14 @@ class WekaMineModel implements Serializable{
 			classValues.add(classAttr.value(i))
 		}				
 	}	
+*/
 	
 	
 	def WekaMineModel(instances,classifier,discretization,filter){
+		
+		// Train the classifier with the instances...
+		classifier.buildClassifier(instances);	
+		
 		this.filter = filter		
 		this.classifier = classifier		
 		this.discretization = discretization
@@ -90,6 +103,7 @@ class WekaMineModel implements Serializable{
 		className = instances.className()
 		attributes = attributes - className	
 
+		// Save the class values so we can use them later...
 		classValues = []
 		def classAttr = instances.attribute(className)
 		for(i in (0..<classAttr.numValues())){
@@ -105,20 +119,15 @@ class WekaMineModel implements Serializable{
 	/****
 	*
 	*/ 
-	def classify(instances){		
-		
+	def classify(instances){				
 		def rval = []
 		def numInstances = instances.numInstances()		
 		
 		for(int i = 0;i < numInstances;i++){
-			def instance = instances.instance(i)					
-				
-			//err.println "classifyInstance:"
-			//def pred = classifier.classifyInstance(instance)
-			//err.println "pred.class="+pred.class
-			//err.println "pred: "+pred				
-			def dist = classifier.distributionForInstance(instance)
-			rval.add(dist)
+			def instance = instances.instance(i)								
+			def dist = classifier.distributionForInstance(instance)						
+			classification = new Classification(dist,classValues)
+			rval.add(classification)
 		}
 		return(rval)		
 	}

@@ -8,6 +8,13 @@ import durbin.util.*
 
 err = System.err
 
+// set the application name for mac os
+// Investigate making more Mac-like, e.g. http://www.curious-creature.org/2007/07/26/improving-groovys-console-gui/
+//System.setProperty("apple.laf.useScreenMenuBar", "true")
+//System.setProperty("com.apple.mrj.application.apple.menu.about.name", "GroovyConsole")
+//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+//ConsoleMacOsSupport.handleMacOs(this.&exit, this.&showAbout)
+
 options = ParseOptions(args)
 
 // Determine separator to use...
@@ -24,6 +31,14 @@ dtm = new TableModel(dt)
 swing = new SwingBuilder()
 def mytable
 frame = swing.frame(title:options.fileName,defaultCloseOperation:JFrame.EXIT_ON_CLOSE){
+	
+	// add a simple menu bar
+	//menuBar() {
+	//	menu(text: "File", mnemonic: 'F') {
+	//		menuItem(text: "Exit", mnemonic: 'X', actionPerformed: { System.exit(0) })
+	//	}
+	//}
+	
   scrollpane = scrollPane {						
 		thetab = table(autoResizeMode:JTable.AUTO_RESIZE_OFF, autoCreateRowSorter:true){
 			tableModel(dtm)	

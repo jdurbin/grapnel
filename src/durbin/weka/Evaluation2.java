@@ -46,6 +46,7 @@ import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.classifiers.xml.XMLClassifier;
+import weka.core.Attribute;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -348,7 +349,10 @@ import java.lang.management.*;
     public ArrayList<LightWeightAttributeSelection> getCVAttributeSelections(){
       return(m_cvAttributeSelections);
     }
-    
+
+		public String getClassName(int idx){
+			return(m_ClassNames[idx]);
+    }
 
   /**
   * Initializes all the counters for the evaluation. 
@@ -1712,8 +1716,20 @@ Instance instance) throws Exception {
       pred = Instance.missingValue();
     }
     updateStatsForClassifier(dist, instance);
-		//KJD Should look instance name up by attribute name "ID"
-    m_Predictions.addElement(new NominalPredictionPlus(instance.classValue(), dist,instance.weight(),instance.toString(0)));
+		//KJD The ID is almost certainly the 0th attribute, I take pains to make it so, 
+		//nonetheless, should probably look the instance name up by attribute name "ID"		
+		// Note that instance.classValue() returns the class value in internal, double, format.
+		// If attribute is nominal or string, this double is the values index. 		
+		Attribute ca = instance.classAttribute();
+		String classNominalValue = ca.value((int) instance.classValue());
+		//System.err.println("classNominalValue: "+classNominalValue);
+		
+		NominalPredictionPlus nompred = new NominalPredictionPlus(instance.classValue(), classNominalValue,dist,instance.weight(),instance.toString(0));
+		
+		// This 'human readable' toString representation includes only internal notation for classes:
+		// nompred:NOM: 0.0 0.0 1.0 0.9999999999999999 8.330361619301978E-17		
+		// System.err.println("nompred:"+nompred.toString());
+    m_Predictions.addElement(nompred);
   } else {
     pred = classifier.classifyInstance(classMissing);
     updateStatsForPredictor(pred, instance);
@@ -1784,6 +1800,8 @@ Instance instance) throws Exception {
 * @return the prediction
 * @throws Exception if model could not be evaluated 
 * successfully
+* 
+* This seems only to be used in DecisionTable, DTNB, and gui classes: classifierPanel, and IncrementalClassifierEvaluator
 */
 public double evaluateModelOnceAndRecordPrediction(double [] dist, 
 Instance instance) throws Exception {
