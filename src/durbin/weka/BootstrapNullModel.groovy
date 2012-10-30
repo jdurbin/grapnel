@@ -16,7 +16,6 @@ class BootstrapNullModel implements Serializable{
 	// BRCA_IPZ run used this serialVersionUID.  Oughf.  
 	//serialVersionUID = 2661308148788524061, local class 
 	
-	
 	static{
 		WekaAdditions.enable()
 	}
@@ -24,9 +23,11 @@ class BootstrapNullModel implements Serializable{
 	//def instances
 	static def err = System.err // sugar
 
-	def nullDistribution = []
+	ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()		
 
-	def BootstrapNullModel(numClassValues){
+	def BootstrapNullModel(classValues){
+		this.classValues = classValues		
+		def numClassValues = classValues.size()
 		for(i in 0..<numClassValues){
 			nullDistribution << new DynamicBin1D()
 		}
@@ -45,12 +46,17 @@ class BootstrapNullModel implements Serializable{
 	/**
 	* Adds points for the null distribution for each class value. 
 	*/ 
-	def addPoints(results){		
+	def addPoints(ArrayList<Classification> results){		
 		// Each result is a distribution for instance...
-		//def classValues = model.classValues
-		results.each{r->						
-			r.eachWithIndex{dist,classValueIdx->
-				nullDistribution[classValueIdx].add(dist); 
+		//def classValues = model.classValues		
+		results.each{r->
+			def prForValues = r.prForValues
+			
+			// Excessively paranoid sanity test
+			r.classNames.eachWithIndex{c,i->if (c != classValues[i]) err.println "ERROR: BNM results class values do not match BNM stored class values."}
+						
+			prForValues.eachWithIndex{probabilityForClassValue,classValueIdx->
+				nullDistribution[classValueIdx].add(probabilityForClassValue); 
 			}
 		}		
 	}

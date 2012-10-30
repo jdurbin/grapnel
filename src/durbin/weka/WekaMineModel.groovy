@@ -1,12 +1,11 @@
 package durbin.weka;
 
 
-// NEW
-class Classification{					
-	def dist = []
+// Package up distForInstance with the associated class names
+class Classification{						
+	def prForValues = []
 	def classNames = []
 }
-
 
 /***
 * Saves a trained classifier and any additional information needed to apply that classifier to a 
@@ -119,14 +118,16 @@ class WekaMineModel implements Serializable{
 	/****
 	*
 	*/ 
-	def classify(instances){				
-		def rval = []
+	ArrayList<Classification> classify(instances){				
+		def rval = new ArrayList<Classification>()
 		def numInstances = instances.numInstances()		
 		
 		for(int i = 0;i < numInstances;i++){
-			def instance = instances.instance(i)								
-			def dist = classifier.distributionForInstance(instance)						
-			classification = new Classification(dist,classValues)
+			def instance = instances.instance(i)											
+			def prForValues = classifier.distributionForInstance(instance)						
+			// Package dist up in a Classification while we have the instance
+			// handy, just be sure we don't mix them up. 
+			def classification = new Classification(prForValues,classValues)
 			rval.add(classification)
 		}
 		return(rval)		
@@ -138,8 +139,8 @@ class WekaMineModel implements Serializable{
 	**/ 
 	def computeBootstrapNullModel(instances){						
 		def rng = new Random();		
-		bnm = new BootstrapNullModel(classValues.size())
-		def results = classify(instances)
+		bnm = new BootstrapNullModel(classValues)
+		ArrayList<Classification> results = classify(instances)
 		bnm.addPoints(results)
 	}
 	
@@ -153,7 +154,7 @@ class WekaMineModel implements Serializable{
 
 		def rng = new Random();
 		
-		bnm = new BootstrapNullModel(classValues.size())
+		bnm = new BootstrapNullModel(classValues)
 									
 		// Generate the desired number of permutations of the model...
 		for(i in 0..<nullModelIterations){
@@ -164,17 +165,16 @@ class WekaMineModel implements Serializable{
 			// Apply classifier to these instances...
 			// one result per instance, each result is a distribution for instance...
 			// Note: it is assumed that instances have already been cleaned up. 
-			def results = classify(pinstances)
+			ArrayList<Classification> results = classify(pinstances)
 			
 			// Will need to have a null distribution for each class value... 						
 			bnm.addPoints(results)
 			err.println "done."
 		}
 	}
-	
-	
-	def printResults(results,sampleIDs){
-		printResults(Syste.out,results,sampleIDs)
+		
+	def printResults(	ArrayList<Classification> results,sampleIDs){
+		printResults(System.out,results,sampleIDs)
 	}
 	
 	def getMaxIdx(list){
@@ -190,27 +190,28 @@ class WekaMineModel implements Serializable{
 	}
 	
 	/***
-	*  Will break on multi-class classifiers. 
+	*  DEFECT: Will break on multi-class classifiers. 
 	*/ 
-	def printResults(out,results,sampleIDs){
+	def printResults(out,	ArrayList<Classification> results,sampleIDs){
 		if (bnm != null){
 			out<<"ID,confidence1,confidence2,call,nullConfidence1,nullConfidence2\n"
 		}else{
 			out<<"ID,confidence1,confidence2,call\n"
 		}
 									
-		results.eachWithIndex{result,i->
-			def r = result as ArrayList	// distribution for instance...			
-			def maxIdx = getMaxIdx(r)
+		results.eachWithIndex{result,i->			
+			
+			def prForValues = result.prForValues as ArrayList						
+			def maxIdx = getMaxIdx(prForValues)
 			def call = classValues[maxIdx] // look up the name of this.
-			def rstr = r.join(",")	
+			def prstr = prForValues.join(",")	
 			
 			if (bnm != null){
-				def nullConf1 = bnm.getSignificance(r[0],0)						
-				def nullConf2 = bnm.getSignificance(r[1],1)
-				out<<"${sampleIDs[i]},$rstr,$call,$nullConf1,$nullConf2\n"
+				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
+				def nullConf1 = bnm.getSignificance(prForValues[1],1)
+				out<<"${sampleIDs[i]},$prstr,$call,$nullConf0,$nullConf1\n"
 			}else{
-				out<<"${sampleIDs[i]},$rstr,$call\n"
+				out<<"${sampleIDs[i]},$prstr,$call\n"
 			}
 		}		
 	}
