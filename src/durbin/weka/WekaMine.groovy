@@ -501,7 +501,7 @@ class WekaMine{
 	    def upperBound = fields[1] as double
 			err.println "lower/upper cutoff discretization [$lowerBound,$upperBound]"
 	    (instances,cutoffString) = classToNominalFromCutoffs(instances,lowerBound,upperBound,"low","high",classAttribute)
-	  }else if (discretization == 'none'){
+	  }else if (discretization.toLowerCase() == 'none'){
 			err.println "NO discretization"
 			cutoffString = "none"
 		}else if (discretization == 'nominal'){
@@ -1034,7 +1034,7 @@ class WekaMine{
   *  weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -M
   */
   static def classifierFromSpec(classifierSpec){
-		if (classifierSpec == 'none') return('none');
+		if (classifierSpec.toLowerCase() == 'none') return('none');
 	
     // Create a classifier from the name...
     def options = Utils.splitOptions(classifierSpec)

@@ -33,14 +33,14 @@ class ExperimentSpec{
 	 def ExperimentSpec(WekaMineResult wmr){
 		classifierStr = wmr.classifier
 		try{
-			if (classifierStr != "None"){
+			if (classifierStr.toLowerCase() != "none"){
 				classifier = WekaMine.classifierFromSpec(classifierStr)
 		  }else{
 				classifier = null;
 			}
 			
 			filterStr = wmr.filter
-			if (filterStr != "None"){
+			if (filterStr.toLowerCase() != "none"){
 				filter = WekaMine.filterFromSpec(filterStr)  // Why is this in WekaMine and not here? 
 			}else{
 				filter = null
@@ -79,7 +79,7 @@ class ExperimentSpec{
     classifierStr = fields[headings2Cols['classifier']]
 
     try{
-      if (classifierStr != "None"){      
+      if (classifierStr.toLowerCase() != "none"){      
         classifier = WekaMine.classifierFromSpec(classifierStr)
       }else{
         classifier = null;
@@ -91,7 +91,7 @@ class ExperimentSpec{
     }
     
 		filterStr = fields[headings2Cols['filter']]
-		if (filterStr != "None"){
+		if (filterStr.toLowerCase() != "none"){
 			filter = WekaMine.filterFromSpec(filterStr)  // Why is this in WekaMine and not here? 
 		}else{
 			filter = null
