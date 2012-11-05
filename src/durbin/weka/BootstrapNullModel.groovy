@@ -54,7 +54,7 @@ class BootstrapNullModel implements Serializable{
 			def prForValues = r.prForValues
 			
 			// Excessively paranoid sanity test
-			r.classNames.eachWithIndex{c,i->if (c != classValues[i]) err.println "ERROR: BNM results class values do not match BNM stored class values."}
+			r.classValues.eachWithIndex{c,i->if (c != classValues[i]) err.println "ERROR: BNM results class values do not match BNM stored class values."}
 						
 			prForValues.eachWithIndex{probabilityForClassValue,classValueIdx->
 				nullDistribution[classValueIdx].add(probabilityForClassValue); 

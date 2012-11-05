@@ -4,13 +4,22 @@ import weka.core.*
 
 // Package up distForInstance with the associated class names
 class Classification{						
-	def Classification(prForValues,classNames){
+	def Classification(prForValues,classValues){
 		this.prForValues = prForValues
-		this.classNames = classNames
+		this.classValues = classValues
 	}
 	
 	def prForValues = []
-	def classNames = []
+	def classValues = []
+	
+	def prForName(name){
+		classValues.eachWithIndex{cname,i->
+			if (name == cname) return(prForValues[i])
+		}
+		System.err.println "WARNING: prForName: $name not found."
+		return(-1);
+	}
+	
 }
 
 /***
