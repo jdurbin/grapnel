@@ -204,8 +204,13 @@ class WekaMine{
   	def singleClinicalInstances = subsetAttributes(clinical,selectedAttributes)  
 		singleClinicalInstances.setClassName(classAttribute)
 		
+		//err.println "DEBUG singleClinicalInstances.size() = "+singleClinicalInstances.numInstances()
+		//err.println "DEBUG  data.size() = "+data.numInstances()		
+		
   	// Merge data and clinical files (i.e. instances contained in both, omitting rest)		
   	def merged = IU.mergeNamedInstances(data,singleClinicalInstances)		
+
+    //err.println "DEBUG merged: "+merged.numInstances()
 
 		def classIdx = merged.setClassName(classAttribute)
 

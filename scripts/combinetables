@@ -101,12 +101,24 @@ def ParseOptions(args){
 	parser.with{
 		required 'o','outFile',[description: 'Name of file for combined output.']
 		optional 'v','defaultValue',[default:"",description: 'Value to use for cells that do not appear in input.']
+		optional 'p','prefixes',[default:"",
+							description: 'Comma separated list of prefixes to append to row names from each input file respectively.',
+							validate:{it.split(",")}]
 	  flag 'h','help',[default:false,description: 'Print script help.']
-		remainder{if(!it) throw new IllegalArgumentException("Must specify a list of files");it}
+		remainder{
+			if(!it) throw new IllegalArgumentException("Must specify a list of files");
+			it
+		}
 	}
 	try{ 
 		options = parser.parse(args); 
 		options.fileNames = parser.remainder
+		if (options.prefixes){
+			if (options.prefixes.size() != options.fileNames.sizes()){
+				System.err << parser.usage
+				System.exit(1)
+			}
+		}
 	}catch(Exception e){System.err << parser.usage;System.exit(1)}		
 	return(options)
 }

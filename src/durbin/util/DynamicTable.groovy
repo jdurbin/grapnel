@@ -68,6 +68,7 @@ class DynamicTable {
 			}
 	}
 	
+	
 	/***
 	* Print the table to stdout
 	*/ 

@@ -118,7 +118,15 @@ class WekaMineResult{
 		recall0	= fields[headings2Cols['recall0']] as float
 		precision1 = fields[headings2Cols['precision1']] as float
 		recall1 = fields[headings2Cols['recall1']] as float
+		
+		println headings2Cols
+		println headings2Cols['classValue1']
+		println fields
+		
 		classValue1 = fields[headings2Cols['classValue1']] as String
+				
+		println "CLASSVALUE:"+classValue1		
+				
 		tp1 = fields[headings2Cols['tp1']] as int
 		fp1 = fields[headings2Cols['fp1']] as int
 		tn1 = fields[headings2Cols['tn1']] as int

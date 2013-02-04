@@ -217,7 +217,7 @@ public class InstanceUtils {
     }
     // Remove specious end ","
     rval = rval.deleteCharAt(rval.length()-1);
-    return(rval.toString());	  
+    return(rval.toString());
 	}
 	
 
@@ -239,6 +239,8 @@ public class InstanceUtils {
 	public static Instances mergeInstances(Instances first, Instances second,
 	                                        Collection<String> secondAttributes) throws Exception {
 
+
+	  System.err.println("WARNING: deprecated mergeInstances. Assumes instances in same order.");
 		if (first.numInstances() != second.numInstances()) {
 			throw new IllegalArgumentException("Instance sets must be of the same size");
 		}				
@@ -293,8 +295,17 @@ public class InstanceUtils {
   	
     // Find the set of instances they have in common...
     Set<String> commonInstanceNames = firstName2InstanceIdxMap.keySet();        
+		//System.err.println("DEBUG: firstInstances:"+commonInstanceNames.size());
+		//System.err.println(commonInstanceNames);
+		
+
     Set<String> secondNames = secondName2InstanceIdxMap.keySet();
+		//System.err.println("DEBUG: secondInstances: "+secondNames.size());
+		//System.err.println(secondNames);
+
     commonInstanceNames.retainAll(secondNames);
+		//System.err.println("commonInstanceNames: "+commonInstanceNames.size());
+
     
   	int maxInstances = first.numInstances()+second.numInstances();  		                                    
     Instances merged = new Instances(first.relationName() + '_'

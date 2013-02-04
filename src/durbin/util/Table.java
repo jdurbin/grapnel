@@ -97,6 +97,7 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
 		}
 	}
 
+	
   
   public long size(){ return(data.size()); }
   public Object get(int idx){ return(data.get(idx)); }  
@@ -534,7 +535,9 @@ public class Table extends GroovyObjectSupport{
   }
 		
   public TableMatrix1D getAt(String rowName){
+		System.err.println("rowName = "+rowName);
     int ridx = getRowIdx(rowName);
+		System.err.println("ridx = "+ridx);
     return(getRow(ridx));
   }
 	
