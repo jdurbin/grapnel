@@ -25,6 +25,7 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 		result.enableAllClasses();
 		result.enable(Capability.NUMERIC_ATTRIBUTES);
 		result.enable(Capability.NO_CLASS);  //// filter doesn't need class to be set//
+		result.enable(Capability.MISSING_CLASS_VALUES); // doesn't even need a class value
 		result.enable(Capability.MISSING_VALUES);
 		return result;
 	}

@@ -36,7 +36,7 @@ import org.codehaus.groovy.runtime.*;
 public class DoubleTable extends GroovyObjectSupport{
 
 	// An somewhat efficient place to store the data...
-	public DoubleMatrix2D matrix;
+	public DenseDoubleMatrix2D matrix;
 	public String[] colNames;  // Groovy getters/setters only gen for non-public variables. 
 	public String[] rowNames;
 	public int numCols;
@@ -49,6 +49,47 @@ public class DoubleTable extends GroovyObjectSupport{
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
   public DoubleTable(){}
+	
+		public DoubleTable(double[][] dataMatrix){
+			
+			// Generate generic default names if none given...
+			numRows = dataMatrix.length;
+			numCols = dataMatrix[0].length;
+			rowNames = new String[numRows];
+			colNames = new String[numCols];
+			for(int i = 0;i < numRows;i++){
+				rowNames[i] = "Row"+i;
+			}
+			
+			for(int i = 0;i < numCols;i++){
+				colNames[i] = "Col"+i;
+			}								
+			
+			matrix = new DenseDoubleMatrix2D(dataMatrix);
+			createNameMap(colNames,colName2Idx);			
+			createNameMap(rowNames,rowName2Idx);
+			
+		}
+		
+	
+		public DoubleTable(double[][] dataMatrix,ArrayList<String> rNames,ArrayList<String> cNames){
+			numRows = rNames.size();
+			numCols = cNames.size();
+			matrix = new DenseDoubleMatrix2D(dataMatrix);
+
+			rowNames = new String[numRows];
+			for(int i = 0;i < rNames.size();i++){
+				rowNames[i] = rNames.get(i);
+			}
+
+			colNames = new String[numCols];
+			for(int i = 0;i < cNames.size();i++){
+				colNames[i] = cNames.get(i);
+			}
+
+			createNameMap(colNames,colName2Idx);
+			createNameMap(rowNames,rowName2Idx);
+		}
 	
 	public DoubleTable(ArrayList<String> rNames,ArrayList<String> cNames){
 		numRows = rNames.size();
@@ -92,6 +133,11 @@ public class DoubleTable extends GroovyObjectSupport{
   public DoubleTable(String fileName,Closure c) throws Exception{
     readFile(fileName,"\t",c);
   }
+
+	public double[][] toArray(){
+		return(matrix.toArray());
+	}
+
 
 	public void setFirstColInTable(boolean firstColInTable){		
 		bFirstColInTable= firstColInTable;
@@ -249,7 +295,7 @@ public class DoubleTable extends GroovyObjectSupport{
 			}
 									      
       for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
-				//System.err.println("colIdx:"+colIdx+" tokens: "+tokens[colIdx+1]);
+				//System.err.println("colIdx:"+colIdx+" tokens: "+tokens[colIdx+1]);				
         matrix.setQuick(rowIdx,colIdx,Double.parseDouble(tokens[colIdx+colOffset]));                
       }     
 			rowIdx++;
@@ -305,6 +351,9 @@ public class DoubleTable extends GroovyObjectSupport{
 		System.err.println("done");
 	}
 	
+	public DenseDoubleMatrix2D getMatrix(){
+		return(matrix);
+	}
 
 	public Double get(int row,int col) {
 		return(matrix.getQuick(row,col));

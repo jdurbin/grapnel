@@ -37,6 +37,9 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
 	public String[] names;  	
 	public HashMap<String,Integer> name2Idx = new HashMap<String,Integer>();
 
+
+	public DenseDoubleMatrix1D getData(){return(data);}
+
 	public DoubleVector(int n,String[] theNames,HashMap<String,Integer> nameMap){
 		data = new DenseDoubleMatrix1D(n);
 		names = theNames;
@@ -83,6 +86,8 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
 	public DoubleVector(double[] values){
 		data = new DenseDoubleMatrix1D(values);
 	}
+	
+	
   
   public long size(){ return(data.size()); }
   public Double get(int idx){ return(data.get(idx)); }  

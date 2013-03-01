@@ -204,32 +204,7 @@ class WekaMineModel implements Serializable{
 		return(maxIdx)
 	}
 	
-	/***
-	*  DEFECT: Will break on multi-class classifiers. 
-	*/ 
-	def printResults(out,	ArrayList<Classification> results,sampleIDs){
-		if (bnm != null){
-			out<<"ID,confidence1,confidence2,call,nullConfidence0,nullConfidence1\n"
-		}else{
-			out<<"ID,confidence1,confidence2,call\n"
-		}
-									
-		results.eachWithIndex{result,i->			
-			
-			def prForValues = result.prForValues as ArrayList						
-			def maxIdx = getMaxIdx(prForValues)
-			def call = classValues[maxIdx] // look up the name of this.
-			def prstr = prForValues.join(",")	
-			
-			if (bnm != null){
-				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
-				def nullConf1 = bnm.getSignificance(prForValues[1],1)
-				out<<"${sampleIDs[i]},$prstr,$call,$nullConf0,$nullConf1\n"
-			}else{
-				out<<"${sampleIDs[i]},$prstr,$call\n"
-			}
-		}		
-	}
+	
 		
 	/***
 	* Print the results and compare with the clinical values in clinical...
@@ -318,6 +293,32 @@ class WekaMineModel implements Serializable{
 			return([tp,tn,fp,fn])
 	}
 		
+	/***
+	*  DEFECT: Will break on multi-class classifiers. 
+	*/ 
+	def printResults(out,	ArrayList<Classification> results,sampleIDs){
+		if (bnm != null){
+			out<<"ID,confidence1,confidence2,call,nullConfidence0,nullConfidence1\n"
+		}else{
+			out<<"ID,confidence1,confidence2,call\n"
+		}
+									
+		results.eachWithIndex{result,i->			
+			
+			def prForValues = result.prForValues as ArrayList						
+			def maxIdx = getMaxIdx(prForValues)
+			def call = classValues[maxIdx] // look up the name of this.
+			def prstr = prForValues.join(",")	
+			
+			if (bnm != null){
+				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
+				def nullConf1 = bnm.getSignificance(prForValues[1],1)
+				out<<"${sampleIDs[i]},$prstr,$call,$nullConf0,$nullConf1\n"
+			}else{
+				out<<"${sampleIDs[i]},$prstr,$call\n"
+			}
+		}		
+	}	
 	
 	/***
 	* results == distributionForInstance
@@ -326,8 +327,13 @@ class WekaMineModel implements Serializable{
 	* 
 	*/ 
 	def printResultsAndCompare(out,ArrayList<Classification> results,dataSampleIDs,Instances clinical){
-		out<< "ID,lowConfidence,highConfidence,call,actual\n"
 		
+		if (bnm != null){
+			out<< "ID,lowConfidence,highConfidence,call,nullConfidence0,nullConfidence1,actual\n"		
+		}else{
+			out<< "ID,lowConfidence,highConfidence,call,actual\n"			
+		}
+						
 		WekaAdditions.enable();
 		
 		// Build a map of clinical samples to results...
@@ -372,6 +378,13 @@ class WekaMineModel implements Serializable{
 			
 			out<< "${id},$rstr,$call"
 			
+			if (bnm != null){
+				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
+				def nullConf1 = bnm.getSignificance(prForValues[1],1)
+				out<<",$nullConf0,$nullConf1"
+			}else{
+			}
+			
 			// If this sample is in the clinical data set, output it's comparison.. 
 			if (id2ClassMap.containsKey(id)){
 				def actualVal = id2ClassMap[id]
@@ -388,6 +401,8 @@ class WekaMineModel implements Serializable{
 				}else if ((actualVal == negVal) && (call == posVal)){
 					fn++;
 					out<<"\n"
+				}else{
+					out<<",?\n"// If there is no actualVal...
 				}				
 			}else{
 				out<< ",?\n"

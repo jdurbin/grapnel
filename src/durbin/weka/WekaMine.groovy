@@ -736,6 +736,9 @@ class WekaMine{
 		return(applyUnsupervisedFilter(instances,exp.filter))
 	}
 
+	/****
+	* 
+	*/ 
 	static Instances applyUnsupervisedFilter(instances,Filter filter){		
 
 		if (filter == null){ 
@@ -743,20 +746,29 @@ class WekaMine{
 			return(instances)
 		}
 		
-		err.print "FILTER: Apply unsupervised filter: ${filter.toString()}..."
-		// Remove ID attribute, since attribute evaluators and classifiers choke on it...
-		def instNames = instances.attributeValues("ID")
-		def noIDinstances = WekaMine.removeInstanceID(instances)
+		err.print "FILTER: Apply unsupervised filter: ${filter.toString()}..."			
+						
+		// If there is an ID attribute, remove it before filtering since attribute 
+		// evaluators and classifiers choke on it. If no ID, just filter...
+		def filteredInstances
+		def nameSet = instances.attributeNames() as Set
+		if (nameSet.contains("ID")){		
+			def instNames = instances.attributeValues("ID")
+			def noIDinstances = WekaMine.removeInstanceID(instances)
 
-		// Apply the filter to instances...
-		//noIDinstances = WekaMine.applyUnsupervisedFilter(noIDinstances,options.filter)
-		filter.setInputFormat(noIDinstances);	
-		noIDinstances = Filter.useFilter(noIDinstances,filter)
+			// Apply the filter to instances...
+			//noIDinstances = WekaMine.applyUnsupervisedFilter(noIDinstances,options.filter)
+			filter.setInputFormat(noIDinstances);	
+			noIDinstances = Filter.useFilter(noIDinstances,filter)
 
-		// Put the ID back into the instances...
-		// KJD: Note that addID below assumes same number of instances in same order. 
-		// KJD: This assumption may not always hold for filters... need to think of how to handle this.
-		def filteredInstances = WekaMine.addID(noIDinstances,instNames)
+			// Put the ID back into the instances...
+			// KJD: Note that addID below assumes same number of instances in same order. 
+			// KJD: This assumption may not always hold for filters... need to think of how to handle this.
+			filteredInstances = WekaMine.addID(noIDinstances,instNames)
+		}else{
+			filter.setInputFormat(instances);				
+			filteredInstances = Filter.useFilter(instances,filter)
+		}
 		
 		err.println("done.")
 		
