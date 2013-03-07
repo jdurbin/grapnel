@@ -764,6 +764,7 @@ class WekaMine{
 			// KJD: This assumption may not always hold for filters... need to think of how to handle this.
 			filteredInstances = WekaMine.addID(noIDinstances,instNames)
 		}else{
+			err.println "WARNING: this code branch is associated with some coding issues.  Please proceed with caution."
 			filter.setInputFormat(instances);				
 			filteredInstances = Filter.useFilter(instances,filter)
 		}

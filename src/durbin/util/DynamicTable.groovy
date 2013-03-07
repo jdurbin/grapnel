@@ -88,14 +88,17 @@ class DynamicTable {
 	* Write the table to a file
 	*/ 
 	def write(fileName,delimiter){
+				
 		def colKeys = delegate.columnKeySet()
 		def rowKeys = delegate.rowKeySet()
+				
 		new File(fileName).withWriter{w->
 			// Print the heading...
 			w.write "Features$delimiter"
 			w.writeLine colKeys.join(delimiter)				
+						
 			delegate.rowMap().each{k,v->
-				//println "$k\t${v.values().join(',')}"
+				//err.println "ROWMAPCLOSURE $k\t${v.values().join(',')}"
 				w.write "${k}${delimiter}"
 				w.writeLine v.values().join(delimiter)
 			}
