@@ -745,14 +745,12 @@ class WekaMine{
 			err.println "FILTER: Apply unsupervised filter: None"
 			return(instances)
 		}
-		
-		err.print "FILTER: Apply unsupervised filter: ${filter.toString()}..."			
-						
+								
 		// If there is an ID attribute, remove it before filtering since attribute 
 		// evaluators and classifiers choke on it. If no ID, just filter...
 		def filteredInstances
 		def nameSet = instances.attributeNames() as Set
-		if (nameSet.contains("ID")){		
+		if (nameSet.contains("ID")){	
 			def instNames = instances.attributeValues("ID")
 			def noIDinstances = WekaMine.removeInstanceID(instances)
 
@@ -776,7 +774,7 @@ class WekaMine{
 	}
 	
 	
-	static Instances applyFilter(instances,String filterName){
+	static Instances applyUnsupervisedFilterFromName(instances,String filterName){
 		err.print("Apply unsupervised filter $filterName...")
 		def filter = filterFromSpec(filterName)
 		filter.setInputFormat(instances);	

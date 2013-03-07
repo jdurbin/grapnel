@@ -35,7 +35,8 @@ class WekaMineModel implements Serializable{
 	
 	static err = System.err
 	
-	static final long serialVersionUID = 1L;
+	static final long serialVersionUID = 1L; // original version
+	//static final long serialVersionUID = 2L; // modded to add data and clin file names.
 	
 	def atrSelMethod  // Just for records sake
 
@@ -44,7 +45,7 @@ class WekaMineModel implements Serializable{
 	def classifier
 	def attributes
 	def className
-	def classValues
+	def classValues	
 	
 	BootstrapNullModel bnm; 
 		
@@ -297,6 +298,9 @@ class WekaMineModel implements Serializable{
 	*  DEFECT: Will break on multi-class classifiers. 
 	*/ 
 	def printResults(out,	ArrayList<Classification> results,sampleIDs){
+		
+		//err.println "DEBUG: results.size=${results.size()} sampleIDs.size=${sampleIDs.size()}"
+		
 		if (bnm != null){
 			out<<"ID,confidence1,confidence2,call,nullConfidence0,nullConfidence1\n"
 		}else{
@@ -339,7 +343,16 @@ class WekaMineModel implements Serializable{
 		// Build a map of clinical samples to results...
 		def id2ClassMap = [:]		
 		def allClassValues = clinical.attributeValues(clinical.classAttribute().name()) 
+		//err.println "DEBUG allClassValues.size: "+allClassValues.size()
+		//allClassValues.each{id->
+		//	err.println "DEBUG allclassValues: $id"
+		//}
+		
+		//err.println "DEBUG NUM INSTANCES: "+clinical.numInstances()
+		
+		err.println "\n\n"
 		dataSampleIDs.eachWithIndex{id,i->
+			err.println "DEBUG dataSampleID: $id  i: $i  allClassValues[i]=${allClassValues[i]}"
 			id2ClassMap[id] = allClassValues[i]
 		}
 
