@@ -477,7 +477,7 @@ class WekaMine{
 			return(filteredInstances);
 	}
 	
-
+	
 	// TODO KJD: This should just be discretizeAttribute where attribute is passed in...
 	// not specific to class...
 	def discretizeClassAttribute(instances){

@@ -48,48 +48,46 @@ public class DoubleTable extends GroovyObjectSupport{
   public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
-  public DoubleTable(){}
+  public DoubleTable(){  	
+  }
 	
-		public DoubleTable(double[][] dataMatrix){
-			
-			// Generate generic default names if none given...
-			numRows = dataMatrix.length;
-			numCols = dataMatrix[0].length;
-			rowNames = new String[numRows];
-			colNames = new String[numCols];
-			for(int i = 0;i < numRows;i++){
-				rowNames[i] = "Row"+i;
-			}
-			
-			for(int i = 0;i < numCols;i++){
-				colNames[i] = "Col"+i;
-			}								
-			
-			matrix = new DenseDoubleMatrix2D(dataMatrix);
-			createNameMap(colNames,colName2Idx);			
-			createNameMap(rowNames,rowName2Idx);
-			
+	public DoubleTable(double[][] dataMatrix){			
+		// Generate generic default names if none given...
+		numRows = dataMatrix.length;
+		numCols = dataMatrix[0].length;
+		rowNames = new String[numRows];
+		colNames = new String[numCols];
+		for(int i = 0;i < numRows;i++){
+			rowNames[i] = "Row"+i;
 		}
+			
+		for(int i = 0;i < numCols;i++){
+			colNames[i] = "Col"+i;
+		}								
+			
+		matrix = new DenseDoubleMatrix2D(dataMatrix);
+		createNameMap(colNames,colName2Idx);			
+		createNameMap(rowNames,rowName2Idx);	
+	}
 		
 	
-		public DoubleTable(double[][] dataMatrix,ArrayList<String> rNames,ArrayList<String> cNames){
-			numRows = rNames.size();
-			numCols = cNames.size();
-			matrix = new DenseDoubleMatrix2D(dataMatrix);
+	public DoubleTable(double[][] dataMatrix,ArrayList<String> rNames,ArrayList<String> cNames){
+		numRows = rNames.size();
+		numCols = cNames.size();
+		matrix = new DenseDoubleMatrix2D(dataMatrix);
 
-			rowNames = new String[numRows];
-			for(int i = 0;i < rNames.size();i++){
-				rowNames[i] = rNames.get(i);
-			}
-
-			colNames = new String[numCols];
-			for(int i = 0;i < cNames.size();i++){
-				colNames[i] = cNames.get(i);
-			}
-
-			createNameMap(colNames,colName2Idx);
-			createNameMap(rowNames,rowName2Idx);
+		rowNames = new String[numRows];
+		for(int i = 0;i < rNames.size();i++){
+			rowNames[i] = rNames.get(i);
 		}
+		colNames = new String[numCols];
+		for(int i = 0;i < cNames.size();i++){
+			colNames[i] = cNames.get(i);
+		}
+
+		createNameMap(colNames,colName2Idx);
+		createNameMap(rowNames,rowName2Idx);
+	}
 	
 	public DoubleTable(ArrayList<String> rNames,ArrayList<String> cNames){
 		numRows = rNames.size();
@@ -155,7 +153,7 @@ public class DoubleTable extends GroovyObjectSupport{
   * in the table as it is read and before it is saved to the table (e.g. to 
   * parse out a substring of each cell, or convert to Double). 
   */ 
-  public DoubleTable(String fileName,String delimiter,Closure c) throws Exception{
+	public DoubleTable(String fileName,String delimiter,Closure c) throws Exception{
      readFile(fileName,delimiter,c);
   }
   
@@ -174,7 +172,7 @@ public class DoubleTable extends GroovyObjectSupport{
 		String[] fields = line.split(regex,-1); // -1 to include empty cols.
 		String[] colNames = new String[fields.length-colOffset];
 		
-		//System.err.println("colNames.length="+colNames.length+" fields.length="+fields.length);
+		//System.err.println("colNames.length="+colNames.length+"fields.length="+fields.length);
 		//System.err.println("fields:");
 		//for(int i = 0;i < fields.length;i++){
 		//	System.err.println("\tfields ["+i+"]="+fields[i]);
@@ -232,7 +230,7 @@ public class DoubleTable extends GroovyObjectSupport{
       sb.append(entry+"\n");
    	}
    	return(sb.toString());		
-   }
+	}
 
 
   /***
