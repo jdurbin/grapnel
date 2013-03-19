@@ -151,26 +151,33 @@ public class TableFileLoader {
 		double dataArray[][] = new double[numAttributes][numInstances];
 			
 		// Populate the matrix with values...
-		int rowIdx = 0;
-		while ((line = reader.readLine()) != null) {
-			String[] tokens = line.split(delimiter,-1);
-			attrNames[rowIdx] = tokens[0].trim();
-		  for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
-				String valToken = tokens[colIdx+1];
-				double value;	
-				if (valToken.equals("null")){
-					value = Instance.missingValue();
-				} else if (valToken.equals("?")){
-					value = Instance.missingValue();
-				}else if (valToken.equals("NA")){
-					value = Instance.missingValue();
-				}else if (valToken.equals("")){
-					value = Instance.missingValue();
-				}else value = Double.parseDouble(valToken);
-				dataArray[rowIdx][colIdx] = value;
-			}     
-			rowIdx++;
-		}	
+		String valToken="";		
+		try{
+			int rowIdx = 0;
+			while ((line = reader.readLine()) != null) {
+				String[] tokens = line.split(delimiter,-1);
+				attrNames[rowIdx] = tokens[0].trim();
+		  	for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
+					valToken = tokens[colIdx+1];
+					double value;									
+					if (valToken.equals("null")){
+						value = Instance.missingValue();
+					} else if (valToken.equals("?")){
+						value = Instance.missingValue();
+					}else if (valToken.equals("NA")){
+						value = Instance.missingValue();
+					}else if (valToken.equals("")){
+						value = Instance.missingValue();
+					}else value = Double.parseDouble(valToken);
+					dataArray[rowIdx][colIdx] = value;
+				}     
+				rowIdx++;
+			}	
+		}catch(NumberFormatException e){
+			System.err.println(e.toString());
+			System.err.println("Parsing line: "+line);
+			System.err.println("Parsing token: "+valToken);
+		}
 			
 		// Set up attributes, which for colInstances will be the rowNames...
 		FastVector atts = new FastVector();
