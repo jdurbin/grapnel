@@ -6,16 +6,8 @@ import durbin.util.*
 
 
 parser = new Parser(description: '''
- Treates csv files as database tables and allows you to perform arbitrary queries
- on those files/tables, including multi-file/table joins.  In general, here 
- are the requirements:
- 
- 1. The query must be in format "select X from Y where Z"
- 2. The table(s) in the Y term must be the csv file name, which must end in .csv
- 3. Everywhere except for the Y term, the table name is used without the .csv extension or path. 
- 
- Other than that, arbitrary X, Y, and Z terms that form valid sql should work.  This
- is probably best shown by examples. 
+ Treates csv (or tab) files as database tables and allows you to perform arbitrary queries
+ on those files/tables, including multi-file/table joins. 
  
  Examples:
 
@@ -44,8 +36,10 @@ parser = new Parser(description: '''
  > from people.csv,children.csv
  > where people.name=children.name and people.age < 40"
  
- csvsql can take either .tab or .csv files.  All files in a query must be in same format. 
- csvsql infers file type by looking at extension .tsv/.tab tab files, .csv csv files. 
+ csvsql can take either .tab or .csv files.  All files in a given query must be in same format. 
+ The output format of the query will be in the same format.  csvsql infers file type by looking 
+ at extension so tab files are required to end in either .tsv or .tab and comma separated files
+ are required to end in .csv
  
  Author:  James Durbin  
 ''')
