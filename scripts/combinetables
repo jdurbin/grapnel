@@ -2,9 +2,8 @@
 
 import durbin.util.*
 
-// combinetables outfile table1 table2 table3...
-
-// Creates a table that is the union of orthogonal tables table1,table2,table3
+// getMAF.R gets MAF data from Synapse. 
+//
 
 err = System.err
 

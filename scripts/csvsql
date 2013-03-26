@@ -44,6 +44,9 @@ parser = new Parser(description: '''
  > from people.csv,children.csv
  > where people.name=children.name and people.age < 40"
  
+ csvsql can take either .tab or .csv files.  All files in a query must be in same format. 
+ csvsql infers file type by looking at extension .tsv/.tab tab files, .csv csv files. 
+ 
  Author:  James Durbin  
 ''')
 
@@ -66,33 +69,51 @@ try{
   System.exit(1)
 }
 
+
 params = parser.remainder.join(" ")
 (what,from,where) = getFields(params)
 
 // Extract the list of table names in the from clause...
 csvfiles = from.split(",") 
 
+// Determine separator to use...  ALL files must have same separator...
+def sep,suffix
+if (csvfiles[0].contains(".tsv")){
+	suffix = ".tsv"
+	sep = "\t"
+}else if (csvfiles[0].contains(".tab")){
+	suffix = ".tab"
+	sep = "\t"
+}else if (csvfiles[0].contains(".csv")){	
+	suffix = ".csv"
+	sep = ","
+}else{
+	err.println "ERROR: File must be either .csv, .tsv, or .tab"
+	System.exit(1)
+}
+
 tablenameMap = [:]
-csvfiles.each{csvfile->
+csvfiles.each{csvfile->	
   start = csvfile.lastIndexOf("/")+1
-  end = csvfile.indexOf(".csv")
+	end = csvfile.indexOf(suffix)
+	
   tablename = csvfile[start..<end]
   tablename = tablename.trim()
   tablenameMap[tablename] = csvfile.trim()
 }
 
-
 // Create an h2 in-memory db, calling it what you like, here db1
 def sql = Sql.newInstance("jdbc:h2:mem:db1","org.h2.Driver")
 
-
-
 // Create tables for each csv file named...
 tablenameMap.each{tablename,csvfile->
-  typeString = inferColumnTypes(csvfile,20)
-  stmt = "create table $tablename($typeString) as select * from csvread('$csvfile')" as String
-	//stmt=  "create table $tablename($typeString) as select * from CSVREAD('data/test.tsv', null, 'rowSeparator=' || CHAR(9));" as String
-  //println "stmt: $stmt"
+  typeString = inferColumnTypes(csvfile,20,sep)
+	def stmt
+	if (sep == ","){		
+		stmt = "create table $tablename($typeString) as select * from csvread('$csvfile')" as String
+	}else{
+		stmt = "create table $tablename($typeString) as select * from csvread('$csvfile',null,'UTF-8',chr(9))" as String	
+	}
   sql.execute(stmt)
 }
 
@@ -100,15 +121,19 @@ tablenameMap.each{tablename,csvfile->
 tablenames = tablenameMap.keySet().join(",")
 selstmt = "select $what from $tablenames where $where" as String
 
-// Write out column headings..
-println what
-
 // Perform the query... 
+def keyset = null
 sql.eachRow(selstmt){result->
+	
+	if (keyset == null){
+		keyset = result.toRowResult().keySet()
+		println keyset.join(sep) 
+	}
+		
   meta = result.getMetaData()
   cols = meta.getColumnCount()
   vals = (0..<cols).collect{result[it]}
-  println vals.join(",")
+  println vals.join(sep)
 }
 
 
@@ -132,11 +157,15 @@ def getFields(params){
     if (b =~ /(?i)select/) selectIdx = i
     if (b =~ /(?i)from/) fromIdx = i
     if (b =~ /(?i)where/) whereIdx = i
-  }
+  }			
+	
   X = bits[selectIdx+1..fromIdx-1].join(" ")
   Y = bits[fromIdx+1..whereIdx-1].join(" ")
-  Z = bits[whereIdx+1..-1].join(" ")
-  
+	
+	// Default where clause is WHERE=1
+	if (whereIdx == 0) Z = "1"
+  else Z = bits[whereIdx+1..-1].join(" ") 
+	
   return([X.trim(),Y.trim(),Z.trim()])
 }
 
@@ -155,7 +184,7 @@ def getFields(params){
 * 
 * Ironic that this is the largest part of the code. 
 */ 
-def inferColumnTypes(fileName,sampleRows = -1){
+def inferColumnTypes(fileName,sampleRows = -1,separator){
   
   columnType = [:]
   
@@ -164,13 +193,13 @@ def inferColumnTypes(fileName,sampleRows = -1){
   if (sampleRows > numLines) sampleRows = numLines
   
   new File(fileName).withReader{r->
-    headings = r.readLine().split(",")
+    headings = r.readLine().split(separator)
     intcounts = new int[headings.size()]
     doublecounts = new int[headings.size()]
         
     (0..<sampleRows-1).each{
       line = r.readLine()
-      fields = line.split(",",-1) // -1 to handle empty fields. 
+      fields = line.split(separator,-1) // -1 to handle empty fields. 
       
       //Sanity test..
       if (fields.size() != headings.size()){
