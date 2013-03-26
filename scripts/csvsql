@@ -4,6 +4,7 @@ import groovy.sql.Sql
 import org.h2.Driver
 import durbin.util.*
 
+err = System.err
 
 parser = new Parser(description: '''
  Treates csv (or tab) files as database tables and allows you to perform arbitrary queries
@@ -11,9 +12,9 @@ parser = new Parser(description: '''
  
  Examples:
 
- csvsql "select * from people.csv where age > 40"
  csvsql "select name,score from people.csv where age >40"
  csvsql "select name,score from people.csv where age <50 and score > 100"
+ csvsql "select * from people.csv where age > 40"
  
  Full path names should work fine: 
  
@@ -41,6 +42,14 @@ parser = new Parser(description: '''
  at extension so tab files are required to end in either .tsv or .tab and comma separated files
  are required to end in .csv
  
+ Note that quotes are actually only needed if you have some symbol, like *,(),<,>    
+ that the shell will try to interpret before passing to the script.  In that case you can quote 
+ the whole query or simply backquote the special symbols.  Examples:  
+ 
+ csvsql "select * from people.csv where age > 40"
+ csvsql select \\* from people.csv where age \\> 40
+ csvsql select count\\(*\\) from people.csv where age \\> 40
+ 
  Author:  James Durbin  
 ''')
 
@@ -63,6 +72,8 @@ try{
   System.exit(1)
 }
 
+
+println parser.remainder
 
 params = parser.remainder.join(" ")
 (what,from,where) = getFields(params)
@@ -221,8 +232,7 @@ def inferColumnTypes(fileName,sampleRows = -1,separator){
   columnType.each{key,value-> pairs<<"$key $value"}
   str = pairs.join(",")
   return(str)
-}
-  
+}  
 
 int countLines(fileName){
   InputStream bis = new BufferedInputStream(new FileInputStream(fileName));

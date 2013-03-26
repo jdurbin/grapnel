@@ -533,16 +533,16 @@ throws Exception {
 		System.err.println("\tnumFolds: "+numFolds);
 		
   	for (int i = 0; i < numFolds; i++) {
-			System.err.println("\t\tDEBUG Initial:");
-			printHeapSpace();
+			//System.err.println("\t\tDEBUG Initial:");
+			//printHeapSpace();
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
 			Instances train = CVUtils.trainCV(data,foldSet,i);
 			Instances test = CVUtils.testCV(data,foldSet,i);		
-			System.err.println("\t\tDEBUG Test/Train instances created:");
-			printHeapSpace();
+			//System.err.println("\t\tDEBUG Test/Train instances created:");
+			//printHeapSpace();
     	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
-			System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
-			printHeapSpace();
+			//System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
+			//printHeapSpace();
   	}
 	}
 }

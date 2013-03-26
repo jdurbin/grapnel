@@ -859,9 +859,6 @@ class WekaMine{
     return(selectedAttributeData)
   }
 
-
-
-
 	/***
 	* Will return the first holdoutFraction instances as a set of instances. 
 	* Will remove those instances from data. 
@@ -877,7 +874,6 @@ class WekaMine{
 		def holdout = Filter.useFilter(data,filter)
 		return(holdout);
 	}
-
 
 	/***
 	* Will return the first remaining instances in data after holdOutInstances
@@ -922,7 +918,6 @@ class WekaMine{
 		(tp,tn,fp,fn) = model.accuracy(results,clinical)
 		return([tp,tn,fp,fn])
 	}
-
 	
 	/***
 	* Remove all the instances from data except those named in selectedInstances
@@ -963,7 +958,6 @@ class WekaMine{
 		def remainingInstanceData = Filter.useFilter(data,remove)
 		return(remainingInstanceData)
 	}
-	
 		
 	/**
   * Read instances from a table, filling in missing value tokens as we go. 
@@ -972,7 +966,6 @@ class WekaMine{
 		def instancesInRows = false // Default 
 		readFromTable(dataFileName,instancesInRows)
 	}
-	
 	
 	/**
   * Read instances from a table, filling in missing value tokens as we go. 
@@ -1091,7 +1084,7 @@ class WekaMine{
 		return(filteredClassifier)
 	}
 
-	
+
   /**
   *  Create a attribute evaluation from the command-line evaluation specification
   *  string.  For example:<br><br>

@@ -193,6 +193,97 @@ class WekaMineModel implements Serializable{
 		printResults(System.out,results,sampleIDs)
 	}
 	
+	def printResults(out,ArrayList<Classification> results,sampleIDs){		
+		def outStrings = getResultStrings(results,sampleIDs)
+		
+		out<<"ID\tconfidence1\tconfidence2\tcall\tnullConfidence0\tnullConfidence1\n"
+
+		outStrings.each{
+			out << "$it\n"
+		}	
+	}
+	
+		
+	/***
+	*  DEFECT: Will break on multi-class classifiers. 
+	*/ 
+	def getResultStrings(ArrayList<Classification> results,sampleIDs){
+		
+		//err.println "DEBUG: results.size=${results.size()} sampleIDs.size=${sampleIDs.size()}"
+		
+		def outStrings = []
+									
+		results.eachWithIndex{result,i->			
+			
+			def prForValues = result.prForValues as ArrayList						
+			def maxIdx = getMaxIdx(prForValues)
+			def call = classValues[maxIdx] // look up the name of this.
+			def prstr = prForValues.join("\t")	
+			
+			if (bnm != null){
+				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
+				def nullConf1 = bnm.getSignificance(prForValues[1],1)
+				outStrings <<"${sampleIDs[i]}\t$prstr\t$call\t$nullConf0\t$nullConf1"
+			}else{
+				outStrings <<"${sampleIDs[i]}\t$prstr\t$call\t\t"
+			}
+		}
+		return(outStrings)		
+	}	
+	
+	/***
+	* Print the results and compare with the clinical values in clinical...
+	*/ 
+	def printResultsAndCompare(results,dataSampleIDs,clinical){
+		printResultsAndCompare(System.out,results,dataSampleIDs,clinical)
+	}
+	
+	
+	def printResultsAndCompare(out,ArrayList<Classification> results,sampleIDs,Instances clinical){
+		
+		def heading = "ID\tlowConfidence\thighConfidence\tcall\tnullConfidence0\tnullConfidence1\tactual\tmatch\tmatchfraction"		
+		
+		def outStrings = getResultStrings(results,sampleIDs)
+		def name2Call = [:]
+		def names = clinical.attributeValues("ID")
+		def classValues = clinical.attributeValues(className)
+		names.eachWithIndex{n,i->
+			name2Call[n] = classValues[i]
+		}
+		
+		//println "id\tcall\tactual\tmatch"
+		def newStrings = []
+		def matchCount = 0;
+		def totalCount = 0;
+		
+		// Just add match onto result string...
+		// kind of kludgy to extract call out of that string... 
+		err.println "ID\tcall\tactual\tmatch"
+		outStrings.each{s->
+			def fields = s.split("\t",-1)
+			def id = fields[0]
+			def call = fields[3]
+			def actual = name2Call[id]
+			def match
+			if (call == actual) {
+				match = "CORRECT"
+				matchCount++
+			}else{
+				match = "MISMATCH"
+			}			
+			totalCount++									
+			newStrings << "$s\t$actual\t$match"
+			err.println "$id\t$call\t$actual\t$match"
+		}
+
+		def matchFraction = matchCount/totalCount 
+		
+		println heading
+		newStrings.each{
+			println "$it\t$matchFraction"
+		}								
+	}
+	
 	def getMaxIdx(list){
 		def maxVal = -9999999;
 		def maxIdx = 0;
@@ -206,15 +297,12 @@ class WekaMineModel implements Serializable{
 	}
 	
 	
+	
+	
+	
+	
+	/*************************************************************************************/ 
 		
-	/***
-	* Print the results and compare with the clinical values in clinical...
-	*/ 
-	def printResultsAndCompare(results,dataSampleIDs,clinical){
-		printResultsAndCompare(System.out,results,dataSampleIDs,clinical)
-	}
-	
-	
 	/***
 	* QUESTIONABLE
 	* 
@@ -293,166 +381,7 @@ class WekaMineModel implements Serializable{
 			} // results.each
 			return([tp,tn,fp,fn])
 	}
-		
-	/***
-	*  DEFECT: Will break on multi-class classifiers. 
-	*/ 
-	def printResults(out,	ArrayList<Classification> results,sampleIDs){
-		
-		//err.println "DEBUG: results.size=${results.size()} sampleIDs.size=${sampleIDs.size()}"
-		
-		if (bnm != null){
-			out<<"ID,confidence1,confidence2,call,nullConfidence0,nullConfidence1\n"
-		}else{
-			out<<"ID,confidence1,confidence2,call\n"
-		}
-									
-		results.eachWithIndex{result,i->			
-			
-			def prForValues = result.prForValues as ArrayList						
-			def maxIdx = getMaxIdx(prForValues)
-			def call = classValues[maxIdx] // look up the name of this.
-			def prstr = prForValues.join(",")	
-			
-			if (bnm != null){
-				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
-				def nullConf1 = bnm.getSignificance(prForValues[1],1)
-				out<<"${sampleIDs[i]},$prstr,$call,$nullConf0,$nullConf1\n"
-			}else{
-				out<<"${sampleIDs[i]},$prstr,$call\n"
-			}
-		}		
-	}	
 	
-	/***
-	* results == distributionForInstance
-	* dataSampleIDs == instanceIDs
-	* clinical == clinical data
-	* 
-	*/ 
-	def printResultsAndCompare(out,ArrayList<Classification> results,dataSampleIDs,Instances clinical){
-		
-		if (bnm != null){
-			out<< "ID,lowConfidence,highConfidence,call,nullConfidence0,nullConfidence1,actual\n"		
-		}else{
-			out<< "ID,lowConfidence,highConfidence,call,actual\n"			
-		}
-						
-		WekaAdditions.enable();
-		
-		// Build a map of clinical samples to results...
-		def id2ClassMap = [:]		
-		def allClassValues = clinical.attributeValues(clinical.classAttribute().name()) 
-		//err.println "DEBUG allClassValues.size: "+allClassValues.size()
-		//allClassValues.each{id->
-		//	err.println "DEBUG allclassValues: $id"
-		//}
-		
-		//err.println "DEBUG NUM INSTANCES: "+clinical.numInstances()
-		
-		err.println "\n\n"
-		dataSampleIDs.eachWithIndex{id,i->
-			err.println "DEBUG dataSampleID: $id  i: $i  allClassValues[i]=${allClassValues[i]}"
-			id2ClassMap[id] = allClassValues[i]
-		}
 
-		// fill in id2ClassMap from clinical...		
-		def tp = 0.0;
-		def tn = 0.0;
-		def fp = 0.0;
-		def fn = 0.0;
-		
-		// The positive value is the value of classValues[1]. It is "positive" only 
-		// in the sense that that's the value we report a confusion matrix for in 
-		// the summary.csv output.  It could mean anything.  
-		// MULTICLASS DEFECT:  formulation doesn't work with multiple class values. 
-		def posVal = classValues[1]
-		def negVal = classValues[0]				
-		
-		// Sanity check that the results are produced with the same class values as the instances we are 
-		// looking at. 
-		def diff1 = classValues-allClassValues
-		def diff2 = allClassValues-classValues
-		if (!(diff1==[] && diff2==[])){
-			err.println "ERROR: The class values in the given input data do not match the classValues from the classification."
-			err.println classValues
-			err.println allClassValues
-		}
-																
-		// Now compare predictions with actual values...
-		results.eachWithIndex{result,i->
-			def prForValues = result.prForValues as ArrayList  // distribution for instance
-			def maxIdx = getMaxIdx(prForValues)
-			def call = classValues[maxIdx] // look up the name of this.
-			def rstr = prForValues.join(",")	
-			
-			// ASSUMPTION: dataSampleIDs are in same order as results... 			
-			def id = dataSampleIDs[i]
-			
-			out<< "${id},$rstr,$call"
-			
-			if (bnm != null){
-				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
-				def nullConf1 = bnm.getSignificance(prForValues[1],1)
-				out<<",$nullConf0,$nullConf1"
-			}else{
-			}
-			
-			// If this sample is in the clinical data set, output it's comparison.. 
-			if (id2ClassMap.containsKey(id)){
-				def actualVal = id2ClassMap[id]
-				out<< ",$actualVal"																							
-				if ((actualVal == posVal) && (call == posVal)){
-					tp++;
-					out<<",+\n"
-				}else if ((actualVal == posVal) && (call == negVal)){
-					fp++
-					out<<"\n"					
-				}else if ((actualVal == negVal) && (call == negVal)){
-					tn++;
-					out<<",+\n"
-				}else if ((actualVal == negVal) && (call == posVal)){
-					fn++;
-					out<<"\n"
-				}else{
-					out<<",?\n"// If there is no actualVal...
-				}				
-			}else{
-				out<< ",?\n"
-			}
-		} // results.each				
-		
-	 	out<< "====================\n"
-	  out<< "Positive: $posVal\n"
-	  out<< "Negative: $negVal\n"
-		out<< "TP\t$tp\n"
-		out<< "FP\t$fp\n"
-		out<< "TN\t$tn\n"
-		out<< "FN\t$fn\n"
-		out<< "Fraction Correct:\t${((tp+tn)/(tp+fp+tn+fn))}\n"
-		out<<"Sensitivity:\t${(tp/(tp+fn))}\n"
-		out<<"Specificity:\t${(tn/(tn+fp))}\n"										
-		out<<"Precision:\t${(tp/(tp+fp))}\n"
-		out<<"Recall:\t${(tp/(tp+fn))}\n"			
-		def mcc = matthewsCorrelationCoeficient(tp,fp,tn,fn)					
-		out<<"Matthews correlation coeficient: $mcc\n"
-	
-	}
-	
-	def matthewsCorrelationCoeficient(tp,fp,tn,fn){
-		def sum1 = tp+fp
-		def sum2 = tp+fn
-		def sum3 = tn+fp
-		def sum4 = tn+fn
-
-		def denominator
-		if ((sum1 == 0) || (sum2 == 0) || (sum3 ==0) || (sum4 ==0)){
-			denominator = 1
-		}else{	
-			denominator = sum1*sum2*sum3*sum4
-		}
-		double mcc = ((tp*tn)-(fp*fn))/Math.sqrt(denominator)
-		return(mcc.round(6))
-	}
 					
 }

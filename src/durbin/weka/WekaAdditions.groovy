@@ -195,7 +195,8 @@ public class WekaAdditions{
       Attribute id = attribute("ID");
       def theInstance
       (0..<numInstances()).each{idx->
-        Instance inst = instance(idx) 
+     
+		    Instance inst = instance(idx) 
         String value = inst.stringValue(id)
         if (value == instanceName) theInstance = inst        
       }
