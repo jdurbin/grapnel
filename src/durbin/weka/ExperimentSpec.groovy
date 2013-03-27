@@ -73,7 +73,7 @@ class ExperimentSpec{
 		* so that we don't have to worry about things getting out of sync. 
 		*/ 
    def ExperimentSpec(String line,headings2Cols){
-    def fields = line.split(",")
+    def fields = line.split("\t")
 
 		//System.err.println "DEBUG: "+headings2Cols
     classifierStr = fields[headings2Cols['classifier']]
@@ -109,12 +109,12 @@ class ExperimentSpec{
    }   
    
    String toString(){
-     def rstr = filterStr+","+attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization+","+dataFile
+     def rstr = filterStr+"\t"+attrEvalStr+"\t"+attrSearchStr+"\t"+numAttributes+"\t"+classifierStr+"\t"+classAttribute+"\t"+discretization+"\t"+dataFile
      return(rstr);
    } 
 
 	 String toOutputString(){
-     def rstr = filterStr+","+attrEvalStr+","+attrSearchStr+","+numAttributes+","+classifierStr+","+classAttribute+","+discretization
+     def rstr = filterStr+"\t"+attrEvalStr+"\t"+attrSearchStr+"\t"+numAttributes+"\t"+classifierStr+"\t"+classAttribute+"\t"+discretization
      return(rstr);
    }   
 }

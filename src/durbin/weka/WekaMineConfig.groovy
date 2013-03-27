@@ -66,7 +66,7 @@ class WekaMineConfig extends ArrayList{
 	def WekaMineConfig(String configFileName,String metaDataFile){			
 		def slurper = new WekaMineConfigSlurper()
 		def cfg = slurper.parse(new File(configFileName).toURL())
-		params = cfg.params // cfg includes all sections.  make alias for section we want. 
+		params = cfg.params // cfg includes all sections.  make alias for section we want. 		
 
 		// read the attribute names from the file...
 		// KJD: This ONLY works with attribute names in rows...
@@ -77,9 +77,11 @@ class WekaMineConfig extends ArrayList{
 				attributeNames << fields[0] 
 			}
 		}
-
+		
 		def headingMap = WekaMineResult.defaultHeadingMap()
 	  slurper.getExpansion('experiments').each{experiment->
+			
+			experiment = experiment.replaceAll(",","\t") // convert the commas in the cfg file to tabs... all tabs from here on out..
 		
 			// If experiment calls for ALL attributes, substitute them in... 
 			if (experiment.contains("ALL")){

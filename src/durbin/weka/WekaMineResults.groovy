@@ -44,8 +44,8 @@ class WekaMineResult{
 	String discretization
 	String dataFile
 	
-	static def headingStr = "filter,attrEval,attrSearch,numAttrs,classifier,classAttr,discretization,dataFile,Break,jobID,samples,pctCorrect,precision0,recall0,precision1,recall1,classValue1,tp1,fp1,tn1,fn1,rms,roc"    		
-	static def expHeadingStr = "filter,attrEval,attrSearch,numAttrs,classifier,classAttr,discretization"
+	static def headingStr = "filter\tattrEval\tattrSearch\tnumAttrs\tclassifier\tclassAttr\tdiscretization\tdataFile\tBreak\tjobID\tsamples\tpctCorrect\tprecision0\trecall0\tprecision1\trecall1\tclassValue1\ttp1\tfp1\ttn1\tfn1\trms\troc"    		
+	static def expHeadingStr = "filter\tattrEval\tattrSearch\tnumAttrs\tclassifier\tclassAttr\tdiscretization"
 	
 	
 	String toString(){
@@ -74,7 +74,7 @@ class WekaMineResult{
 		sb << rms
 		sb << roc
 		
-		def rval = sb.join(",")
+		def rval = sb.join("\t")
 		return(rval)    		
 	}
 	
@@ -82,7 +82,7 @@ class WekaMineResult{
 	* If we're not given a heading map, we can assume it comes from the default...
 	*/ 
 	static def defaultHeadingMap(){
-		def headings = headingStr.split(",")
+		def headings = headingStr.split("\t")
 		
 		//err.println "DEBUG: headings:"+headings
 		
@@ -99,7 +99,7 @@ class WekaMineResult{
 	}
 	
 	def parse(line,headings2Cols){
-		def fields = line.split(",")				
+		def fields = line.split("\t")				
 						
 		//err.println "DEBUG fields: "+fields
 		//err.println "DEBUG headings2Cols"+headings2Cols				
@@ -158,7 +158,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 	*/
 	static String getFullSummaryLine(jobIdx,data,experiment,eval,dataName){
 		def summaryLine = getFormattedEvaluationSummary(data.numInstances(),eval)
-    def fullSummaryLine="${experiment.filterStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classifierStr},${experiment.classAttribute},${experiment.discretization},${dataName},*,$jobIdx,$summaryLine"		
+    def fullSummaryLine="${experiment.filterStr}\t${experiment.attrEvalStr}\t${experiment.attrSearchStr}\t${experiment.numAttributes}\t${experiment.classifierStr}\t${experiment.classAttribute}\t${experiment.discretization}\t${dataName}\t*\t$jobIdx\t$summaryLine"		
 		return(fullSummaryLine)
 	}
 
@@ -168,7 +168,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 	*/ 
 	def WekaMineResults(resultsFile){
 		new File(resultsFile).withReader{r->
-			def headings = r.readLine().split(",")						
+			def headings = r.readLine().split("\t")						
 			def heading2Col = [:]
 			headings.eachWithIndex{h,i-> heading2Col[h] = i}
 			
@@ -212,7 +212,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
         list << "Attribute$i" as String
       }
     }
-    def rval = list.join(",")
+    def rval = list.join("\t")
     return(rval)    
   }
 
@@ -242,7 +242,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
     def fn1 = eval.numFalseNegatives(1) as Integer
     def rms = eval.rootMeanSquaredError()
     def roc = eval.weightedAreaUnderROC()    
-    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%s,%d,%d,%d,%d,%.4g,%.4g",
+    def rval = sprintf("%d\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%s\t%d\t%d\t%d\t%d\t%.4g\t%.4g",
               samples,pctCorrect,precision0,recall0,precision1,recall1,classValue1,tp1,fp1,tn1,fn1,rms,roc)
   
     return(rval)    
@@ -267,7 +267,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
     def fn1 = 0 as int
     def rms = 0 as double
     def roc = 0 as double
-    def rval = sprintf("%d,%.4g,%.4g,%.4g,%.4g,%.4g,%s,%d,%d,%d,%d,%.4g,%.4g",
+    def rval = sprintf("%d\t%.4g\t%.4g\t%.4g\t%.4g\t%.4g\t%s\t%d\t%d\t%d\t%d\t%.4g\t%.4g",
               samples,pctCorrect,precision0,recall0,precision1,recall1,classValue1,tp1,fp1,tn1,fn1,rms,roc)
   
     return(rval)    
@@ -310,7 +310,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
        
      // Append a summary line to a file. 
      def summaryLine = getFeatureOnlyEvaluationSummary(numInstances) // Basically a dummy record.
-     def lineOut = "$jobIdx,$summaryLine,${experiment.classifierStr},${experiment.attrEvalStr},${experiment.attrSearchStr},${experiment.numAttributes},${experiment.classAttribute}" as String
+     def lineOut = "$jobIdx\t$summaryLine\t${experiment.classifierStr}\t${experiment.attrEvalStr}\t${experiment.attrSearchStr}\t${experiment.numAttributes}\t${experiment.classAttribute}" as String
      
      if (maxFeaturesToReport != 0){                       
        def rankedAttrs = attributeSelection.rankedAttributes()
@@ -333,8 +333,8 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
          //score = score.round(4)             
          attrList << "$attName~$score" as String
        }
-       lineOut = lineOut + ","
-       lineOut = lineOut + attrList.join(",")
+       lineOut = lineOut + "\t"
+       lineOut = lineOut + attrList.join("\t")
       }
       lineOut = lineOut +"\n" as String    
       out << lineOut            // Build the entire string so that write is atomic...
@@ -361,7 +361,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 	
       // Append a summary line to a file. 
 			out << getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
-			out <<","
+			out <<"\t"
 			out << holdoutAcc
       out<<"\n"      
   }
@@ -379,7 +379,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 			
       // Figure out the feature selections across cross validation folds...
       if (maxFeaturesToReport != 0){  		
-        out << ","
+        out << "\t"
         out << cvFeatureSelections(data,eval.getCVAttributeSelections(),maxFeaturesToReport)
       }      
       out<<"\n"      
@@ -400,7 +400,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 						
 			out << getFullSummaryLine(jobIdx,data,experiment,eval2,dataName)
 			for(i in 0..<predictions.size()){
-				out<<","
+				out<<"\t"
 				def id = data.attribute("ID")
 				def p = (NominalPredictionPlus) predictions.elementAt(i)
 				def sampleName = p.instanceName
@@ -421,7 +421,7 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 			/* Old way of getting these values...
 			if (results.size() >0){						
 				results.each{r->
-					out<<","
+					out<<"\t"
 					def sampleID = r.instanceID
 					def actual = r.actual
 					def predicted = r.predicted
@@ -538,6 +538,6 @@ static String cvFeatureSelectionsOld(data,attributeSelections,maxToReport){
       pairs << "$attr~${attribute2Score[attr]}" 
     }
   }    
-  return(pairs.join(","))  
+  return(pairs.join("\t"))  
 }
 */
