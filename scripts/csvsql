@@ -72,9 +72,6 @@ try{
   System.exit(1)
 }
 
-
-println parser.remainder
-
 params = parser.remainder.join(" ")
 (what,from,where) = getFields(params)
 
