@@ -922,7 +922,7 @@ class WekaMine{
 	/***
 	* Remove all the instances from data except those named in selectedInstances
 	*/ 
-	static Instances subsetInstances(Instances data,ArrayList selectedInstances){
+	static Instances subsetInstances(Instances data,List selectedInstances){
 		WekaAdditions.enable() // Just in case
 		
 		def remove = new RemoveRange()

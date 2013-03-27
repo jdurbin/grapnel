@@ -196,7 +196,7 @@ class WekaMineModel implements Serializable{
 	def printResults(out,ArrayList<Classification> results,sampleIDs){		
 		def outStrings = getResultStrings(results,sampleIDs)
 		
-		out<<"ID\tconfidence1\tconfidence2\tcall\tnullConfidence0\tnullConfidence1\n"
+		out<<"ID\tconfidence0\tconfidence1\tcall\tnullConfidence0\tnullConfidence1\n"
 
 		outStrings.each{
 			out << "$it\n"
@@ -223,9 +223,9 @@ class WekaMineModel implements Serializable{
 			if (bnm != null){
 				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
 				def nullConf1 = bnm.getSignificance(prForValues[1],1)
-				outStrings <<"${sampleIDs[i]}\t$prstr\t$call\t$nullConf0\t$nullConf1"
+				outStrings <<"${sampleIDs[i]}\t$prstr\t$nullConf0\t$nullConf1\t$call"
 			}else{
-				outStrings <<"${sampleIDs[i]}\t$prstr\t$call\t\t"
+				outStrings <<"${sampleIDs[i]}\t$prstr\t\t\t$call"
 			}
 		}
 		return(outStrings)		
@@ -241,7 +241,7 @@ class WekaMineModel implements Serializable{
 	
 	def printResultsAndCompare(out,ArrayList<Classification> results,sampleIDs,Instances clinical){
 		
-		def heading = "ID\tlowConfidence\thighConfidence\tcall\tnullConfidence0\tnullConfidence1\tactual\tmatch\tmatchfraction"		
+		def heading = "ID\tconfidence0\tconfidence1\tnullConfidence0\tnullConfidence1\tcall\tactual\tmatch\tmatchfraction"		
 		
 		def outStrings = getResultStrings(results,sampleIDs)
 		def name2Call = [:]
@@ -262,7 +262,7 @@ class WekaMineModel implements Serializable{
 		outStrings.each{s->
 			def fields = s.split("\t",-1)
 			def id = fields[0]
-			def call = fields[3]
+			def call = fields[5]
 			def actual = name2Call[id]
 			def match
 			if (call == actual) {
