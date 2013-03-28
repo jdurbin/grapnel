@@ -295,7 +295,7 @@ class WekaMineModel implements Serializable{
 		out << heading
 		out << "\n"
 		newStrings.each{
-			out << "$it\t$matchFraction\t$majorityFraction"
+			out << "$it\t$matchFraction\t$majorityFrac"
 			out << "\n"
 		}								
 	}
