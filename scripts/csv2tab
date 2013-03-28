@@ -1,9 +1,12 @@
 #!/usr/bin/env groovy 
 
+err = System.err
+
 new File(args[0]).withReader{r->
 	heading = r.readLine()
-	println heading.replaceAll(",","\t")
-	r.splitEachLine(","){line->
-		println line.replaceAll(",","\t")
+  newheading = heading.replaceAll(",","\t")
+	println newheading
+	r.eachLine{line->
+		if (line != null) println line.replaceAll(",","\t")
 	}
 }

@@ -4,13 +4,9 @@ err = System.err
 
 new File(args[0]).withReader{r->
 	heading = r.readLine()
-	//err.println "heading :"+heading[0..20]
   newheading = heading.replaceAll("\t",",")
-	//err.println "newheading: "+heading[0..20]
 	println newheading
-	idx = 0
 	r.eachLine{line->
-		idx++
 		println line.replaceAll("\t",",")
 	}
 }
