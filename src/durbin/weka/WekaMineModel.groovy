@@ -265,13 +265,18 @@ class WekaMineModel implements Serializable{
 			def call = fields[5]
 			def actual = name2Call[id]
 			def match
-			if (call == actual) {
-				match = "CORRECT"
-				matchCount++
-			}else{
-				match = "MISMATCH"
+						
+			if (actual == '?'){
+				match = "UNKNOWN"
+			}else{			
+				if (call == actual) {
+					match = "CORRECT"
+					matchCount++
+				}else{
+					match = "MISMATCH"
+				}
+				totalCount++		// Only count the ones we have an actual value for. 
 			}			
-			totalCount++									
 			newStrings << "$s\t$actual\t$match"
 			err.println "$id\t$call\t$actual\t$match"
 		}
