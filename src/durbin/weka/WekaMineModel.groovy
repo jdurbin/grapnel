@@ -278,9 +278,11 @@ class WekaMineModel implements Serializable{
 
 		def matchFraction = matchCount/totalCount 
 		
-		println heading
+		out << heading
+		out << "\n"
 		newStrings.each{
-			println "$it\t$matchFraction"
+			out << "$it\t$matchFraction"
+			out << "\n"
 		}								
 	}
 	
