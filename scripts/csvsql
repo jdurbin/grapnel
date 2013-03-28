@@ -7,8 +7,14 @@ import durbin.util.*
 err = System.err
 
 parser = new Parser(description: '''
- Treates csv (or tab) files as database tables and allows you to perform arbitrary queries
- on those files/tables, including multi-file/table joins. 
+ Treates csv (or tab) files as database tables and allows you to perform arbitrary select queries
+ on those files/tables, including multi-file/table joins.  The query grammer is described here:
+ http://www.h2database.com/html/grammar.html.  The input files can be tab or csv and must end with 
+ one of .csv, .tsv, or .tab. 
+ 
+ The file name can be referenced anywhere in the query, one or more times.  Any other references 
+ to the base name (e.g. beer for beer.csv) will refer to that same file/table.  This is best seen
+ with examples. 
  
  Examples:
 
@@ -18,7 +24,7 @@ parser = new Parser(description: '''
  
  Full path names should work fine: 
  
- csvsql "select * from /users/data/people.csv where age > 40"
+ csvsql "select * from /users/data/people.csv where age > 40 order by age"
  csvsql "select people.name from /users/data/people.csv where age > 40"
 
  You can even do queries with sum and average and so on like:
@@ -37,18 +43,11 @@ parser = new Parser(description: '''
  > from people.csv,children.csv
  > where people.name=children.name and people.age < 40"
  
- csvsql can take either .tab or .csv files.  All files in a given query must be in same format. 
- The output format of the query will be in the same format.  csvsql infers file type by looking 
- at extension so tab files are required to end in either .tsv or .tab and comma separated files
- are required to end in .csv
+ More Examples:
  
- Note that quotes are actually only needed if you have some symbol, like *,(),<,>    
- that the shell will try to interpret before passing to the script.  In that case you can quote 
- the whole query or simply backquote the special symbols.  Examples:  
+ csvsql "select alcohol,count(*) from beer.tab group by alcohol"
+ csvsql "select brand,alcohol,price as SalesPrice from beer.tab order by price"
  
- csvsql "select * from people.csv where age > 40"
- csvsql select \\* from people.csv where age \\> 40
- csvsql select count\\(*\\) from people.csv where age \\> 40
  
  Author:  James Durbin  
 ''')
@@ -72,56 +71,42 @@ try{
   System.exit(1)
 }
 
-params = parser.remainder.join(" ")
-(what,from,where) = getFields(params)
+rawQuery = parser.remainder.join(" ")
 
-// Extract the list of table names in the from clause...
-csvfiles = from.split(",") 
-
-// Determine separator to use...  ALL files must have same separator...
-def sep,suffix
-if (csvfiles[0].contains(".tsv")){
-	suffix = ".tsv"
-	sep = "\t"
-}else if (csvfiles[0].contains(".tab")){
-	suffix = ".tab"
-	sep = "\t"
-}else if (csvfiles[0].contains(".csv")){	
-	suffix = ".csv"
-	sep = ","
-}else{
-	err.println "ERROR: File must be either .csv, .tsv, or .tab"
-	System.exit(1)
-}
-
-tablenameMap = [:]
-csvfiles.each{csvfile->	
-  start = csvfile.lastIndexOf("/")+1
-	end = csvfile.indexOf(suffix)
-	
-  tablename = csvfile[start..<end]
-  tablename = tablename.trim()
-  tablenameMap[tablename] = csvfile.trim()
-}
+// Get a list of the csv or tab files mentioned in the query...
+tablenameMap = getAllPathsAndNames(rawQuery)
 
 // Create an h2 in-memory db, calling it what you like, here db1
 def sql = Sql.newInstance("jdbc:h2:mem:db1","org.h2.Driver")
 
 // Create tables for each csv file named...
-tablenameMap.each{tablename,csvfile->
-  typeString = inferColumnTypes(csvfile,20,sep)
+selstmt = rawQuery
+tablenameMap.each{tablename,pathname->
+	if (pathname.contains(".csv")) sep = ","
+	else sep = "\t"
+	
+  typeString = inferColumnTypes(pathname,20,sep)
 	def stmt
-	if (sep == ","){		
-		stmt = "create table $tablename($typeString) as select * from csvread('$csvfile')" as String
+	if (pathname.contains(".csv")){		
+		stmt = "create table $tablename($typeString) as select * from csvread('$pathname')" as String
+	}else if (pathname.contains(".tab") || pathname.contains(".tsv")){
+		stmt = "create table $tablename($typeString) as select * from csvread('$pathname',null,'UTF-8',chr(9))" as String	
 	}else{
-		stmt = "create table $tablename($typeString) as select * from csvread('$csvfile',null,'UTF-8',chr(9))" as String	
+		err.println "ERROR: File must be one of .csv, .tab, or .tsv"
+		System.exit(1)
 	}
   sql.execute(stmt)
+	
+	// Replace the path with the tablename in the query
+	selstmt = selstmt.replaceAll(pathname,tablename)
+	
 }
 
-// Create our stereotyped select statement from the pieces...
-tablenames = tablenameMap.keySet().join(",")
-selstmt = "select $what from $tablenames where $where" as String
+// Remove the .tab, .csv, or .tsv endings to leave just table names in query...
+//selstmt = rawQuery.replaceAll(".csv","")
+//selstmt = selstmt.replaceAll(".tsv","")
+//selstmt = rawQuery.replaceAll(".tab","")
+
 
 // Perform the query... 
 def keyset = null
@@ -142,6 +127,36 @@ sql.eachRow(selstmt){result->
 /****************************************************************************
 *                              Methods
 ****************************************************************************/
+
+
+/****
+* Extracts all the paths from the query along with their root names. 
+* Returns a list of path/root pairs. 
+*/ 
+def getAllPathsAndNames(rawQuery){
+	tokens = rawQuery.tokenize()
+	tableNameMap = [:]
+	tokens.each{
+		if (it.contains(".tab") || it.contains(".csv") || it.contains(".tsv")){
+			//println "Full path: "+it
+			path = it
+		 	slashIdx = it.lastIndexOf("/")
+		 	if (slashIdx == -1) rootname = it
+		 	else rootname = it.substring(slashIdx+1)
+			
+			println "rootname: $rootname"
+			
+			
+			rootname = rootname.replaceAll(".csv","")
+			rootname = rootname.replaceAll(".tsv","")
+			rootname = rootname.replaceAll(".tab","")			
+			
+			tableNameMap[rootname] = path
+		}
+	}
+	return(tableNameMap)
+}
+
 
 
 /**
