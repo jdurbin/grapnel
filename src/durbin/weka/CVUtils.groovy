@@ -43,9 +43,6 @@ public class CVUtils{
 
 	static err = System.err
 
-	
-
-
 	/***
 	* Generate cross validation test set from a saved set of folds...
 	*/ 

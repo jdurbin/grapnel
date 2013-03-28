@@ -535,6 +535,7 @@ throws Exception {
   	for (int i = 0; i < numFolds; i++) {
 			//System.err.println("\t\tDEBUG Initial:");
 			//printHeapSpace();
+			System.err.println("foldset "+i+" = "+foldSet);
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
 			Instances train = CVUtils.trainCV(data,foldSet,i);
 			Instances test = CVUtils.testCV(data,foldSet,i);		

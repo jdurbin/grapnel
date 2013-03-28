@@ -46,7 +46,6 @@ class FoldSet{
 		}
 	}
 	
-	
 	def getHoldoutSamples(){
 		if (bHasHoldout) return(idx2sampleList[-1]);
 		else{
