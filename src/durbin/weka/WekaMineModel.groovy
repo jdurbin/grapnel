@@ -241,7 +241,7 @@ class WekaMineModel implements Serializable{
 	
 	def printResultsAndCompare(out,ArrayList<Classification> results,sampleIDs,Instances clinical){
 		
-		def heading = "ID\tconfidence0\tconfidence1\tnullConfidence0\tnullConfidence1\tcall\tactual\tmatch\tmatchfraction"		
+		def heading = "ID\tconfidence0\tconfidence1\tnullConfidence0\tnullConfidence1\tcall\tactual\tmatch\tmatchfraction\tmajorityFraction"		
 		
 		def outStrings = getResultStrings(results,sampleIDs)
 		def name2Call = [:]
@@ -259,13 +259,17 @@ class WekaMineModel implements Serializable{
 		// Just add match onto result string...
 		// kind of kludgy to extract call out of that string... 
 		err.println "ID\tcall\tactual\tmatch"
+		
+		def counterMap = new CounterMap()
 		outStrings.each{s->
 			def fields = s.split("\t",-1)
 			def id = fields[0]
 			def call = fields[5]
 			def actual = name2Call[id]
 			def match
-						
+			
+			counterMap.inc(actual) // count occurences of each actual call.
+			
 			if (actual == '?'){
 				match = "UNKNOWN"
 			}else{			
@@ -280,13 +284,18 @@ class WekaMineModel implements Serializable{
 			newStrings << "$s\t$actual\t$match"
 			err.println "$id\t$call\t$actual\t$match"
 		}
+		
+		def values = counterMap.collect{it.value}
+		def maxcallvalues = values.max()
+		def totalcallvalues = values.sum()
+		def majorityFrac = (double)maxcallvalues / (double)totalcallvalues
 
 		def matchFraction = matchCount/totalCount 
 		
 		out << heading
 		out << "\n"
 		newStrings.each{
-			out << "$it\t$matchFraction"
+			out << "$it\t$matchFraction\tmajorityFraction"
 			out << "\n"
 		}								
 	}
@@ -302,10 +311,6 @@ class WekaMineModel implements Serializable{
 		}
 		return(maxIdx)
 	}
-	
-	
-	
-	
 	
 	
 	/*************************************************************************************/ 
