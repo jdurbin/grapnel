@@ -267,12 +267,12 @@ class WekaMineModel implements Serializable{
 			def call = fields[5]
 			def actual = name2Call[id]
 			def match
-			
-			counterMap.inc(actual) // count occurences of each actual call.
-			
+						
 			if (actual == '?'){
 				match = "UNKNOWN"
-			}else{			
+			}else{					
+				counterMap.inc(actual) // count occurences of each actual call, excluding ? calls. 
+
 				if (call == actual) {
 					match = "CORRECT"
 					matchCount++
