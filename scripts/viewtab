@@ -120,8 +120,10 @@ def histogramSelectedRows(thetab,selectedRows){
 			try{
 				v = o as double
 				values.add(v)
-			}catch(NumberFormatException e){
+			}catch(Exception e){
 				// Don't do anything...
+				err.println "Can't histogram, column contains non-numeric values."
+				return;
 			}					
 		}
 	
@@ -142,8 +144,10 @@ def histogramSelectedCols(thetab,selectedCols){
 			try{
 				v = o as double
 				values.add(v)
-			}catch(NumberFormatException e){
+			}catch(Exception e){				
 				// Don't do anything...
+				err.println "Can't histogram, column contains non-numeric values."
+				return;
 			}			
 		}
 	
@@ -198,9 +202,7 @@ def ParseOptions(args){
 	separator in case of other separator or mixed tab/, headings.   
 	
 	Control-click on table for a pop-up to toggle between selecting columns and selecting rows.  Pop-up
-	also includes option to plot a histogram of the values in selected rows/columns.  Note: error checking
-	is currently pretty weak, so if you try to histogram a row or column with non-numeric entries you will
-	get an exception. 
+	also includes option to plot a histogram of the values in selected rows/columns.  
 	
 	Written by: James Durbin (kdurbin@ucsc.edu)
 	
@@ -208,22 +210,26 @@ def ParseOptions(args){
 	
 	viewtab data.tab
 	
-	viewtab -s "\t" data.tab
+	viewtab -s "\\t" data.tab
 
 	''');
 
-	parser.with{
-		optional 's','separator',[description: 'Force separator to be this character.']
-	  flag 'h','help',[default:false,description: 'Print script help.']
-		remainder{
-			if(!it) throw new IllegalArgumentException("Must specify a file.");
-			it
-		}
-	}
 	try{ 
+		parser.with{
+			optional 's','separator',[description: 'Force separator to be this character.']
+	  	flag 'h','help',[default:false,description: 'Print script help.']
+			remainder{			
+				if(!it) throw new Exception("Must specify a file.");
+				it
+			}
+		}
+	
 		options = parser.parse(args); 
 		options.fileName = parser.remainder[0]
-	}catch(Exception e){System.err << parser.usage;System.exit(1)}		
+	}catch(Exception e){
+		System.err << parser.usage;
+		System.exit(1)
+	}		
 	return(options)
 }
 

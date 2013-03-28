@@ -6,6 +6,7 @@
         <delete dir="target/classes"/>
         <delete dir="target/classes"/>
         <delete file="target/jar/*"/>
+				<delete file="target/jar/durbinlib.jar"/>
         <delete dir="doc/"/>
     </target>
 

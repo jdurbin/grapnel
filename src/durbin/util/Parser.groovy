@@ -317,39 +317,39 @@ public class Parser {
     def missing = missingOptions
     def errors = errorOptions
     if( parseCalled && (missing || errors || remainderError || postParseError)) {
-      if(missing) {
-        // Don't print the list if help option was given...
-        if (!parameters['help']){
+			 // Don't print error messages if the help option was given...
+			if (!parameters['help']){
+				if(missing) {
+        	// Don't print the list if help option was given...
           writer.println( "Missing required parameter(s)" )
           missing.each {
             def option = it.shortName ? "-$it.shortName" : "--$it.longName"
             writer.println( "  ${( it.description ) ? "$option $it.description" : "$option"}" )
           }
-        }
-      }
+				}
 
-      if( errors ) {
-        writer.println( "Validation errors" )
-        errors.each {
-          def option = it.shortName ? "-$it.shortName" : "--$it.longName"
-          writer.println( "  $option : ${it.error.toString()}" )
-        }
-      }
+      	if( errors ) {
+        	writer.println( "Validation errors" )
+        	errors.each {
+          	def option = it.shortName ? "-$it.shortName" : "--$it.longName"
+          	writer.println( "  $option : ${it.error.toString()}" )
+        	}
+      	}
 
-      if( remainderError ) {
-        writer.println( "Remainder validation error" )
-        writer.println( "  $remainderError" )
-      }
+      	if( remainderError ) {
+        	writer.println( "Remainder validation error" )
+        	writer.println( "  $remainderError" )
+      	}
 
-      if( postParseError ) {
-        writer.println( "" )
-        writer.println( "Option validation error:" )
-        writer.println( "  ${postParseError.getMessage()}" )
-      }
-
-      //writer.println( "" )
-    }
-
+      	if( postParseError ) {
+        	writer.println( "" )
+        	writer.println( "Option validation error:" )
+        	writer.println( "  ${postParseError.getMessage()}" )
+      	}
+      	//writer.println( "" )
+    	}
+		}
+		
     if( description ) writer.println( description )
 
     def longestName = 5 + options.inject( 0 ) { max, option -> 
