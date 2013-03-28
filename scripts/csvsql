@@ -143,10 +143,7 @@ def getAllPathsAndNames(rawQuery){
 		 	slashIdx = it.lastIndexOf("/")
 		 	if (slashIdx == -1) rootname = it
 		 	else rootname = it.substring(slashIdx+1)
-			
-			println "rootname: $rootname"
-			
-			
+						
 			rootname = rootname.replaceAll(".csv","")
 			rootname = rootname.replaceAll(".tsv","")
 			rootname = rootname.replaceAll(".tab","")			
@@ -155,35 +152,6 @@ def getAllPathsAndNames(rawQuery){
 		}
 	}
 	return(tableNameMap)
-}
-
-
-
-/**
-* Parse the query into it's component clauses.  All
-* queries are assumed to be in the form:
-* 
-* select X from Y where Z 
-* 
-* This function returns X,Y,Z. 
-*/
-def getFields(params){
-  bits = params.split(/\s+/)
-  def selectIdx,fromIdx,whereIdx = 0
-  bits.eachWithIndex{b,i->
-    if (b =~ /(?i)select/) selectIdx = i
-    if (b =~ /(?i)from/) fromIdx = i
-    if (b =~ /(?i)where/) whereIdx = i
-  }			
-	
-  X = bits[selectIdx+1..fromIdx-1].join(" ")
-  Y = bits[fromIdx+1..whereIdx-1].join(" ")
-	
-	// Default where clause is WHERE=1
-	if (whereIdx == 0) Z = "1"
-  else Z = bits[whereIdx+1..-1].join(" ") 
-	
-  return([X.trim(),Y.trim(),Z.trim()])
 }
 
 
