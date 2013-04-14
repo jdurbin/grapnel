@@ -26,11 +26,10 @@ class OnlineTable{
 			def headingStr = r.readLine()
 			headings = headingStr.split(sep,-1)
 		}
-
 	}
 
 	def OnlineTable(String f){
-		sep = FileUtils.determineSeparator(f)a
+		sep = FileUtils.determineSeparator(f)
 		fileName = f
 	}			
 
