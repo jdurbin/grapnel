@@ -43,3 +43,5 @@
     * **tablesize**  How big is that csv/tab file in rows/columns? 
 
 Some of the functionality is described in blog entries on my blog at [The Bayesian Conspiracy](http://bayesianconspiracy.blogspot.com)
+
+---
