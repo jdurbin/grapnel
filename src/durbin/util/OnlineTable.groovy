@@ -16,22 +16,27 @@ class OnlineTable{
 	String fileName
 	String sep = null;
 	
+	def headings
 	def row
 
 	def OnlineTable(String f,String delimiter){
 		fileName = f
-		sep = delimiter
+		sep = delimiter		
+		new File(fileNAme).withReader{r->
+			def headingStr = r.readLine()
+			headings = headingStr.split(sep,-1)
+		}
+
 	}
 
 	def OnlineTable(String f){
-		sep = FileUtils.determineSeparator(f)
+		sep = FileUtils.determineSeparator(f)a
 		fileName = f
 	}			
 
 	def eachRow(Closure c){
 		new File(fileName).withReader{r->
-			def headingStr = r.readLine()
-			def headings = headingStr.split(sep,-1)
+			def temp = r.readLine() // consume header.
 			r.eachLine{rowStr->
 				def rfields = rowStr.split(sep,-1)
 				row = [:]
@@ -42,7 +47,6 @@ class OnlineTable{
 	}	
 	
 	def headings(){
-		return(row.keySet())
-	}
-	
+		return(headings)
+	}	
 }
