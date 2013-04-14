@@ -22,15 +22,22 @@ class OnlineTable{
 	def OnlineTable(String f,String delimiter){
 		fileName = f
 		sep = delimiter		
-		new File(fileNAme).withReader{r->
+		getHeader(f)
+	}
+	
+	// Get the headers 
+	def getHeader(String fileName){
+		new File(fileName).withReader{r->
 			def headingStr = r.readLine()
 			headings = headingStr.split(sep,-1)
 		}
 	}
-
+	
+	// No separator given, try to figure it out...
 	def OnlineTable(String f){
 		sep = FileUtils.determineSeparator(f)
 		fileName = f
+		getHeader(f)
 	}			
 
 	def eachRow(Closure c){
