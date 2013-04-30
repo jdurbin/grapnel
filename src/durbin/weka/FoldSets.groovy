@@ -19,6 +19,8 @@ class FoldSet{
 	def samples;
 	def bHasHoldout = true;
 	
+	def err = System.err
+	
 	def FoldSet(samples,foldValues){
 		
 		this.samples = samples
@@ -61,7 +63,9 @@ class FoldSet{
 	def getTrainSamples(int foldNum){
 		def testSamples = idx2sampleList[foldNum]
 		def trainSamples = samples.collect{it}
+				
 		trainSamples.removeAll(testSamples)
+
 		return(trainSamples)
 	}	
 	
@@ -81,6 +85,8 @@ class FoldSet{
 * determine which it means, but need to iron this out in some sensible way...
 */ 
 class FoldSets{
+	
+	def err = System.err
 	
 	ArrayList<FoldSet> data;
 	HashMap<String,FoldSet> map;
@@ -143,16 +149,27 @@ class FoldSets{
 	/***
 	* Finds the subset of foldsets that apply to this attribute
 	* combined with the generic foldsets. 
+	* 
+	* If the foldset has a tag UNIVERSAL, it will be used for all 
+	* attributes...
 	*/ 
 	FoldSets getFoldSetsForAttribute(Attribute a){
 		// Get foldsets matching fold\d+
-		def foldKeys = map.keySet().grep(~/fold\d+/)
+		//def foldKeys = map.keySet().grep(~/fold\d+/)
+		def foldKeys = map.keySet().grep(~/[fF]old(s)*\d+/)
 		def foldMap = map.subMap(foldKeys)
+		
+		map.each{k,v-> println "Map: $k\t$v"}
+		err.println "foldKeys:"+foldKeys
+		err.println "foldMap: "+foldMap
 		
 		// Get foldsets matching attribute name
 		def attributeName = a.name()
 		def attributeKeys = map.keySet().grep(attributeName)
 		def attributeMap = map.subMap(attributeKeys)
+		
+		err.println "attributeKeys:"+attributeKeys
+		err.println "attributeMap: "+attributeMap
 		
 		// Merge the two maps...
 		def newMap = attributeMap + foldMap

@@ -522,6 +522,13 @@ throws Exception {
 	// attribute name.)	
 	FoldSets foldSets = allFoldSets.getFoldSetsForAttribute(data.classAttribute());
 
+	System.err.println("Number of FoldSets: "+foldSets.size());
+	
+	if (foldSets.size() == 0){
+		String exStr = "No foldsets specified for attribute: "+data.classAttribute();
+		throw new Exception(exStr);
+	}
+
 	// Fold sets let you specify the folds.  Each foldSet is one Nx cross-validation. 
 	// To do 5 5x cross validations, you'd have 5 foldSets each 5 numbers long. 
 	m_NumFolds = 0;	
@@ -533,14 +540,21 @@ throws Exception {
 		System.err.println("\tnumFolds: "+numFolds);
 		
   	for (int i = 0; i < numFolds; i++) {
-			//System.err.println("\t\tDEBUG Initial:");
 			//printHeapSpace();
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
 			Instances train = CVUtils.trainCV(data,foldSet,i);
+			
+			//System.err.println("Eval: train.size="+train.numInstances());
+			
 			Instances test = CVUtils.testCV(data,foldSet,i);		
 			//System.err.println("\t\tDEBUG Test/Train instances created:");
 			//printHeapSpace();
+			//System.err.println("Eval: evalsingle fold...");
+			
     	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
+			
+			//System.err.println("Eval: evalsingle fold DONE.");
+			
 			//System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
 			//printHeapSpace();
   	}
@@ -695,20 +709,20 @@ throws Exception {
 * 
 */ 
 public void evaluateSingleFold(Instances data, Instances train,Instances test,Classifier classifier,Object... forPredictionsPrinting) throws Exception{
-	
+		
 	// Create a list to store classifiers (Evaluation2)
 	setPriors(train);
 	
 	Classifier copiedClassifier=null;
 	//try{
 		copiedClassifier = Classifier.makeCopy(classifier);
+		
 		copiedClassifier.buildClassifier(train);
 	//}catch(Exception e){
 	//	System.err.println("DEBUG2 Exception occurred:\n"+e);
 	//	System.err.println(train);
 	//}	
-
-
+	
 	// copiedClassifier is a FilteredClassifier...
 	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
 	
@@ -720,7 +734,7 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	
 	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
 	//System.err.println("transformedHeader:"+pceval.transformedHeader());
-	
+
 	// attributeSelection is too heavy-weight, saving instances and so on, to save many copies of it
 	// so we extract just what we need to know from each attributeSelection and save that...
 	// Attribute selection is performed on training set so provide training set as reference for 

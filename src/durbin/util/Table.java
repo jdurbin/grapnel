@@ -535,9 +535,9 @@ public class Table extends GroovyObjectSupport{
   }
 		
   public TableMatrix1D getAt(String rowName){
-		System.err.println("rowName = "+rowName);
+		//System.err.println("rowName = "+rowName);
     int ridx = getRowIdx(rowName);
-		System.err.println("ridx = "+ridx);
+		//System.err.println("ridx = "+ridx);
     return(getRow(ridx));
   }
 	

@@ -4,14 +4,20 @@ import durbin.util.*
 
 err = System.err
 
-err.println "CUTBYNAME DEBUG GALAXY TEST"
-
+if (args.size() < 2){
+	err.println """
+	cutbyname fileName columnName
+	
+	Cuts a single column out of a table file.  To cut multiple columns check out csvsql.
+	
+	e.g. cutbyname BRCA.clin days_to_death.
+	"""
+	System.exit(0)
+}
 
 fileName = args[0]
 cutName = args[1]
 sep = FileUtils.determineSeparator(fileName) as String
-
-
 
 new File(fileName).withReader{r->
 	headerStr = r.readLine()

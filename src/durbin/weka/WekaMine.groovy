@@ -195,6 +195,8 @@ class WekaMine{
 	* instances. 
 	*/ 
 	static def createInstancesFromDataAndClinical(data,clinical,classAttribute){		
+			
+		err.print "Creating instances from data and clinical..."
 				
  		// Remove all clinical attributes except for the current class...
   	def selectedAttributes = []
@@ -213,6 +215,8 @@ class WekaMine{
     //err.println "DEBUG merged: "+merged.numInstances()
 
 		def classIdx = merged.setClassName(classAttribute)
+
+		err.println "done."
 
 		return(merged)
 	}
@@ -744,7 +748,9 @@ class WekaMine{
 		if (filter == null){ 
 			err.println "FILTER: Apply unsupervised filter: None"
 			return(instances)
-		}
+		}				
+				
+		err.print "Applying unsupervised filter ${filter.toString()}..."	
 								
 		// If there is an ID attribute, remove it before filtering since attribute 
 		// evaluators and classifiers choke on it. If no ID, just filter...

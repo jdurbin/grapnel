@@ -51,8 +51,10 @@ class WekaMineModel implements Serializable{
 		
 	String toString(){
 		def rval = "";
+		rval += "Filter: $filter\n"
 		rval += "AttributeSeletion: $atrSelMethod\n"
 		rval += "Discretization: $discretization\n"
+		rval += "NumAttributes: ${attributes.size()}"
 		rval += "Class Name: $className\n"
 		rval += "ClassValues: ${classValues.join(";")}\n"				
 		rval += "Classifier: $classifier\n"

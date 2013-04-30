@@ -1,6 +1,5 @@
 package durbin.util;
 
-
 /***********************************
 * Support for accessing a table one row at a time, accessing
 * fields by name.  

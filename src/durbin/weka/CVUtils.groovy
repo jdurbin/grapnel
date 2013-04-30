@@ -47,13 +47,14 @@ public class CVUtils{
 	* Generate cross validation test set from a saved set of folds...
 	*/ 
 	static Instances testCV(Instances data,FoldSet foldset,int fold){
-		def testSampleNames = foldset.getTestSamples(fold)					
+		def testSampleNames = foldset.getTestSamples(fold)		
 		// Look up the instance indexes for this list of names...
 		def testSampleIdxs = data.nameListToIndexList(testSampleNames)					
 		// Copy each instance to the test set...
 		Instances test = new Instances(data,testSampleNames.size())
 		testSampleIdxs.each{idx->
-			if (idx != -1) data.copyInstances(idx,test,1);	// -1 means no instance with that name
+			//err.println "idx: $idx \ttest: ${test.numInstances()}"
+			if (idx != -1) data.copyInstances(idx,test,1);	// -1 means no instance with that name\n			
 		}		
 		return(test)
 	}
@@ -63,12 +64,13 @@ public class CVUtils{
 	*/ 
 	static Instances trainCV(Instances data,FoldSet foldset,int fold){
 		def trainSampleNames = foldset.getTrainSamples(fold)					
-		
+
 		// Look up the instance indexes for this list of names...
 		def trainSampleIdxs = data.nameListToIndexList(trainSampleNames)		
 
 		// Copy each instance to the test set...
 		Instances train = new Instances(data,trainSampleNames.size())
+
 		trainSampleIdxs.each{idx->
 			if (idx != -1) data.copyInstances(idx,train,1);	// -1 means no instance with that name
 		}		
