@@ -77,32 +77,28 @@ class DynamicTable {
 		def rowKeys = delegate.rowKeySet()
 	 	print "Features\t"
 		println colKeys.join("\t")				
-		delegate.rowMap().each{k,v->
-			print "${k}\t"
-		 	println v.values().join("\t")
+		rowKeys.each{r->		
+			print "${r}\t"
+			def rowvals = colKeys.collect{c->delegate.get(r,c)}
+			println rowvals.join("\t")
 		}
 	}		
 	
-	
-	/***
-	* Write the table to a file
-	*/ 
 	def write(fileName,delimiter){
-				
-		def colKeys = delegate.columnKeySet()
-		def rowKeys = delegate.rowKeySet()
-				
+		
 		new File(fileName).withWriter{w->
-			// Print the heading...
+		
+			def colKeys = delegate.columnKeySet()
+			def rowKeys = delegate.rowKeySet()
 			w.write "Features$delimiter"
-			w.writeLine colKeys.join(delimiter)				
-						
-			delegate.rowMap().each{k,v->
-				//err.println "ROWMAPCLOSURE $k\t${v.values().join(',')}"
-				w.write "${k}${delimiter}"
-				w.writeLine v.values().join(delimiter)
+			w.writeLine colKeys.join(delimiter)		
+
+			rowKeys.each{r->		
+				w.write "${r}$delimiter"
+				def rowvals = colKeys.collect{c->delegate.get(r,c)}
+				w.writeLine rowvals.join(delimiter)
 			}
-		}		
+		}
 	}
 
 
