@@ -19,6 +19,7 @@ class DynamicTable {
 	
 	// For the HashBasedTable. Using delegation instead of inheritance.
 	HashBasedTable delegate; 
+	def defaultVal = "null"
 	
 	def DynamicTable(){
 		delegate = HashBasedTable.create()
@@ -79,7 +80,7 @@ class DynamicTable {
 		println colKeys.join("\t")				
 		rowKeys.each{r->		
 			print "${r}\t"
-			def rowvals = colKeys.collect{c->delegate.get(r,c)}
+			def rowvals = colKeys.collect{c->delegate.get(r,c) ?: defaultVal}
 			println rowvals.join("\t")
 		}
 	}		
@@ -95,7 +96,7 @@ class DynamicTable {
 
 			rowKeys.each{r->		
 				w.write "${r}$delimiter"
-				def rowvals = colKeys.collect{c->delegate.get(r,c)}
+				def rowvals = colKeys.collect{c->delegate.get(r,c) ?: defaultVal}
 				w.writeLine rowvals.join(delimiter)
 			}
 		}
