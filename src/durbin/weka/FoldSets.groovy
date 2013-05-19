@@ -159,17 +159,20 @@ class FoldSets{
 		def foldKeys = map.keySet().grep(~/[fF]old(s)*\d+/)
 		def foldMap = map.subMap(foldKeys)
 		
-		map.each{k,v-> println "Map: $k\t$v"}
-		err.println "foldKeys:"+foldKeys
-		err.println "foldMap: "+foldMap
+		//map.each{k,v-> println "Map: $k\t$v"}
+		//err.println "foldKeys:"+foldKeys
+		//err.println "foldMap: "+foldMap
 		
 		// Get foldsets matching attribute name
 		def attributeName = a.name()
-		def attributeKeys = map.keySet().grep(attributeName)
+		def pattern = "${attributeName}.*"
+		def attributeKeys = map.keySet().grep(~/${pattern}/)
 		def attributeMap = map.subMap(attributeKeys)
 		
-		err.println "attributeKeys:"+attributeKeys
-		err.println "attributeMap: "+attributeMap
+		//err.println "map.keySet()= "+map.keySet()
+		//err.println "attributeName: "+attributeName
+		//err.println "attributeKeys:"+attributeKeys
+		//err.println "attributeMap: "+attributeMap
 		
 		// Merge the two maps...
 		def newMap = attributeMap + foldMap

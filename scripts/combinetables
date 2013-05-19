@@ -87,7 +87,10 @@ def ParseOptions(args){
 	parser = new Parser(description: '''	
 	combinetables combines multiple tab delimited tables into one larger table, doing a
 	union of the rows and columns. (row,col) pairs that do not appear in any file are 
-	assigned a defaultValue which can be specified with the -v option.   
+	assigned a defaultValue which can be specified with the -v option.  
+	
+	NOTE: This script currently also removes anything after a '|' character in the row names. 
+	  
 	
 	Written by: James Durbin (kdurbin@ucsc.edu)
 	

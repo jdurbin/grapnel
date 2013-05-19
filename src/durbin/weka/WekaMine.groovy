@@ -552,12 +552,8 @@ class WekaMine{
 	  }
 		return(asClassifier)
 	}
-	
-	def appendSummaryWithHoldout(out,idx,instances,holdoutAcc){
-		WekaMineResults.appendSummaryLineWithHoldout(idx,instances,out,exp,eval,dataName,holdoutAcc)
-	}
-	
-	def appendSummary(out,idx,instances){		
+		
+	def appendSummary(out,idx,instances){	
 	  WekaMineResults.appendSummaryLine(idx,instances,out,exp,eval,dataName)
 	}
 	
@@ -927,6 +923,9 @@ class WekaMine{
 	
 	/***
 	* Remove all the instances from data except those named in selectedInstances
+	* 
+	* InstanceUtils.removeNamedInstances does the opposite of this.  Should move 
+	* this to InstanceUtils and make the names match.  
 	*/ 
 	static Instances subsetInstances(Instances data,List selectedInstances){
 		WekaAdditions.enable() // Just in case
@@ -949,6 +948,7 @@ class WekaMine{
 	
 	/***
 	* Remove the named instances from data. 
+	* InstanceUtils.removeNamedInstances duplicates this functionality...
 	*/ 
 	static Instances removeInstances(Instances data,selectedInstances){
 		WekaAdditions.enable() // Just in case

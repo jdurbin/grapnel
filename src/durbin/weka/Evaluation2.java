@@ -535,7 +535,7 @@ throws Exception {
 	for(int fsIdx = 0;fsIdx < foldSets.size();fsIdx++){
 		FoldSet foldSet = foldSets.get(fsIdx);
 		int numFolds = foldSet.numFolds(); // should already have presence/absence of holdout baked in. 
-		System.err.println("\n\tFoldSet: "+fsIdx);		
+		System.err.println("\n\tFoldSet (Repetition): "+fsIdx);		
 		m_NumFolds+= numFolds;
 		System.err.println("\tnumFolds: "+numFolds);
 		

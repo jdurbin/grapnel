@@ -226,8 +226,6 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
   *
   */ 
   static String getFormattedEvaluationSummary(numInstances,eval){
-	
-		err.println eval.toMatrixString("DEBUG")
 		
     def samples = numInstances
     def pctCorrect = eval.pctCorrect() 
@@ -350,22 +348,6 @@ class WekaMineResults extends ArrayList<WekaMineResult>{
 			out << getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
       out<<"\n"      
   } 
-
- 	/****
-  * Appends a results summary line to the output stream out
-  *
-  */ 
-  static void appendSummaryLineWithHoldout(jobIdx,data,out,experiment,eval,dataName,holdoutAcc){
-	
-			holdoutAcc = holdoutAcc.round(4)
-	
-      // Append a summary line to a file. 
-			out << getFullSummaryLine(jobIdx,data,experiment,eval,dataName)
-			out <<"\t"
-			out << holdoutAcc
-      out<<"\n"      
-  }
-
 
 	/****
   * Appends a results summary line to the output stream out, tacking on the top features for classifiers. 

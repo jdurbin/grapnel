@@ -134,7 +134,8 @@ public class InstanceUtils {
 	* contains the instance name.
 	* 
 	* <i>Note: inefficient implementation.  Might have to rework for millions of instances, 
-	* but should be fine for hundreds or a few thousand.  </i>
+	* but should be fine for hundreds or a few thousand.  Actually, duplicate of function
+	* in wekaMine.   Should move the wekaMine version here and deprecate this one. </i>
 	*/
 	public static Instances removeNamedInstances(Instances data,Collection<String> names){
 	  Map<String,Integer> name2idx = createInstanceNameMap(data);	    	    
