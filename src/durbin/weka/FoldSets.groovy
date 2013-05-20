@@ -38,11 +38,15 @@ class FoldSet{
 		}
 
 		// Each index will map to a list of sample names...				
-		for(i in -1..<foldValueSet.size()){ idx2sampleList[i] = [] }
+		for(i in -1..<foldValueSet.size()){ idx2sampleList[i] = [] }									
 							
 		foldValues.eachWithIndex{foldNum,i->			
+			
+			if (foldNum == -1) return;  // -1 == samples to skip.
+			
 			def foldIdx = foldNum-1 // fold values are 1-based, so convert to 0-based. 
 			def sample = samples[i] // i is walking through samples...			
+						
 			//System.err.println "foldNum: $foldNum  i: $i numFolds:$numFolds foldIdx:$foldIdx"
 			idx2sampleList[foldIdx].add(sample) // add the next sample to the specified fold list.
 		}
