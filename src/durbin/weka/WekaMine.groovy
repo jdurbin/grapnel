@@ -107,6 +107,9 @@ class WekaMine{
 		WekaAdditions.enable()
 	}	
 	
+	
+	
+	
 	//=================================================================================
 	// *********                  Pipeline Steps.                          ***********
 	//=================================================================================
@@ -629,6 +632,31 @@ class WekaMine{
 						
 		return(eval);		
 	}
+	
+	/***
+	* cross validate model with folds generated in advance. 
+	*/ 
+	def crossValidateModelWithPoolsAndFolds(classifier,trainData,testData,trainFoldSets,testFoldSets,evalTraining){				
+		def filteredClassifier = getFilteredClassifier(classifier);		
+
+		// Perform cross-validation of the model..
+		// Evaluation2 only uses data to look at number of class values and create confusion and cost matrix.
+		// So it doesn't matter which we pass to it as both should have clinical instances in them. 
+		eval = new Evaluation2(trainData)
+		
+		def predictions = new StringBuffer()
+		def trainPredictions = null;
+		if (evalTraining) trainPredictions = new StringBuffer()		
+		eval.crossValidateModelWithPoolsAndFolds(filteredClassifier,trainData,testData,(FoldSets) trainFoldSets,
+		(FoldSets) testFoldSets,predictions,new Range("first,last"),false,trainPredictions)
+		//testResults = CVUtils.parsePredictions(predictions)
+
+		//if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
+		//else trainResults = null
+						
+		return(eval);		
+	}
+	
 
 	/***
 	* cross validate model with generated folds. 

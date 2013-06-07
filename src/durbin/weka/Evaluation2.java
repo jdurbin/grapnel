@@ -561,6 +561,100 @@ throws Exception {
 	}
 }
 
+
+/**
+* Performs a (stratified if class is nominal) cross-validation 
+* for a classifier on a set of instances. Now performs
+* a deep copy of the classifier before each call to 
+* buildClassifier() (just in case the classifier is not
+* initialized properly).
+*
+* @param classifier the classifier with any options set.
+* @param data the data on which the cross-validation is to be 
+* performed.  In this pooled case, one set of instances is used for the
+* training folds, another set of instances is used for the testing folds. 
+* @param foldSets is a list of cross validation folds to use.  One set of folSets is use
+* for training folds, the other foldSets is used for testing.  Foldsets must match in 
+* number. 
+* @param forPredictionsString varargs parameter that, if supplied, is
+* expected to hold a StringBuffer to print predictions to, 
+* a Range of attributes to output and a Boolean (true if the distribution
+* is to be printed)
+* @throws Exception if a classifier could not be generated 
+* successfully or the class is not defined
+* Instances data, ArrayList< ArrayList<Integer> > foldSets,Object... forPredictionsPrinting) 
+*/
+public void crossValidateModelWithPoolsAndFolds(Classifier classifier,
+Instances data1,Instances data2, FoldSets allFoldSets1,FoldSets allFoldSets2,Object... forPredictionsPrinting) 
+throws Exception {
+	
+	if (allFoldSets1.size() != allFoldSets2.size()) throw new Exception("Foldsets for pools must have same size.");
+		
+  // We assume that the first element is a StringBuffer, the second a Range (attributes
+  // to output) and the third a Boolean (whether or not to output a distribution instead
+  // of just a classification)
+  if (forPredictionsPrinting.length > 0) {
+    // print the header first    
+    StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
+    Range attsToOutput = (Range)forPredictionsPrinting[1];
+    boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+    printClassificationsHeader(data2, attsToOutput, printDist, buff);
+  }
+
+	// I also use named foldsets with folds associated with given class attributes. 
+	// So this should be preceeded by a step that retrieves only the foldsets corresponding to 
+	// a named class attribute or fold0, fold1,etc. if it is ment to apply to all attributes.  A 
+	// simple implementation would be just to union foldsets[fold_i] and foldsets[classAttribute]  
+	// In normal usage one or the other should be an empty set... either you're specifying the folds 
+	// for all attributes with fold_i  or you are specifying them for a particular attribute with the
+	// attribute name.)	
+	FoldSets foldSets1 = allFoldSets1.getFoldSetsForAttribute(data1.classAttribute());
+	FoldSets foldSets2 = allFoldSets2.getFoldSetsForAttribute(data2.classAttribute());
+
+	System.err.println("Number of FoldSets1: "+foldSets1.size());
+	System.err.println("Number of FoldSets2: "+foldSets2.size());
+	
+	if ((foldSets1.size() == 0) || (foldSets2.size() == 0)){
+		String exStr = "Missing foldsets for specified attribute: "+data1.classAttribute();
+		throw new Exception(exStr);
+	}
+
+	// Fold sets let you specify the folds.  Each foldSet is one Nx cross-validation. 
+	// To do 5 5x cross validations, you'd have 5 foldSets each 5 numbers long. 
+	m_NumFolds = 0;	
+	for(int fsIdx = 0;fsIdx < foldSets1.size();fsIdx++){
+		FoldSet foldSet1 = foldSets1.get(fsIdx);
+		FoldSet foldSet2 = foldSets2.get(fsIdx);
+				
+		int numFolds = foldSet1.numFolds(); // should already have presence/absence of holdout baked in. 
+		
+		
+		System.err.println("\n\tFoldSet (Repetition): "+fsIdx);		
+		m_NumFolds+= numFolds;
+		System.err.println("\tnumFolds: "+numFolds);
+		
+  	for (int i = 0; i < numFolds; i++) {
+			//printHeapSpace();
+			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
+			Instances train = CVUtils.trainCV(data1,foldSet1,i);
+			
+			//System.err.println("Eval: train.size="+train.numInstances());
+			
+			Instances test = CVUtils.testCV(data2,foldSet2,i);		
+			//System.err.println("\t\tDEBUG Test/Train instances created:");
+			//printHeapSpace();
+			//System.err.println("Eval: evalsingle fold...");
+			
+    	evaluateSingleFold(data1,train,test,classifier,forPredictionsPrinting);			
+			
+			//System.err.println("Eval: evalsingle fold DONE.");
+			
+			//System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
+			//printHeapSpace();
+  	}
+	}
+}
+
 void printHeapSpace(){
 	// Get current size of heap in bytes
 	System.err.println("\t\tHeapSize: "+(Runtime.getRuntime().totalMemory() / 1000000000.0));
@@ -698,6 +792,10 @@ throws Exception {
 			System.err.println("\tFold: "+i);
     	Instances train = data.trainCV(numFolds, i, random);
     	Instances test = data.testCV(numFolds, i);		
+			
+			// This function potentially needs to produce a new Evaluation2 object using the data
+			// from the training insances, thus data1.  It only does this when saving training instance
+			// performance.  That should be moved out of this function to this level. 
 			evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
 
   }
