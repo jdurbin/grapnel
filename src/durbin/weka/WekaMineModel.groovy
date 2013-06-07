@@ -231,24 +231,27 @@ class WekaMineModel implements Serializable{
 			}
 		}
 		return(outStrings)		
-	}	
+	}		
 	
 	/***
 	* Print the results and compare with the clinical values in clinical...
 	*/ 
 	def printResultsAndCompare(results,dataSampleIDs,clinical){
-		printResultsAndCompare(System.out,results,dataSampleIDs,clinical)
+		printResultsAndCompare(System.out,results,dataSampleIDs,clinical,className)
 	}
 	
-	
 	def printResultsAndCompare(out,ArrayList<Classification> results,sampleIDs,Instances clinical){
+		printResultsAndCompare(out,results,sampleIDs,clinical,className)
+	}
+	
+	def printResultsAndCompare(out,ArrayList<Classification> results,sampleIDs,Instances clinical,String cName){
 		
 		def heading = "ID\tconfidence0\tconfidence1\tnullConfidence0\tnullConfidence1\tcall\tactual\tmatch\tmatchfraction\tmajorityFraction"		
 		
 		def outStrings = getResultStrings(results,sampleIDs)
 		def name2Call = [:]
 		def names = clinical.attributeValues("ID")
-		def classValues = clinical.attributeValues(className)
+		def classValues = clinical.attributeValues(cName)
 		names.eachWithIndex{n,i->
 			name2Call[n] = classValues[i]
 		}
