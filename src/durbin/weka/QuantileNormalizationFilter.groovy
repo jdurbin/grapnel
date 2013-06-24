@@ -8,6 +8,7 @@ import weka.filters.*;
 import org.apache.commons.math.stat.ranking.*;
 import org.apache.commons.math.distribution.*;
 
+/*
 public class QuantileNormalizationFilter extends GenericFilter {
 
 	static{WekaAdditions.enable();}
@@ -34,6 +35,7 @@ public class QuantileNormalizationFilter extends GenericFilter {
 		Instances result = new Instances(inputFormat, 0);
 		return result;
 	}
+*/
 	
 	/*
 	A quick illustration of such normalizing on a very small dataset:
@@ -79,7 +81,8 @@ public class QuantileNormalizationFilter extends GenericFilter {
 	C    3.00    4.67    4.67
 	D    4.67    3.00    5.67
 */
-	
+
+	/*
 	protected Instances process(Instances instances) throws Exception {
 	
 		Instances result = new Instances(determineOutputFormat(instances), 0);
@@ -122,3 +125,4 @@ public class QuantileNormalizationFilter extends GenericFilter {
 	
 		
 }
+	*/
