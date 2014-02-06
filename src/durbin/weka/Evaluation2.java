@@ -432,7 +432,7 @@ public double areaUnderROC(int classIndex) {
     ThresholdCurve tc = new ThresholdCurve();
     Instances result = tc.getCurve(m_Predictions, classIndex);
     return ThresholdCurve.getROCArea(result);
-  }
+	}
 }
 
 /**
@@ -768,6 +768,8 @@ public void crossValidateModel(Classifier classifier,
 Instances data, int numFolds, Random random,
 Object... forPredictionsPrinting) 
 throws Exception {
+	
+	System.err.println("CHECK3");
 
   // Make a copy of the data we can reorder
   data = new Instances(data);
@@ -775,11 +777,15 @@ throws Exception {
   if (data.classAttribute().isNominal()) {
     data.stratify(numFolds);
   }
+	
+	System.err.println("CHECK4");
 
   // We assume that the first element is a StringBuffer, the second a Range (attributes
   // to output) and the third a Boolean (whether or not to output a distribution instead
   // of just a classification)
   if (forPredictionsPrinting.length > 0) {
+		System.err.println("forPredictionsPringing.length="+forPredictionsPrinting.length);
+		
     // print the header first    
     StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
     Range attsToOutput = (Range)forPredictionsPrinting[1];
@@ -787,11 +793,13 @@ throws Exception {
     printClassificationsHeader(data, attsToOutput, printDist, buff);
   }
 
+	System.err.println("CHECK5");
+
   // Do the folds	
   for (int i = 0; i < numFolds; i++) {		
 			System.err.println("\tFold: "+i);
     	Instances train = data.trainCV(numFolds, i, random);
-    	Instances test = data.testCV(numFolds, i);		
+    	Instances test = data.testCV(numFolds, i);					
 			
 			// This function potentially needs to produce a new Evaluation2 object using the data
 			// from the training insances, thus data1.  It only does this when saving training instance

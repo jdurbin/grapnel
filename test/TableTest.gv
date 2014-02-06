@@ -30,6 +30,9 @@ assert beer['BrooklynBrand'][0] == 6.24
 assert brooklyn["price"] == 6.24
 assert beer['BrooklynBrand']["price"] == 6.24
 
+err.println "TRANSPOSE:"
+err.println beer.transpose()
+
 // So I'm going to have to handle case of null getAt() as special case... next...
 // beer[]['price']  should return a column vector
 //
@@ -46,6 +49,37 @@ assert beer['BrooklynBrand']["price"] == 6.24
 // cass.  Is it really a lot slower than colt for my use?  
 //println beer[1..-1]['price']
 
+/***
+*
+*/ 
+err.println "Test Table"
+beer = new Table("beer.tab")
+
+assert beer.rows() == 69
+assert beer.cols() == 5
+
+colNames = ["price", "calories", "alcohol", "type", "domestic"] as String[]
+assert beer.colNames == colNames
+
+rowNames = ["BrooklynBrand","LeinenkugelsRed","SamuelAdamsBoston","GeorgeKilliansIrishRed","RedWolf","HenryWeinhardsPrivateRes.","Sterling","Legacy","Dominion","LoneStar","AbitaAmber","YuenglingPremium","BerghoffOriginal","SamuelAdamsBoston","SierraNevadaPale","FullSailAmber","Liberty","ElkMountainAmber","CelisPaleBock","PetesWicked","AnchorSteam","DockStreetAmber","Bass","RedhookESB","NewAmsterdamNewYork","CatamountAmber","RedNectar","OldDetroitAmber","BridgePortBlueHeronPale","GearysPale","MolsonGolden","LabattBlue","Fosters","Kirin","DosEquis","Heineken","CoronaExtra","St.PauliGirl","Becks","PilsnerUrquell","OldMilwaukee","Strohs","RedDog","Budweiser","Icehouse","MolsonIce","Michelob","BudIce","Busch","CoorsOriginal","GeneseeCreamAle","MillerHighLife","PabstBlueRibbon","MilwaukeesBest","MillerGenuineDraft","RollingRock","MichelobLight","BudLight","NaturalLight","CoorsLight","MillerLite","AmstelLight","Sharps","CoorsCutter","Kingsbury","OldMilwaukee","ODouls","Kaliber","Clausthaler"] as String[]
+assert beer.rowNames == rowNames
+
+alcohol = beer.getCol("alcohol") 
+assert alcohol.size() == 69
+assert alcohol[0] as double == 5.2
+assert alcohol[68] as double == 0
+
+brooklyn = beer["BrooklynBrand"]
+//println brooklyn.class
+
+assert beer['BrooklynBrand'][0] as double == 6.24
+assert brooklyn["price"] as double == 6.24
+assert beer['BrooklynBrand']["price"] as double == 6.24
+
+//err.println beer
+
+//err.println "TRANSPOSE:"
+//err.println beer.transpose()
 
 /***********************************************
 *       Table including first column in table

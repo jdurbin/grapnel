@@ -191,6 +191,19 @@ public class Table extends GroovyObjectSupport{
   
   public Table(){}
   
+	public Table(DoubleTable t){
+		numRows = t.rows();
+		numCols = t.cols();
+		matrix = new DenseObjectMatrix2D(numRows,numCols);
+		colNames = t.colNames.clone();
+		rowNames = t.rowNames.clone();
+		for(int r = 0;r < numRows;r++){
+			for(int c = 0;c < numCols;c++){
+				matrix.setQuick(r,c,t.matrix.getQuick(r,c));
+			}
+		}
+	}
+	
   public Table(int rows,int cols){
     numRows = rows;
     numCols = cols;
@@ -245,6 +258,104 @@ public class Table extends GroovyObjectSupport{
 		createNameMap(rowNames,rowName2Idx);
 	}
 	
+	
+	/***
+	* Return a transposed copy of this table. 
+	*/ 
+	public Table addRow(Collection<Object> row,int rowIdx,String rowName){
+		Table newt = new Table(rows()+1,cols());
+		newt.colNames = colNames.clone();
+		newt.rowNames = new String[rows()+1];
+		int offset = 0;
+		for(int r =0;r < rows()+1;r++){			
+			if (r == rowIdx){
+				newt.rowNames[r] = rowName;
+				int colIdx =0;
+				for(Object val : row){
+					newt.matrix.setQuick(r,colIdx++,val);
+				}				
+				offset = 1; // After inserted row, need to shift index by one
+			}else{
+				int oldrow = r - offset;
+				newt.rowNames[r] = rowNames[oldrow];
+				for(int c = 0;c < cols();c++){
+					newt.matrix.setQuick(r,c,matrix.getQuick(oldrow,c));			
+				}
+			}
+		}
+		return(newt);		
+	}	
+		
+	/***
+	* Return a transposed copy of this table. 
+	*/ 
+	public Table addCol(Collection<Object> col,int colIdx,String colName){
+		Table newt = new Table(rows(),cols()+1);
+		newt.rowNames = rowNames.clone();
+		newt.colNames = new String[cols()+1];
+		int offset = 0;
+		for(int c =0;c < cols()+1;c++){			
+			if (c == colIdx){
+				newt.colNames[c] = colName;
+				int rowIdx =0;
+				for(Object val : col){
+					newt.matrix.setQuick(rowIdx++,c,val);
+				}				
+				offset = 1; // After inserted row, need to shift index by one
+			}else{
+				int oldcol = c - offset;
+				newt.colNames[c] = colNames[oldcol];
+				for(int r = 0;r < rows();r++){
+					newt.matrix.setQuick(r,c,matrix.getQuick(r,oldcol));			
+				}
+			}
+		}
+		return(newt);		
+	}	
+	
+	/**
+	* Reorders rows according to the given list.
+	*/
+	public Table orderRowsBy(List newOrder){			
+		Table newt = new Table(rows(),cols());
+		newt.colNames = colNames.clone();
+		newt.rowNames = new String[rows()];
+		for(int r =0;r < rows();r++){
+			int oldr = ((int)newOrder.get(r)) -1;
+			newt.rowNames[r] = rowNames[oldr];
+			for(int c = 0;c < cols();c++){
+				newt.matrix.setQuick(r,c,matrix.getQuick(oldr,c));			
+			}
+		}
+		return(newt);
+	}
+	
+	/**
+	* Reorders columns according to the given list.
+	*/
+	public Table orderColumnsBy(List newOrder){			
+		Table newt = new Table(rows(),cols());
+		newt.rowNames = rowNames.clone();
+		newt.colNames = new String[cols()];
+		for(int c =0;c < cols();c++){
+			int oldc = ((int)newOrder.get(c)) -1;
+			newt.colNames[c] = colNames[oldc];
+			for(int r = 0;r < rows();r++){
+				newt.matrix.setQuick(r,c,matrix.getQuick(r,oldc));			
+			}
+		}
+		return(newt);
+	}
+	
+	public Table transpose(){
+		Table ttable = new Table(this.numCols,this.numRows);
+		ttable.rowNames = colNames.clone();
+		ttable.colNames = rowNames.clone();
+		 ObjectMatrix2D diceView = matrix.viewDice();
+		ttable.matrix = diceView.copy();
+		return(ttable);
+	}
+	
 	public void assign(Object o){
 		matrix.assign(o);
 	}
@@ -255,6 +366,8 @@ public class Table extends GroovyObjectSupport{
 	public int cols() {
 		return(numCols);
 	}
+	
+	
 	
 	
 	public void setFirstColInTable(boolean firstColInTable){		
@@ -323,7 +436,9 @@ public class Table extends GroovyObjectSupport{
    			sb.append(entry+delimiter);
    		}
    		Object entry = matrix.getQuick(r,(numCols-1));
-      sb.append(entry+"\n");
+			// Don't tack on \n to last row...
+			if (r == (numRows-1)) sb.append(entry);
+			else sb.append(entry+"\n");
    	}
    	return(sb.toString());		
    }
@@ -353,7 +468,6 @@ public class Table extends GroovyObjectSupport{
 		}		
 	}
 	
-
 	/***
 	*  Read a delimited table from a file.
 	*

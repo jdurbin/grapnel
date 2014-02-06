@@ -35,7 +35,6 @@ public class DataReader{
       }
     }
 
-
     // Read in the data file.  The data file is basically a 3D 
     // vector of features x compounds x titrations.  Well 4D, 4th dimension is 
     // the replicate, since experiments are often replicated multiple times...

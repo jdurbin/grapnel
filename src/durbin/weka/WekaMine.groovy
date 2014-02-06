@@ -671,6 +671,12 @@ class WekaMine{
 		
 		def trainPredictions = null;
 		if (evalTraining) trainPredictions = new StringBuffer()
+	
+		err.println "CHECK1"
+		//eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions)
+		
+		// Apparently I haven't written this yet.... looks like I intended the functionality to match 
+		// cross-validate with folds... 
 		eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions,new Range("first,last"),false,trainPredictions)
 		//testResults = CVUtils.parsePredictions(predictions)
 				

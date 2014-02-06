@@ -156,6 +156,112 @@ public class DoubleTable extends GroovyObjectSupport{
 	public DoubleTable(String fileName,String delimiter,Closure c) throws Exception{
      readFile(fileName,delimiter,c);
   }
+	
+	//public DoubleTable addRow(Collection row,int rowIdx){
+		// If no rowName is given, assume first item of collection is row name
+		
+		//}
+	
+	/***
+	* Return a transposed copy of this table. 
+	*/ 
+	public DoubleTable addRow(Collection<Double> row,int rowIdx,String rowName){
+		DoubleTable newt = new DoubleTable(rows()+1,cols());
+		newt.colNames = colNames.clone();
+		newt.rowNames = new String[rows()+1];
+		int offset = 0;
+		for(int r =0;r < rows()+1;r++){			
+			if (r == rowIdx){
+				newt.rowNames[r] = rowName;
+				int colIdx =0;
+				for(Double val : row){
+					newt.matrix.setQuick(r,colIdx++,val);
+				}				
+				offset = 1; // After inserted row, need to shift index by one
+			}else{
+				int oldrow = r - offset;
+				newt.rowNames[r] = rowNames[oldrow];
+				for(int c = 0;c < cols();c++){
+					newt.matrix.setQuick(r,c,matrix.getQuick(oldrow,c));			
+				}
+			}
+		}
+		return(newt);		
+	}	
+		
+	/***
+	* Return a transposed copy of this table. 
+	*/ 
+	public DoubleTable addCol(Collection<Double> col,int colIdx,String colName){
+		DoubleTable newt = new DoubleTable(rows(),cols()+1);
+		newt.rowNames = rowNames.clone();
+		newt.colNames = new String[cols()+1];
+		int offset = 0;
+		for(int c =0;c < cols()+1;c++){			
+			if (c == colIdx){
+				newt.colNames[c] = colName;
+				int rowIdx =0;
+				for(Double val : col){
+					newt.matrix.setQuick(rowIdx++,c,val);
+				}				
+				offset = 1; // After inserted row, need to shift index by one
+			}else{
+				int oldcol = c - offset;
+				newt.colNames[c] = colNames[oldcol];
+				for(int r = 0;r < rows();r++){
+					newt.matrix.setQuick(r,c,matrix.getQuick(r,oldcol));			
+				}
+			}
+		}
+		return(newt);		
+	}	
+	
+	/***
+	* Return a transposed copy of this table. 
+	*/ 
+	public DoubleTable transpose(){
+		DoubleTable ttable = new DoubleTable(this.numCols,this.numRows);
+		ttable.rowNames = colNames.clone();
+		ttable.colNames = rowNames.clone();
+		DoubleMatrix2D diceView = matrix.viewDice();
+		ttable.matrix = (DenseDoubleMatrix2D) diceView.copy();
+		return(ttable);
+	}	
+	
+	/**
+	* Reorders rows according to the given list.
+	*/
+	public DoubleTable orderRowsBy(List newOrder){			
+		DoubleTable newt = new DoubleTable(rows(),cols());
+		newt.colNames = colNames.clone();
+		newt.rowNames = new String[rows()];
+		for(int r =0;r < rows();r++){
+			int oldr = ((int)newOrder.get(r)) -1;
+			newt.rowNames[r] = rowNames[oldr];
+			for(int c = 0;c < cols();c++){
+				newt.matrix.setQuick(r,c,matrix.getQuick(oldr,c));			
+			}
+		}
+		return(newt);
+	}
+	
+	/**
+	* Reorders columns according to the given list.
+	*/
+	public DoubleTable orderColumnsBy(List newOrder){			
+		DoubleTable newt = new DoubleTable(rows(),cols());
+		newt.rowNames = rowNames.clone();
+		newt.colNames = new String[cols()];
+		for(int c =0;c < cols();c++){
+			int oldc = ((int)newOrder.get(c)) -1;
+			newt.colNames[c] = colNames[oldc];
+			for(int r = 0;r < rows();r++){
+				newt.matrix.setQuick(r,c,matrix.getQuick(r,oldc));			
+			}
+		}
+		return(newt);
+	}
+	
   
 	public int rows() {
 		return(numRows);
@@ -227,7 +333,10 @@ public class DoubleTable extends GroovyObjectSupport{
    			sb.append(entry+delimiter);
    		}
    		Double entry = matrix.getQuick(r,(numCols-1));
-      sb.append(entry+"\n");
+			
+			// Don't tack on \n to last row...
+			if (r == (numRows-1)) sb.append(entry);
+			else sb.append(entry+"\n");
    	}
    	return(sb.toString());		
 	}
@@ -349,6 +458,56 @@ public class DoubleTable extends GroovyObjectSupport{
 		System.err.println("done");
 	}
 	
+	/***
+	*  Read a delimited table from a file.
+	*
+	*  Some attention has been paid to performance, since this is meant to be
+	*  a core class.  Additional performance gains are no doubt possible.
+	*/
+	public void readWithoutHeadings(String fileName,String regex) throws Exception {
+		colOffset = 0;
+		numRows = FileUtils.fastCountLines(fileName); // no heading so count all lines
+		rowNames = new String[numRows];
+		for(int i = 0;i< numRows;i++){
+			rowNames[i] = "Row"+i;
+		}
+
+		// Read the col headings and figure out the number of columns in the table..
+		BufferedReader reader = new BufferedReader(new FileReader(fileName));
+		String line = reader.readLine();
+		colNames = parseColNames(line,regex);
+		numCols = colNames.length;
+		colNames = new String[numCols];
+		for(int i = 0;i < numCols;i++){
+			colNames[i] = "Col"+i;
+		}
+		createNameMap(colNames,colName2Idx);
+		numCols = colNames.length; 
+
+		System.err.print("Reading "+numRows+" x "+numCols+" table...");
+
+		// Create an empty object matrix...
+		matrix = new DenseDoubleMatrix2D(numRows,numCols);
+
+		// Reopen the file...
+		reader = new BufferedReader(new FileReader(fileName));
+
+		// Populate the matrix with values...
+		int rowIdx = 0;
+		while ((line = reader.readLine()) != null) {
+			String[] tokens = line.split(regex,-1);
+			rowNames[rowIdx] = "Row "+rowIdx;
+									      
+      for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
+				//System.err.println("rowIdx:"+rowIdx+" colIdx:"+colIdx+" colOffset:"+colOffset+" tokens.length:"+tokens.length);
+        matrix.setQuick(rowIdx,colIdx,Double.parseDouble(tokens[colIdx+colOffset]));                
+      }     
+			rowIdx++;
+		}
+		createNameMap(rowNames,rowName2Idx);
+		System.err.println("done");
+	}
+	
 	public DenseDoubleMatrix2D getMatrix(){
 		return(matrix);
 	}
@@ -399,7 +558,6 @@ public class DoubleTable extends GroovyObjectSupport{
 		
   public DoubleVector getAt(String rowName){
 		//System.err.println("rowName: "+rowName);
-	
     int ridx = getRowIdx(rowName);
     return(getRow(ridx));
   }
