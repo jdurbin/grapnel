@@ -7,17 +7,14 @@ package durbin.util
 * http://code.google.com/p/groovy-option-parser/
 * 
 * GOP is nice, but I didn't like the fact that it didn't handle a help option 
-* (that is, it'd always print out the required missing list, which was distracting)<br>
-* 
+* (that is, it'd always print out the required missing list, which was distracting)
 * I also messed with the formatting a little here and there.  
+* <br><br>
+* GOP DOC:<br>
 * 
-*/ 
-
-
-/**
- * Groovy Option Parser
- *
- * GOP is a command line option parser alternative to CliBuilder.
+* Groovy Option Parser
+*
+* GOP is a command line option parser alternative to CliBuilder.
  * 
  * An example:
  * <pre>
@@ -52,12 +49,6 @@ package durbin.util
  *  assert params.i == 123
  *  assert parser.remainder.join(' ') == 'some other stuff'
  * </pre>
- * 
- * <b>NOTICE: Durbin fork!!</b><br><br>
- * 
- *  GOP is nice, but I didn't like the fact that it didn't handle a help option 
- * (that is, it'd always print out the required missing list, which was distracting)
- * I also messed with the formatting a little here and there.<br><br>
  * 
  *
  * @author Travis Hume (travis@computoring.org)

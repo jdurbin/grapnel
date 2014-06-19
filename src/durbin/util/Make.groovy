@@ -1,13 +1,55 @@
  package durbin.util;
 
 
-/***************************
-* Support for vaguely make-like functionality in a groovy script. 
-* For starters, just the ability to dispatch commands and arguments from the 
-* command line. 
+/**
+* Support for vaguely make-like functionality in a groovy script. <br><br>
+* For starters it just adds the ability to dispatch commands and arguments 
+* from the command line.  Coupled with the RunBash helper class this makes 
+* it easy to script up short pipelines invoked by name.  For example, 
+* the following script fragment, saved in a file like make.gv, could be used 
+* to create or remove project directories: 
+* 
+* <pre>
+* RunBash.enable()
+* RunBash.bEchoCommand = true
+* 
+* projectDir = '/Users/james/project/'
+* ROOTNAMES=['code','docs','libs'] 
+* 
+* def createDirs(){
+* 	ROOTNAMES.each{name->
+* 		 "mkdir $projectDirDir/$name".bash()
+* 	}
+* }
+* 
+* def delDirs(){
+* 	ROOTNAMES.each{name->
+* 		 "rm -rf $projectDirDir/$name".bash()
+* 	}
+*  }
+*
+* // Run targets by name... Has to be at end so that
+* // all methods will have already been defined. 
+* Make.runCommands(this,args)
+* </pre>
+* This could be executed like:
+* <pre>
+* make.gv createDirs
+* </pre>
+* or 
+* <pre>
+* make.gv delDirs
+* </pre>
+* 
 */
 public class Make{
 	
+	/**
+	* Runs the commands specified in args. 
+	* 
+	* @param obj   The object containing the methods (usually this script object)
+	* @param args  The command line arguments to use. 
+	*/ 
 	static def runCommands(obj,args){		
 		// Go through the arguments invoking each one in turn. 
 		// This allows syntax like ./make clean mask blastz 

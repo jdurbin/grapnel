@@ -4,13 +4,6 @@ import java.util.*;
 import java.io.*;
 import java.lang.*;
 
-// Parallel colt versions of these routines...
-// I saw no speedup on MacBook Pro when using 
-// these... would be interesting to try on a many core cpu.
-// import cern.colt.matrix.tobject.*;
-// import cern.colt.matrix.tobject.impl.*;
-// import cern.colt.list.tdouble.*;
-
 import cern.colt.matrix.*;
 import cern.colt.matrix.impl.*;
 import cern.colt.list.*;
@@ -21,163 +14,25 @@ import groovy.lang.Closure;
 import groovy.lang.IntRange;
 import org.codehaus.groovy.runtime.*;
 
-//import org.codehaus.groovy.runtime.DefaultGroovyMethodsSupport.RangeInfo;
-
-/***
-* An iterator for a row or a column of a table
-*/
-class TableMatrix1DIterator implements Iterator{
-  TableMatrix1D table;
-  int idx = 0;
-  
-  TableMatrix1DIterator(TableMatrix1D t){
-    table = t;
-  }
-  
-  public boolean hasNext(){
-    if (idx < table.size()) return(true);
-    else return(false);
-  }
-  
-  public Object next(){
-    Object rval = table.get(idx);
-    idx++;
-    return(rval);
-  }
-  public void remove(){}
-}
-
-/***
-* A row or a column in the table.   Specifically wrapper to make the 
-* ObjectMatrix1D returned by matrix.viewColumn/Row 
-* into something that is iterable, since ObjectMatrix1D doesn't
-* implement iterable (probably because colt is old as dirt). <br>
-* 
-* KJD: I've gone off the deep end here... I'm sure this is not
-* the Right Way to do this, although it works...
-* all of this probably should have been handled  from the Table.groovy 
-* wrapper, using some kind of expando magic or some such...<br>
-* 
-* Ugh... even worse, all this hasn't helped performance compared to 
-* getting a copy of the array for each row... 
-*/
-class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
-  
-  ObjectMatrix1D data;
-	public HashMap<String,Integer> names2Idx;
-	public String name;
-  
-  //public TableMatrix1D(ObjectMatrix1D dom){
-  //  data = dom;
-  //}
-
-	public TableMatrix1D(ObjectMatrix1D dom,HashMap<String,Integer> n2I,String theName){
-		names2Idx = n2I;
-		name = theName;
-    data = dom;
-  }
-
-	public Object asType(Class clazz) {
-		if (clazz.equals(java.util.ArrayList.class)) {			
-			ArrayList rval = new ArrayList();
-			for(int i = 0;i < data.size();i++){
-				rval.add(data.get(i));
-			}
-			return(rval);			
-		}else if ((clazz.equals(java.util.Set.class) ||
-							 clazz.equals(java.util.HashSet.class))){
-			HashSet rval = new HashSet();
-			for(int i = 0;i < data.size();i++){
-				rval.add(data.get(i));
-			}
-			return(rval);
-		}else{
-			String msg = "Can't cast TableMatrix1D to "+clazz;
-			throw new ClassCastException(msg);
-		}
-	}
-
-	
-  
-  public long size(){ return(data.size()); }
-  public Object get(int idx){ return(data.get(idx)); }  
-  public void set(int idx,Object value){ data.set(idx,value); }
-  
-
-  public TableMatrix1DIterator iterator(){
-    return(new TableMatrix1DIterator(this));
-  }
-
-	public Object getAt(String colName){
-    int cidx = names2Idx.get(colName);
-		//System.err.println("colName:"+colName+" index: "+cidx);
-    return(data.get(cidx));
-  }
-  
-  public Object getAt(int idx){
-    if (idx < 0) idx =(int) data.size()+idx; // 5 -1 = 4
-    return(data.get(idx));
-  }
-
-	public double[] toDoubleArray(){
-		double[] rval = new double[(int)size()];
-		for(int i =0;i < size();i++){
-			rval[i] = (Double) getAt(i);
-		}
-		return(rval);
-	}
-    
-	public String toString(){
-		StringBuffer rval = new StringBuffer();
-		for(int i = 0;i < size();i++){
-			rval.append(getAt(i));
-		}
-		return(rval.toString());
-	}
-  
-  /****************************************************
-  * Returns a view corresponding to the given range. 
-  */ 
-  public TableMatrix1D getAt(IntRange r){
-    
-    // KJD:  This range is coming in with from/to swapped, but why? 
-    // HACK ALERT: Until I understand why, I'm just going to swap them 
-    // back... so there...  
-    IntRange r2 = new IntRange(r.getToInt(),r.getFromInt());
-    
-    // Convert Groovy relative range values (e.g. -2) into actual 
-    // range numbers...
-    RangeInfo ri = DefaultGroovyMethodsSupport.subListBorders((int)this.size(),r2);        
-    int start = ri.from;
-    int width = ri.to-start; 
-    return(new TableMatrix1D(data.viewPart(start,width),names2Idx,name));
-  }  
-}
-
-/***
+/**
 * A 2D table of objects with methods to read from file, iterate over
 * rows or columns, and support for Groovy closures.  A Table is a 
 * 2D collection of cells.  Table cells can be accessed by index or by 
 * name.<br><br>
 * 
-* Note:  I intended for this to be a high performance 2D table that could
-* be accessed by row/column index or by row/column name.  However, in practice
-* I am using Multidimensional map for most things now, with adequate performance. 
-* This is still used in a few places, though. 
-*	
 *	Note: There is a specialized table, DoubleTable, that is a more efficient version
-*	of table when the data is all numeric.  DoubleTable has an easier to use API.  Eventually
-*	the api for Table should be made to match and be made into an interface with two 
-*	implementations:
+*	of table when the data is all numeric plus some added numeric functionality.   
+* Eventually the api for Table should be made to match in some subset and made 
+* into a default Table interface with two implementations: 
+* <pre>
 *	
 *	Table ->  DoubleTable
 *	          ObjectTable
-*	
+*	</pre>
 */
 public class Table extends GroovyObjectSupport{
 
-	// An somewhat efficient place to store the data...
-	public ObjectMatrix2D matrix;
+	public ObjectMatrix2D matrix; // Backing storage. 
 	public String[] colNames;
 	public String[] rowNames;
 	public int numCols;
@@ -186,11 +41,18 @@ public class Table extends GroovyObjectSupport{
 	public int colOffset = 1; // Default doesn't include first column in table. 
 	boolean bFirstColInTable = false;	
 		
-  public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
-  public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
+	public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
+	public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
-  public Table(){}
+	/**
+		* Create empty Table
+		*/
+	public Table(){
+	}
   
+	/**
+		* Create a Table from a DoubleTable
+		*/
 	public Table(DoubleTable t){
 		numRows = t.rows();
 		numCols = t.cols();
@@ -204,41 +66,68 @@ public class Table extends GroovyObjectSupport{
 		}
 	}
 	
-  public Table(int rows,int cols){
-    numRows = rows;
-    numCols = cols;
-    // Create an empty object matrix...
-	  matrix = new DenseObjectMatrix2D(numRows,numCols);
-  }  
+	/**
+		* Create an empty Table with the given dimensions. 
+		*/
+	public Table(int rows,int cols){
+		numRows = rows;
+		numCols = cols;
+		// Create an empty object matrix...
+		matrix = new DenseObjectMatrix2D(numRows,numCols);
+	}  
   
-  public Table(String fileName,String delimiter) throws Exception{
-    readFile(fileName,delimiter);
-  }
+	/**
+		* Create a Table by reading a file delimited by delimiter
+		*/
+	public Table(String fileName,String delimiter) throws Exception{
+		
+		readFile(fileName,delimiter);
+		
+	}
 
-
+	/**
+		* The first row will always populate the rowNames, but sometimes we want to put the 
+		* first col in the table itself (e.g. when stuffing into JTable)
+		*/
 	public Table(String fileName,String delimiter,boolean bFirstRowInTable) throws Exception{
 		setFirstColInTable(bFirstRowInTable);
-    readFile(fileName,delimiter);
-  }
+		readFile(fileName,delimiter);
+	}
 
-  public Table(String fileName) throws Exception{
-    readFile(fileName,"\t");
-  }
+	/**
+		* Create a new table by reading from given file with default tab delimiter.
+		*/
+	public Table(String fileName) throws Exception{
+		
+		readFile(fileName,"\t");
+		
+	}
   
-  public Table(String fileName,Closure c) throws Exception{
-    readFile(fileName,"\t",c);
-  }
+	/**
+		* Create and read a table from a file, applying the closure to each cell 
+		* before it is saved to the table.
+		*/
+	public Table(String fileName,Closure c) throws Exception{
+		
+		readFile(fileName,"\t",c);
+		
+	}
   
   
-  /***
-  * Create and read a table from a file, applying the closure to each cell 
-  * in the table as it is read and before it is saved to the table (e.g. to 
-  * parse out a substring of each cell, or convert to Double). 
-  */ 
-  public Table(String fileName,String delimiter,Closure c) throws Exception{
-     readFile(fileName,delimiter,c);
-   }
+	/**
+		* Create and read a table from a file, applying the closure to each cell 
+		* in the table as it is read and before it is saved to the table (e.g. to 
+		* parse out a substring of each cell, or convert to Double). 
+		*/ 
+	public Table(String fileName,String delimiter,Closure c) throws Exception{
+		
+		readFile(fileName,delimiter,c);
+		 
+	}
 
+	/**
+		* Create an empty table of size given by list of row and column names.
+		*/
 	public Table(ArrayList<String> rNames,ArrayList<String> cNames){
 		numRows = rNames.size();
 		numCols = cNames.size();
@@ -258,10 +147,19 @@ public class Table extends GroovyObjectSupport{
 		createNameMap(rowNames,rowName2Idx);
 	}
 	
+	/**
+		* Assigns every cell in the table to the given object.
+		*/
+	public void assign(Object o){
+		
+		matrix.assign(o);
+		
+	}
 	
-	/***
-	* Return a transposed copy of this table. 
-	*/ 
+	
+	/**
+		* Add a row to this table.
+		*/ 
 	public Table addRow(Collection<Object> row,int rowIdx,String rowName){
 		Table newt = new Table(rows()+1,cols());
 		newt.colNames = colNames.clone();
@@ -286,9 +184,9 @@ public class Table extends GroovyObjectSupport{
 		return(newt);		
 	}	
 		
-	/***
-	* Return a transposed copy of this table. 
-	*/ 
+	/**
+		* Add a column to this table
+		*/ 
 	public Table addCol(Collection<Object> col,int colIdx,String colName){
 		Table newt = new Table(rows(),cols()+1);
 		newt.rowNames = rowNames.clone();
@@ -313,63 +211,46 @@ public class Table extends GroovyObjectSupport{
 		return(newt);		
 	}	
 	
+	
 	/**
-	* Reorders rows according to the given list.
-	*/
-	public Table orderRowsBy(List newOrder){			
-		Table newt = new Table(rows(),cols());
-		newt.colNames = colNames.clone();
-		newt.rowNames = new String[rows()];
-		for(int r =0;r < rows();r++){
-			int oldr = ((int)newOrder.get(r)) -1;
-			newt.rowNames[r] = rowNames[oldr];
-			for(int c = 0;c < cols();c++){
-				newt.matrix.setQuick(r,c,matrix.getQuick(oldr,c));			
-			}
-		}
-		return(newt);
+		* Returns true if the table contains a column with the given column name. 
+		*/
+	public boolean containsCol(String colName){
+		return(colName2Idx.keySet().contains(colName));
+		
 	}
 	
 	/**
-	* Reorders columns according to the given list.
-	*/
-	public Table orderColumnsBy(List newOrder){			
-		Table newt = new Table(rows(),cols());
-		newt.rowNames = rowNames.clone();
-		newt.colNames = new String[cols()];
-		for(int c =0;c < cols();c++){
-			int oldc = ((int)newOrder.get(c)) -1;
-			newt.colNames[c] = colNames[oldc];
-			for(int r = 0;r < rows();r++){
-				newt.matrix.setQuick(r,c,matrix.getQuick(r,oldc));			
-			}
-		}
-		return(newt);
+		* Returns true if the table contains a row with the given row name. 
+		*/
+	public boolean containsRow(String rowName){
+		return(rowName2Idx.keySet().contains(rowName));
+		
 	}
 	
-	public Table transpose(){
-		Table ttable = new Table(this.numCols,this.numRows);
-		ttable.rowNames = colNames.clone();
-		ttable.colNames = rowNames.clone();
-		 ObjectMatrix2D diceView = matrix.viewDice();
-		ttable.matrix = diceView.copy();
-		return(ttable);
-	}
-	
-	public void assign(Object o){
-		matrix.assign(o);
-	}
   
+	/**
+		* Returns number of rows in table
+		*/
 	public int rows() {
+		
 		return(numRows);
+		
 	}
+	
+	/**
+		* Returns number of columns in table. 
+		*/
 	public int cols() {
+		
 		return(numCols);
+		
 	}
 	
-	
-	
-	
+	/**
+		* Set flag to indicate whether or not first column of a file should be in the 
+		* table or used as row names. 
+		*/
 	public void setFirstColInTable(boolean firstColInTable){		
 		// The first row will always populate the rowNames, but sometimes we want
 		// to put the first row in the table itself (e.g. when stuffing into JTable)
@@ -381,99 +262,121 @@ public class Table extends GroovyObjectSupport{
 		}
 	}
 	
-	/***
-  * Parse the column names from a line. 
-  */ 
-  public String[] parseColNames(String line,String regex){
-    // Not quite right, because includes spurious 0,0 column. 
+	/**
+		* Convenience method to initialize a name2Idx map from an array of Strings
+		*/ 
+	public static void createNameMap(String[] names,HashMap<String,Integer> name2IdxMap){	  
+		for(int i = 0;i < names.length;i++){
+			name2IdxMap.put(names[i],i);
+		}
+		
+	}
+	
+	/**
+		* Parse the column names from a line. 
+		*/ 
+	public String[] parseColNames(String line,String regex){
+		// Not quite right, because includes spurious 0,0 column. 
 		String[] fields = line.split(regex,-1); // -1 to include empty cols.
 				
 		String[] colNames = new String[fields.length - colOffset];
 		
 		for(int i = colOffset;i < fields.length;i++){
-		  //System.err.println("i-colOffset: "+(i-colOffset)+" i :"+i);
-		  colNames[i-colOffset] = (fields[i]).trim();
+			//System.err.println("i-colOffset: "+(i-colOffset)+" i :"+i);
+			colNames[i-colOffset] = (fields[i]).trim();
 		}				
 		return(colNames);
 	}
-	
-	
-	/***
-  * Convenience method to initialize a name2Idx map from an array of Strings
-  * 
-  */ 
-	public static void createNameMap(String[] names,HashMap<String,Integer> name2IdxMap){	  
-	  for(int i = 0;i < names.length;i++){
-	    name2IdxMap.put(names[i],i);
-	  }
-	}
 
-  /***
-  * Write table to a file
-  */ 
+	/**
+		* Write Table to a file
+		*/ 
 	public void write(String fileName,String delimiter) throws Exception {
+		
 		BufferedWriter out = new BufferedWriter(new FileWriter(fileName));
 		write(out,delimiter);
 		out.close();
+		
 	}
 
-  public String toString(){
-    String delimiter = "\t";
-    StringBuilder sb = new StringBuilder();
-    // Write first line of column names...
-    sb.append("feature_name\t");
-   	for(int c = 0;c < (numCols-1);c++){
-   	  sb.append(colNames[c]+delimiter);
-   	}
-   	sb.append(colNames[numCols-1]);
-   	sb.append("\n");
+	/**
+		* Converts to a string representation of the table. 
+		*/
+	public String toString(){
+		String delimiter = "\t";
+		StringBuilder sb = new StringBuilder();
+		// Write first line of column names...
+		sb.append("feature_name\t");
+		for(int c = 0;c < (numCols-1);c++){
+			sb.append(colNames[c]+delimiter);
+		}
+		sb.append(colNames[numCols-1]);
+		sb.append("\n");
 
-   	for (int r = 0;r < numRows;r++) {
-   	  // First column of each line is a row name...
-   	  sb.append(rowNames[r]+delimiter);
-   		for (int c = 0;c < (numCols -1);c++) {
-   			Object entry = matrix.getQuick(r,c);
-   			sb.append(entry+delimiter);
-   		}
-   		Object entry = matrix.getQuick(r,(numCols-1));
+		for (int r = 0;r < numRows;r++) {
+			// First column of each line is a row name...
+			sb.append(rowNames[r]+delimiter);
+			for (int c = 0;c < (numCols -1);c++) {
+				Object entry = matrix.getQuick(r,c);
+				sb.append(entry+delimiter);
+			}
+			Object entry = matrix.getQuick(r,(numCols-1));
 			// Don't tack on \n to last row...
 			if (r == (numRows-1)) sb.append(entry);
 			else sb.append(entry+"\n");
-   	}
-   	return(sb.toString());		
-   }
+		}
+		return(sb.toString());		
+	}
 
+	/**
+		* Attempts to convert the object table to a DenseDoubleMatrix2D
+		* Assumes cells are strings and interprets empty string, null, and NA
+		* as 0 entries. 
+		*/
+	public DenseDoubleMatrix2D toDenseDoubleMatrix2D(){
+		DenseDoubleMatrix2D t = new DenseDoubleMatrix2D(rows(),cols());
+		for(int i =0;i < rows();i++){
+			for(int j = 0; j< cols();j++){
+				String val = (String) get(i,j);
+				if ((val == "") || (val == "null") || (val == "NA")){  // limited missing value support
+					val = "0.0"; // ??? has to be some number.. 
+				}
+				t.setQuick(i,j,Double.parseDouble(val));
+			}
+		}
+		return(t);
+	}
 
-  /***
-  * Write table to a file
-  */ 
+	/**
+		* Write table to a file
+		*/ 
 	public void write(BufferedWriter br,String delimiter) throws Exception{	  	  
-	  // Write first line of column names...
-	  br.write("rowName"+delimiter);
-	  for(int c = 0;c < (numCols-1);c++){
-	    String str = colNames[c]+delimiter;
-	    br.write(str);
-	  }
-	  br.write(colNames[numCols-1]+"\n");
+		// Write first line of column names...
+		br.write("rowName"+delimiter);
+		for(int c = 0;c < (numCols-1);c++){
+			String str = colNames[c]+delimiter;
+			br.write(str);
+		}
+		br.write(colNames[numCols-1]+"\n");
 	  	  
 		for (int r = 0;r < numRows;r++) {
-		  // First column of each line is a row name...
-		  br.write(rowNames[r]+delimiter);
+			// First column of each line is a row name...
+			br.write(rowNames[r]+delimiter);
 			for (int c = 0;c < (numCols -1);c++) {
 				Object entry = matrix.getQuick(r,c);
-        br.write(entry+delimiter);
+				br.write(entry+delimiter);
 			}
 			Object entry = matrix.getQuick(r,(numCols-1));
-      br.write(entry+"\n");
+			br.write(entry+"\n");
 		}		
 	}
 	
-	/***
-	*  Read a delimited table from a file.
-	*
-	*  Some attention has been paid to performance, since this is meant to be
-	*  a core class.  Additional performance gains are no doubt possible.
-	*/
+	/**
+		*  Read a delimited table from a file.
+		*
+		*  Some attention has been paid to performance, since this is meant to be
+		*  a core class.  Additional performance gains are no doubt possible.
+		*/
 	public void readFile(String fileName,String regex) throws Exception {
 
 		numRows = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
@@ -502,27 +405,33 @@ public class Table extends GroovyObjectSupport{
 				rowNames[rowIdx] = tokens[0].trim();
 			}
 									      
-      for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
+			for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
 				//System.err.println("rowIdx:"+rowIdx+" colIdx:"+colIdx+" colOffset:"+colOffset+" tokens.length:"+tokens.length);
-        matrix.setQuick(rowIdx,colIdx,tokens[colIdx+colOffset]);                
-      }     
+				matrix.setQuick(rowIdx,colIdx,tokens[colIdx+colOffset]);                
+			}     
 			rowIdx++;
 		}
 		createNameMap(rowNames,rowName2Idx);
 		System.err.println("done");
 	}
 	
+	/**
+		*  Create a table from the given tab delimited file applying closure to 
+		*  each element before assigning to table. 
+		*/
 	public void readFile(String fileName,Closure c) throws Exception {
-	  readFile(fileName,"\t",c);
+		
+		readFile(fileName,"\t",c);
+		
 	}
 	
 
 	
-  /***
-	*  Read a delimited table from a file.
-	*  Same as other readFile, except this one accepts a closure 
-	*  to apply to each value before storing it in the matrix.
-	*/
+	/**
+		*  Read a delimited table from a file.
+		*  Same as other readFile, except this one accepts a closure 
+		*  to apply to each value before storing it in the matrix.
+		*/
 	public void readFile(String fileName,String regex,Closure c) throws Exception {
 
 		numRows = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
@@ -540,139 +449,198 @@ public class Table extends GroovyObjectSupport{
 		// Create an empty object matrix...
 		matrix = new DenseObjectMatrix2D(numRows,numCols);
 
-    // Populate the matrix with values...
-  	int rowIdx = 0;
-  	while ((line = reader.readLine()) != null) {
-  		String[] tokens = line.split(regex,-1); 
+		// Populate the matrix with values...
+		int rowIdx = 0;
+		while ((line = reader.readLine()) != null) {
+			String[] tokens = line.split(regex,-1); 
 			if (bFirstColInTable){
 				rowNames[rowIdx] = "Row "+rowIdx;
 			}else{
 				rowNames[rowIdx] = tokens[0].trim();
 			} 		  		
 
-      for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
-        matrix.setQuick(rowIdx,colIdx,c.call(tokens[colIdx+colOffset]));                
-      }     
-  		rowIdx++;
-  	}
+			for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
+				matrix.setQuick(rowIdx,colIdx,c.call(tokens[colIdx+colOffset]));                
+			}     
+			rowIdx++;
+		}
 		createNameMap(rowNames,rowName2Idx);
 		System.err.println("done");
 	}
 	
 	
-
+	/**
+		* Returns the object stored at indices (row,col)
+		*/
 	public Object get(int row,int col) {
+		
 		return(matrix.getQuick(row,col));
+		
 	}
 	
+	/**
+		* Sets the cell specified by a row and column index to contain data. 
+		*/
 	public void set(int row,int col,Object data){
-	  matrix.setQuick(row,col,data);
+		
+		matrix.setQuick(row,col,data);
+		
 	}
 	
+	/**
+		* Sets the cell specified by a row and column name to contain data. 
+		*/
 	public void set(String rowStr,String colStr,Object data){
-	  int row = getRowIdx(rowStr);
-	  int col = getColIdx(colStr);
-	  matrix.setQuick(row,col,data);
+		int row = getRowIdx(rowStr);
+		int col = getColIdx(colStr);
+		matrix.setQuick(row,col,data);
 	}
 	
-	public boolean containsCol(String colName){
-		return(colName2Idx.keySet().contains(colName));
-	}
-	
-	public boolean containsRow(String rowName){
-		return(rowName2Idx.keySet().contains(rowName));
-	}
-	
-	
+	/**
+		* Returns a list of the indices of rows that contain the given substring
+		* in the row name.
+		*/
 	public List<Integer> getRowIndicesContaining(String substring){
-	  ArrayList<Integer> rvals = new ArrayList<Integer>();
-	  for(int r = 0;r < numRows;r++){
-	    if (rowNames[r].contains(substring)){
-	      rvals.add(r);
-	    }
-	  }
-	  return(rvals);
+		ArrayList<Integer> rvals = new ArrayList<Integer>();
+		for(int r = 0;r < numRows;r++){
+			if (rowNames[r].contains(substring)){
+				rvals.add(r);
+			}
+		}
+		return(rvals);
 	}
 	
+	/**
+		* Returns a list of the indices of columns that contain the given substring
+		* in the column name. 
+		*/
 	public List<Integer> getColIndicesContaining(String substring){
-	  ArrayList<Integer> rvals = new ArrayList<Integer>();
-	  for(int c = 0;c < numCols;c++){
-	    if (colNames[c].contains(substring)){
-	      rvals.add(c);
-	    }
-	  }
-	  return(rvals);
+		ArrayList<Integer> rvals = new ArrayList<Integer>();
+		for(int c = 0;c < numCols;c++){
+			if (colNames[c].contains(substring)){
+				rvals.add(c);
+			}
+		}
+		return(rvals);
 	}
 	
-	
-	public int getRowIdx(String row){return(rowName2Idx.get(row));}
-	public int getColIdx(String col){return(colName2Idx.get(col));}
-	
-	/***
-	*
-	*/
-  public DoubleArrayList getRowAsDoubleArrayList(int row){
-    DoubleArrayList dal = new DoubleArrayList();
-    ObjectMatrix1D dm1D  = matrix.viewRow(row);
-    for(int r = 0;r < dm1D.size();r++){
-      dal.add((Double)dm1D.get(r));
-    }
-    return(dal);
-  }
+	/**
+		* Get a row by index as a DoubleArrayList
+		*/
+	public DoubleArrayList getRowAsDoubleArrayList(int row){
+		DoubleArrayList dal = new DoubleArrayList();
+		ObjectMatrix1D dm1D  = matrix.viewRow(row);
+		for(int r = 0;r < dm1D.size();r++){
+			dal.add((Double)dm1D.get(r));
+		}
+		return(dal);
+	}
   
-  /***
-	*
-	*/
-  public DoubleArrayList getColAsDoubleArrayList(int col){
-    DoubleArrayList dal = new DoubleArrayList();
-    ObjectMatrix1D dm1D  = matrix.viewColumn(col);
-    for(int r = 0;r < dm1D.size();r++){
-      dal.add((Double)dm1D.get(r));
-    }
-    return(dal);
-  }
+	/**
+		* Get a column by index as a DoubleArrayList
+		*/
+	public DoubleArrayList getColAsDoubleArrayList(int col){
+		DoubleArrayList dal = new DoubleArrayList();
+		ObjectMatrix1D dm1D  = matrix.viewColumn(col);
+		for(int r = 0;r < dm1D.size();r++){
+			dal.add((Double)dm1D.get(r));
+		}
+		return(dal);
+	}
 	
+	/**
+		* Get the index of the row with the given name. 
+		*/
+	public int getRowIdx(String row){
+		
+		return(rowName2Idx.get(row));
+	
+	}
+	
+	/**
+		* Get the index of the column with the given name. 
+		*/
+	public int getColIdx(String col){
+		
+		return(colName2Idx.get(col));
+	
+	}
+	
+	/**
+		* Get row by index as an array of objects. 
+		*/
 	public Object[] getRowAsArray(int row){
-	  return(matrix.viewRow(row).toArray());
-	}
 		
+		return(matrix.viewRow(row).toArray());
+	}
+	
+	/**
+		* Get column by index as an array of objects
+		*/
 	public Object[] getColAsArray(int col){
-	  return(matrix.viewColumn(col).toArray());
-	}
 		
-	public TableMatrix1D getRow(int row){
-	   return(new TableMatrix1D(matrix.viewRow(row),colName2Idx,rowNames[row]));
+		return(matrix.viewColumn(col).toArray());
 	}
 	
+ 
+	
+	/**
+		* Get row at row index with [] notation in Groovy 
+		*/
 	public TableMatrix1D getAt(int ridx){
-    return(getRow(ridx));
-  }
 		
-  public TableMatrix1D getAt(String rowName){
-		//System.err.println("rowName = "+rowName);
-    int ridx = getRowIdx(rowName);
-		//System.err.println("ridx = "+ridx);
-    return(getRow(ridx));
-  }
-	
-	
-	public TableMatrix1D getCol(int col){
-	   return(new TableMatrix1D(matrix.viewColumn(col),rowName2Idx,colNames[col]));
+		return(getRow(ridx));
+		
 	}
 	
+	/**
+		* Get row at row name with [] notation in Groovy
+		*/	
+	public TableMatrix1D getAt(String rowName){
+		int ridx = getRowIdx(rowName);
+		return(getRow(ridx));
+	}
+	
+	/**
+		* Get column by index of the column. 
+		*/
+	public TableMatrix1D getCol(int col){
+		
+		return(new TableMatrix1D(matrix.viewColumn(col),rowName2Idx,colNames[col]));
+		 
+	}
+	
+	/**
+		* Get column by the name of the column
+		*/
 	public TableMatrix1D getCol(String colStr){
 		int col = getColIdx(colStr);
 		return(new TableMatrix1D(matrix.viewColumn(col),rowName2Idx,colNames[col]));
+		
 	}
 	
+	/**
+		* Get row by index of the row.  
+		*/
+	public TableMatrix1D getRow(int row){
+		
+		return(new TableMatrix1D(matrix.viewRow(row),colName2Idx,rowNames[row]));
+		 
+	}
+	
+	/**
+		* Get row by the name of the row. 
+		*/
 	public TableMatrix1D getRow(String rowStr){
+		
 		int row = getRowIdx(rowStr);
 		return(new TableMatrix1D(matrix.viewRow(row),colName2Idx,rowNames[row]));
+		
 	}
 
-	/***
-	* Provide support for iterating over table by rows...
-	*/
+	/**
+		* Provide support for iterating over table by rows...
+		*/
 	public Table each(Closure closure) {
 		for (int r = 0;r < numRows;r++) {
 			for (int c = 0;c < numCols;c++) {
@@ -683,9 +651,9 @@ public class Table extends GroovyObjectSupport{
 		return this;
 	}
 
-	/***
-	* Provide support for iterating over table by rows...
-	*/
+	/**
+		* Provide support for iterating over table by rows...
+		*/
 	public Table eachByRows(Closure closure) {
 		for (int r = 0;r < numRows;r++) {
 			for (int c = 0;c < numCols;c++) {
@@ -697,9 +665,9 @@ public class Table extends GroovyObjectSupport{
 	}
 
 
-	/***
-	* Provide support for iterating over table by columns...
-	*/
+	/**
+		* Provide support for iterating over table by columns...
+		*/
 	public Table eachByCols(Closure closure) {
 		for (int c = 0;c < numCols;c++) {
 			for (int r = 0;r < numRows;r++) {
@@ -710,14 +678,14 @@ public class Table extends GroovyObjectSupport{
 		return this;
 	}
 
-	/***
-	* Provide support for iterating over columns
-	*
-	* Note: I should be able to provide my own
-	* column view object that supports iteration so
-	* that I don't have to pay the cost of making a toArray
-	* copy.
-	*/
+	/**
+		* Provide support for iterating over columns
+		*
+		* Note: I should be able to provide my own
+		* column view object that supports iteration so
+		* that I don't have to pay the cost of making a toArray
+		* copy.
+		*/
 	public Table eachColumn(Closure closure) {
 		for (int c = 0;c < numCols;c++) {
 			//Object[] column = matrix.viewColumn(c).toArray();			
@@ -727,9 +695,9 @@ public class Table extends GroovyObjectSupport{
 		return this;
 	}
 
-	/***
-	* Provide support for iterating over rows
-	*/
+	/**
+		* Provide support for iterating over rows
+		*/
 	public Table eachRow(Closure closure) {
 		for (int r = 0;r < numRows;r++) {
 			//Object[] row = matrix.viewRow(r).toArray();  bit costly to make a copy...
@@ -738,63 +706,71 @@ public class Table extends GroovyObjectSupport{
 		}
 		return this;
 	}
+
+
 	
-	/***
-	* Crude tests. 
-	*/ 
-	public static void main(String args[]) throws Exception {
-	  Table tc = new Table();
-	  tc.readFile(args[0],"\t");
-	  System.gc();
-
-	  Double onevalue = (Double) tc.matrix.getQuick(500,500);
-	  System.err.println("One value: "+onevalue);
-  }
-  
-  	
-	/***
-	*  DEPRECATED SLOW (MAY TRY TO SPEED UP)
-	*  Read a delimited table from a file.
-	*
-	*  Some attention has been paid to performance, since this is meant to be
-	*  a core class.  Additional performance gains are no doubt possible.
-	*/
-	public void readFile0(String fileName,String regex) throws Exception {
-
-		numRows = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
-		rowNames = new String[numRows];
-
-		// Read the col headings and figure out the number of columns in the table..
-		BufferedReader reader = new BufferedReader(new FileReader(fileName));
-		String line = reader.readLine();
-
-		colNames = parseColNames(line,regex);
-		createNameMap(colNames,colName2Idx);
-		numCols = colNames.length; 
-
-		System.err.print("Reading "+numRows+" x "+numCols+" table...");
-
-		// Create an empty object matrix...
-		matrix = new DenseObjectMatrix2D(numRows,numCols);
-
-    // Populate the matrix with values...
-  	int rowIdx = 0;
-  	while ((line = reader.readLine()) != null) {
-  	  //		StringTokenizer parser = new StringTokenizer(line,"\t");
-  	  Scanner sc = new Scanner(line).useDelimiter(regex);
-  	  rowNames[rowIdx] = sc.next().trim();
-  	  int colIdx = 0;
-  	  while (sc.hasNext()) {
-  	    String next = sc.next();
-  		  matrix.setQuick(rowIdx,colIdx,sc.next());
-  			colIdx++;
-  		}
-  	  rowIdx++;
-  	}
-		createNameMap(rowNames,rowName2Idx);
-		System.err.println("done");
+	
+	/**
+		* Reorders rows according to the given list.
+		*/
+	public Table orderRowsBy(List newOrder){			
+		Table newt = new Table(rows(),cols());
+		newt.colNames = colNames.clone();
+		newt.rowNames = new String[rows()];
+		for(int r =0;r < rows();r++){
+			//int oldr = ((int)newOrder.get(r)) -1; // for zero based coordnates.
+			int oldr = ((int)newOrder.get(r));
+			newt.rowNames[r] = rowNames[oldr];
+			for(int c = 0;c < cols();c++){
+				newt.matrix.setQuick(r,c,matrix.getQuick(oldr,c));			
+			}
+		}
+		return(newt);
 	}
+	
+	/**
+		* Reorders columns according to the given list.
+		*/
+	public Table orderColumnsBy(List newOrder){	
+		System.err.println("newOrder: "+newOrder);
+		System.err.println("newOrder.size:"+newOrder.size());		
+		Table newt = new Table(rows(),cols());
+		newt.rowNames = rowNames.clone();
+		newt.colNames = new String[cols()];
+		
+		System.err.println("DEBUG cols: "+cols());
+		
+		for(int c =0;c < cols();c++){
+			//int oldc = ((int)newOrder.get(c)) -1; -1 is just for 1 based coord offset, right?
+			int oldc = ((int)newOrder.get(c));
+			
+			System.err.println("\tDEBUG oldc: "+oldc);
+			System.err.println("\tDEBUG c: "+c);
+			
+			newt.colNames[c] = colNames[oldc];
+			for(int r = 0;r < rows();r++){
+				newt.matrix.setQuick(r,c,matrix.getQuick(r,oldc));			
+			}
+		}
+		return(newt);
+	}
+	
+	/**
+		* Returns a copy that is the transposition of this table. 
+		*/
+	public Table transpose(){
+		Table ttable = new Table(this.numCols,this.numRows);
+		ttable.rowNames = colNames.clone();
+		ttable.colNames = rowNames.clone();
+		ObjectMatrix2D diceView = matrix.viewDice();
+		ttable.matrix = diceView.copy();
+		return(ttable);
+	}
+	
+	
 }
+
+
 
 
 //Put split back in, because StringTokenizer doesn't handle missing values 

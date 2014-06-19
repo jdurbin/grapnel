@@ -159,16 +159,12 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
     
 	public String toString(){
 		return(data.toString());
-
-/*
-		for(int i = 0;i < size();i++){
-			rval.append(getAt(i));
-		}
-		return(rval.toString());
-		*/
 	}
 	
-		
+	/**
+	* Attempts to return the vector as an instance of the given class (e.g. ArrayList, Set, 
+	* HashSet). 
+	*/ 
 	public Object asType(Class clazz) {
 		if (clazz.equals(java.util.ArrayList.class)) {			
 			ArrayList rval = new ArrayList();
@@ -196,7 +192,7 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
 		return(getAt(new IntRange(start,end)));
 	}
   
-  /****************************************************
+  /**
   * Returns a view corresponding to the given range. 
   */ 
   public DoubleVector getAt(IntRange r){       

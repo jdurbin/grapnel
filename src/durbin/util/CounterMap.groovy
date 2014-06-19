@@ -2,13 +2,28 @@
 
 
 /***
-* Eventually I'd like to do something where this syntax works whether
-* or not 'bob' has already been added to the map...
+* Set that counts occurrences of each elment. <br><br>
 *
+* Should probably be renamed to CounterSet. 
+* 
+* <pre>
+* cm = new CounterMap()
+* 
+* cm.inc('bob')
+* cm.inc('bob')
+* cm.inc('mary')
+* 
+* assert cm['bob'] == 2
+* assert cm['mary'] == 1
+* </pre>
+* 
+* Eventually I'd like to do something where this syntax works whether
+* or not 'bob' has already been added to the map:
+* <pre>
 * cm = new CounterMap()
 *
 * cm['bob']++
-*
+* </pre>
 * Not sure if that is even possible because getAt() has no way to know
 * if it's being invoked in a case where the value should be supplied or
 * where the value will be operated on by math. 

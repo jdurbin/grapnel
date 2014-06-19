@@ -77,8 +77,9 @@ class MultidimensionalMap extends LinkedHashMap {
 *  Differs from Table mainly in that it's completely dynamic, whereas 
 *  Table requires explicit dimensions up front. 
 * 
-*  !! DEPRECATED !! in favor of GTable.  GTable is based on google Guava 
-*  library and is more efficient and has fewer issues than TwoDMap. 
+*  !! DEPRECATED !! in favor of DynamicTable . DynamicTable is based on 
+*  google Guava library and is more efficient and has fewer issues than 
+*  TwoDMap. 
 * 
 */
 class TwoDMap extends MultidimensionalMap{

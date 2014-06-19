@@ -1,13 +1,15 @@
 package durbin.util;
 
-/***********************************
+/**
 * Support for accessing a table one row at a time, accessing
-* fields by name.  
+* fields by name.  <br>
 * 
-*  new OnlineTable(fileName).eachRow{row->
+*  <pre>
+*	new OnlineTable(fileName).eachRow{row->
 *		println row.name
-*   println row.address
-* }
+*		println row.address
+*	}
+* </pre>
 * 
 */
 class OnlineTable{			

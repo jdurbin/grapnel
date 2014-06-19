@@ -3,10 +3,10 @@ package durbin.util
 import com.google.common.collect.*
 import groovy.transform.ToString
 
-/****
-* A dynamic, potentially sparse, table of objects. 
+/**
+* A dynamic, potentially sparse, table of objects. <br><br>
 * 
-* DynamicTable implements all the methods from HashBasedTable via 
+* DynamicTable implements all the methods from google HashBasedTable via 
 * Groovy Meta Object Programming and delegation. 
 * 
 * DynamicTable adds functionality to read and write tables, access

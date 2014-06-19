@@ -25,10 +25,9 @@ class Charts{
 	
 	static err = System.err
 	
-/**************************************************************************************************
-	                                           Display Charts
-***************************************************************************************************/			
-	
+	/**
+	* Saves a chart as PNG with fileName
+	*/ 
 	static saveChart(chart,fileName){
 		err.println "Saving chart to $fileName..."
 		def chartpanel = new ChartPanel(chart);
@@ -36,14 +35,16 @@ class Charts{
 		err.print "saving done."
 	}
 	
-	
+	/**
+	* Displays chart in a window. 
+	*/ 
 	static showChart(chart){
 		def title = chart.getTitle().getText()
 		showChart(chart,title);
 	}
 			
 	/***
-	* Creates a window and displays the chart.
+	* Creates a window and displays the chart. Window has title chartTitle
 	*/ 
 	static showChart(chart,chartTitle){
 		def swing = new SwingBuilder()
@@ -55,10 +56,6 @@ class Charts{
 		}
 		return(swing)		
 	}
-
-	/**************************************************************************************************
-		                                           Utilities
-	***************************************************************************************************/
 	 
   /**
   * Creates an XY series from a Groovy [:], aka LinkedHashMap
@@ -75,7 +72,9 @@ class Charts{
     return(dataset);
   }
 
-
+	/**
+	* Creates an XYSeries from a pair of collections X and Y
+	*/ 
 	static createXYFromCollections(Collection X,Collection Y,String seriesName){
 		XYSeries series1 = new XYSeries(seriesName);    
 		for(int i = 0;i < X.size();i++){
@@ -88,6 +87,9 @@ class Charts{
 		return(dataset);
 	}
 
+	/**
+	* Creates an XYSeries from a pair of DoubleVectors
+	*/ 
 	static createXYFromDoubleVectors(DoubleVector X,DoubleVector Y,String seriesName){
     XYSeries series1 = new XYSeries(seriesName);    
 		for(int i = 0;i < X.size();i++){
@@ -100,20 +102,18 @@ class Charts{
     return(dataset);
   }
   
-	/**************************************************************************************************
-	                                           Line
-	***************************************************************************************************/
-
   
   /**
-  * Returns a default line chart.  Not hard to do, but I like to just grab my standard
-  * chart without having to set these things up each time. 
+  * Returns a default line chart with data in a LinkedHashMap. 
   */
   static lineChart(String title,LinkedHashMap data,int xsize,int ysize){            
     def xydata = createXYFromMap(data,"Series 1");    
     return(lineChart(title,xydata,xsize,ysize))
   }
   
+	/**
+	* Creats a line chart form data in an XYSeriesCollection
+	*/ 
   static lineChart(String title,XYSeriesCollection xydata){
     
     // create the chart...
@@ -143,36 +143,49 @@ class Charts{
     return chart;
   }
   
-	/**************************************************************************************************
-	                                           Scatter
-	***************************************************************************************************/
-	
+	/**
+	* XY Plot from two collections. 
+	*/ 
 	static xyplot(String title,String xlabel,String ylabel,Collection x,Collection y){
 		def xydata = createXYFromCollections(x,y,"Series 1")
 		return(xyplot(title,xlabel,ylabel,xydata))
 	}
 
-
+	/**
+	* XY Plot from two DoubleVectors
+	*/ 
 	static xyplot(String title,String xlabel,String ylabel,DoubleVector x,DoubleVector y){
 		def xydata = createXYFromDoubleVectors(x,y,"Series 1")
 		return(xyplot(title,xlabel,ylabel,xydata))
 	}
 
 
+	/**
+	* XY Plot with generic X and Y labels. 
+	*/ 
 	static xyplot(String title,DoubleVector x,DoubleVector y){
 		def xydata = createXYFromDoubleVectors(x,y,"Series 1")
 		return(xyplot(title,"X","Y",xydata))
 	}
 
+	/**
+	* XY Plot from LinkedHashMap data. 
+	*/ 
 	static xyplot(String title,LinkedHashMap data){
 		def xydata = createXYFromMap(data,"Series 1")
 		return(xyplot(title,"X","Y",xydata))
 	}
 
+	/**
+	* XY Plot from XYSeriesCollection
+	*/ 
   static xyplot(String title,XYSeriesCollection xydata){
     return(xyplot(title,"X","Y",xydata))
   }
   
+	/**
+	*	XY Plot from XYSeriesCollection
+	*/ 
   static xyplot(String title,String xlabel,String ylabel, 
     XYSeriesCollection xydata){
     
@@ -209,11 +222,6 @@ class Charts{
     return chart;
   }
 
-	
-/**************************************************************************************************
-                                           HISTOGRAM
-***************************************************************************************************/
-
 	/***
 	* Create a histogram from values in an arbitrary collection...
 	*/ 						
@@ -239,14 +247,14 @@ class Charts{
 	}
   
 	/***
-	* Create  with default labels. 
+	* Create histogram with generic labels. 
 	*/ 
   static hist(String title,HistogramDataset xydata){
     return(hist(title,"Count","X",xydata))
   }
   
 	/***
-	* Create histogram...
+	* Create histogram from HistogramDataset
 	*/ 
   static hist(String title,String xlabel,String ylabel, HistogramDataset xydata){
     
@@ -287,14 +295,16 @@ class Charts{
   }
 
 
-	/**************************************************************************************************
-	                                           DUALHISTOGRAM 
-	***************************************************************************************************/
-
+	/**
+	* Create a dual histogram from two series. 
+	*/ 
 	static dualhistogram(values1,series1name,values2,series2name,cName){
 		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,20))
 	}
 
+	/**
+	* Create a dual histogram from two series. 
+	*/ 
 	static dualhistogram(values1,series1name,values2,series2name,cName,bins){
 		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,bins))
 	}

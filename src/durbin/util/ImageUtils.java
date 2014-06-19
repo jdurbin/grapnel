@@ -15,7 +15,7 @@ import java.io.*;
 * Various utilities for handling images.  OK, right now just one utility, 
 * save component as JPEG.  Easy enough to do GIF or PNG also.  <br><br>
 * 
-* Supported Image types (Java 1.6 OS X): <br>
+* Supported Image types (Java 1.6 OS X): <br><br>
 * [jpg, BMP, bmp, JPG, jpeg, wbmp, png, JPEG, PNG, WBMP, GIF, gif]
 * 
 *
@@ -36,7 +36,7 @@ public class ImageUtils{
      
   /**
   * I think it's more expensive to layout 1000 charts than it is to layout 1000 
-  * already rendered, and so fixed, images.  We'll see...
+  * already rendered (fixed) images. 
   */ 
   public static Image getPanelImage(JPanel p){
     JFrame frame;

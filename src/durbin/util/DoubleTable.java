@@ -4,7 +4,6 @@ import java.util.*;
 import java.io.*;
 import java.lang.*;
 
-
 import cern.colt.matrix.*;
 import cern.colt.matrix.impl.*;
 import cern.colt.list.*;
@@ -15,29 +14,20 @@ import groovy.lang.Closure;
 import groovy.lang.IntRange;
 import org.codehaus.groovy.runtime.*;
 
-//import org.codehaus.groovy.runtime.DefaultGroovyMethodsSupport.RangeInfo;
 
-// KJD GroovyLab and the Matrix package might be mature enough that this should be 
-// backed with that.  Basically end up having a Table as a frame for a Matrix like in R. 
-// http://code.google.com/p/groovylab/
-
-
-/***
-* A 2D table of objects with methods to read from file, iterate over
-* rows or columns, and support for Groovy closures.  A DoubleTable is a 
-* 2D collection of cells.  DoubleTable cells can be accessed by index or by 
-* name.<br><br>
+/**
+* A high performance 2D table of doubles with methods to read from file, 
+* iterate over rows or columns, reorder rows or columns, transpose the table, 
+* and support for Groovy closures.  A DoubleTable is a 2D collection of cells that
+* can be accessed either by index or by name.  It is somewhat similar to an 
+* R data-frame.  Currently it is backed by the Cern colt DenseDoubleMatrix2D 
+* high performance matrix class.<br><br>
 * 
-* Note:  I intended for this to be a high performance 2D table that could
-* be accessed by row/column index or by row/column name.  However, in practice
-* I am using Multidimensional map for most things now, with adequate performance. 
-* This is still used in a few places, though. 
 */
 public class DoubleTable extends GroovyObjectSupport{
 
-	// An somewhat efficient place to store the data...
-	public DenseDoubleMatrix2D matrix;
-	public String[] colNames;  // Groovy getters/setters only gen for non-public variables. 
+	public DenseDoubleMatrix2D matrix; // Backing storage. 
+	public String[] colNames;   
 	public String[] rowNames;
 	public int numCols;
 	public int numRows;
@@ -48,9 +38,15 @@ public class DoubleTable extends GroovyObjectSupport{
   public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
   public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
+	/**
+	* Create an empty DoubleTable
+	*/
   public DoubleTable(){  	
   }
 	
+	/**
+	* Create a DoubleTable from a 2D array with no row/column names. 
+	*/
 	public DoubleTable(double[][] dataMatrix){			
 		// Generate generic default names if none given...
 		numRows = dataMatrix.length;
@@ -70,7 +66,9 @@ public class DoubleTable extends GroovyObjectSupport{
 		createNameMap(rowNames,rowName2Idx);	
 	}
 		
-	
+	/**
+	* Create with a list of row and column names and a double 2D array. 
+	*/
 	public DoubleTable(double[][] dataMatrix,ArrayList<String> rNames,ArrayList<String> cNames){
 		numRows = rNames.size();
 		numCols = cNames.size();
@@ -89,6 +87,9 @@ public class DoubleTable extends GroovyObjectSupport{
 		createNameMap(rowNames,rowName2Idx);
 	}
 	
+	/**
+	* Create an empty table of size given by list of row and column names. 
+	*/
 	public DoubleTable(ArrayList<String> rNames,ArrayList<String> cNames){
 		numRows = rNames.size();
 		numCols = cNames.size();
@@ -108,6 +109,9 @@ public class DoubleTable extends GroovyObjectSupport{
 		createNameMap(rowNames,rowName2Idx);
 	}
   
+	/**
+	* Create an empty table of given size. 
+	*/
   public DoubleTable(int rows,int cols){
     numRows = rows;
     numCols = cols;
@@ -115,55 +119,111 @@ public class DoubleTable extends GroovyObjectSupport{
 	  matrix = new DenseDoubleMatrix2D(numRows,numCols);
   }  
   
-  public DoubleTable(String fileName,String delimiter) throws Exception{
-    readFile(fileName,delimiter);
-  }
-    
+	/**
+	* Create a new table by reading from given file with default tab delimiter. 
+	*/  
   public DoubleTable(String fileName) throws Exception{
     readFile(fileName,"\t");
+		
   }
 
+	/**
+	* Create a new table by reading from the given csv/tab file with specified delimiter
+	*/
+  public DoubleTable(String fileName,String delimiter) throws Exception{
+    readFile(fileName,delimiter);
+		
+  }
+
+	/**
+	* The first row will always populate the rowNames, but sometimes we want
+	* to put the first col in the table itself (e.g. when stuffing into JTable)
+	*/
  	public DoubleTable(String fileName,boolean bFirstColInTable) throws Exception{
 		setFirstColInTable(bFirstColInTable);
     readFile(fileName,"\t");
   }
-  
-  public DoubleTable(String fileName,Closure c) throws Exception{
-    readFile(fileName,"\t",c);
-  }
-
-	public double[][] toArray(){
-		return(matrix.toArray());
-	}
-
-
-	public void setFirstColInTable(boolean firstColInTable){		
-		bFirstColInTable= firstColInTable;
-		// The first row will always populate the rowNames, but sometimes we want
-		// to put the first row in the table itself (e.g. when stuffing into JTable)
-		if(bFirstColInTable){
-			colOffset = 0;			
-		}else{
-			colOffset = 1;
-		}
-	}
-    
-  /***
+      
+  /**
   * Create and read a table from a file, applying the closure to each cell 
   * in the table as it is read and before it is saved to the table (e.g. to 
   * parse out a substring of each cell, or convert to Double). 
   */ 
 	public DoubleTable(String fileName,String delimiter,Closure c) throws Exception{
      readFile(fileName,delimiter,c);
+		 
   }
 	
-	//public DoubleTable addRow(Collection row,int rowIdx){
-		// If no rowName is given, assume first item of collection is row name
+
+	/**
+	* Create and read a table from a file, applying the closure to each cell 
+	* before it is saved to the table. 
+	*/
+  public DoubleTable(String fileName,Closure c) throws Exception{
+    readFile(fileName,"\t",c);
 		
-		//}
+  }
+		
+		
+	/**
+	*	The first row will always populate the rowNames, but sometimes we want
+	* to put the first col in the table itself (e.g. when stuffing into JTable)
+	*/
+	public void setFirstColInTable(boolean firstColInTable){		
+		bFirstColInTable= firstColInTable;
+			if(bFirstColInTable){
+			colOffset = 0;			
+		}else{
+			colOffset = 1;
+		}
+	}
+
+	/**
+	* Convert matrix to a double array. 
+	*/ 
+	public double[][] toArray(){
+		return(matrix.toArray());
+	}
+		
+		
+	/**
+	* Compares this table with another to see if they match within epsilon
+	*/
+	public boolean equalsTable(DoubleTable t2,Double epsilon){
+		boolean bMismatch = false;
+		for(int r = 0;r < rows();r++){
+			for(int c = 0;c < cols();c++){
+				Double v1 = matrix.getQuick(r,c);
+				Double v2 = t2.matrix.getQuick(r,c);
+		
+				Double delta = Math.abs(v1 - v2);
+				if (delta > epsilon) bMismatch = true;
+			}
+		}
+		return(!bMismatch);
+	}
 	
-	/***
-	* Return a transposed copy of this table. 
+	/**
+	* Returns true if the table is symmetric to within epsilon
+	*/
+	public boolean isSymmetric(Double epsilon){
+		
+		if (rows() != cols()) return(false);
+		
+		for(int i = 0;i<rows();i++){
+			for(int j = 0;j < cols();j++){
+				Double a = matrix.getQuick(i,j);
+				Double b = matrix.getQuick(j,i);
+				Double delta = Math.abs(a-b);
+				if (delta > epsilon) return(false);
+			}			
+		}
+		return(true);
+	}
+	
+	
+	/**
+	* Add a row to the table 
 	*/ 
 	public DoubleTable addRow(Collection<Double> row,int rowIdx,String rowName){
 		DoubleTable newt = new DoubleTable(rows()+1,cols());
@@ -189,8 +249,8 @@ public class DoubleTable extends GroovyObjectSupport{
 		return(newt);		
 	}	
 		
-	/***
-	* Return a transposed copy of this table. 
+	/**
+	* Add a column to this table. 
 	*/ 
 	public DoubleTable addCol(Collection<Double> col,int colIdx,String colName){
 		DoubleTable newt = new DoubleTable(rows(),cols()+1);
@@ -216,7 +276,7 @@ public class DoubleTable extends GroovyObjectSupport{
 		return(newt);		
 	}	
 	
-	/***
+	/**
 	* Return a transposed copy of this table. 
 	*/ 
 	public DoubleTable transpose(){
@@ -229,14 +289,14 @@ public class DoubleTable extends GroovyObjectSupport{
 	}	
 	
 	/**
-	* Reorders rows according to the given list.
+	* Returns a new DoubleTable with rows reordered according to the given list.
 	*/
 	public DoubleTable orderRowsBy(List newOrder){			
 		DoubleTable newt = new DoubleTable(rows(),cols());
 		newt.colNames = colNames.clone();
 		newt.rowNames = new String[rows()];
 		for(int r =0;r < rows();r++){
-			int oldr = ((int)newOrder.get(r)) -1;
+			int oldr = ((int)newOrder.get(r));
 			newt.rowNames[r] = rowNames[oldr];
 			for(int c = 0;c < cols();c++){
 				newt.matrix.setQuick(r,c,matrix.getQuick(oldr,c));			
@@ -246,14 +306,14 @@ public class DoubleTable extends GroovyObjectSupport{
 	}
 	
 	/**
-	* Reorders columns according to the given list.
+	* Returns a new DoubleTable with columns reordered according to the given list. 
 	*/
 	public DoubleTable orderColumnsBy(List newOrder){			
 		DoubleTable newt = new DoubleTable(rows(),cols());
 		newt.rowNames = rowNames.clone();
 		newt.colNames = new String[cols()];
 		for(int c =0;c < cols();c++){
-			int oldc = ((int)newOrder.get(c)) -1;
+			int oldc = ((int)newOrder.get(c));
 			newt.colNames[c] = colNames[oldc];
 			for(int r = 0;r < rows();r++){
 				newt.matrix.setQuick(r,c,matrix.getQuick(r,oldc));			
@@ -262,15 +322,24 @@ public class DoubleTable extends GroovyObjectSupport{
 		return(newt);
 	}
 	
-  
-	public int rows() {
-		return(numRows);
-	}
+	/**
+	* Number of columns in table
+	*/
 	public int cols() {
+		
 		return(numCols);
+		
 	}
 	
-	/***
+  /**
+	* Number of rows in table
+	*/
+	public int rows() {
+		return(numRows);	
+			
+	}
+	
+	/**
   * Parse the column names from a line. 
   */ 
   public String[] parseColNames(String line,String regex){
@@ -292,9 +361,8 @@ public class DoubleTable extends GroovyObjectSupport{
 	}
 	
 	
-	/***
+	/**
   * Convenience method to initialize a name2Idx map from an array of Strings
-  * 
   */ 
 	public static void createNameMap(String[] names,HashMap<String,Integer> name2IdxMap){	  
 	  for(int i = 0;i < names.length;i++){
@@ -302,7 +370,7 @@ public class DoubleTable extends GroovyObjectSupport{
 	  }
 	}
 
-  /***
+  /**
   * Write table to a file
   */ 
 	public void write(String fileName,String delimiter) throws Exception {
@@ -311,8 +379,8 @@ public class DoubleTable extends GroovyObjectSupport{
 		out.close();
 	}
 
-	/***
-	*
+	/**
+	* Return a string representation of the table. 
 	*/ 
   public String toString(){
     String delimiter = "\t";
@@ -342,7 +410,7 @@ public class DoubleTable extends GroovyObjectSupport{
 	}
 
 
-  /***
+  /**
   * Write table to a file
   */ 
 	public void write(BufferedWriter br,String delimiter) throws Exception{	  	  
@@ -367,7 +435,7 @@ public class DoubleTable extends GroovyObjectSupport{
 	}
 	
 
-	/***
+	/**
 	*  Read a delimited table from a file.
 	*
 	*  Some attention has been paid to performance, since this is meant to be
@@ -413,11 +481,12 @@ public class DoubleTable extends GroovyObjectSupport{
 	
 	public void readFile(String fileName,Closure c) throws Exception {
 	  readFile(fileName,"\t",c);
+		
 	}
 	
 
 	
-  /***
+  /**
 	*  Read a delimited table from a file.
 	*  Same as other readFile, except this one accepts a closure 
 	*  to apply to each value before storing it in the matrix.
@@ -458,7 +527,7 @@ public class DoubleTable extends GroovyObjectSupport{
 		System.err.println("done");
 	}
 	
-	/***
+	/**
 	*  Read a delimited table from a file.
 	*
 	*  Some attention has been paid to performance, since this is meant to be
@@ -510,29 +579,30 @@ public class DoubleTable extends GroovyObjectSupport{
 	
 	public DenseDoubleMatrix2D getMatrix(){
 		return(matrix);
+		
 	}
 
 	public Double get(int row,int col) {
 		return(matrix.getQuick(row,col));
+		
 	}
 	
 	public void set(int row,int col,Double data){
 	  matrix.setQuick(row,col,data);
+		
 	}
 	
 	public void set(String rowStr,String colStr,Double data){
 	  int row = getRowIdx(rowStr);
 	  int col = getColIdx(colStr);
 	  matrix.setQuick(row,col,data);
+		
 	}
 	
 	
 	public int getRowIdx(String row){return(rowName2Idx.get(row));}
 	public int getColIdx(String col){return(colName2Idx.get(col));}
 	
-	/***
-	*
-	*/
   public DoubleArrayList getRowAsDoubleArrayList(int row){
     DoubleArrayList dal = new DoubleArrayList();
     DenseDoubleMatrix1D dm1D  = (DenseDoubleMatrix1D) matrix.viewRow(row);
@@ -569,7 +639,7 @@ public class DoubleTable extends GroovyObjectSupport{
 	//}
 
 	
-	/****************************************************
+	/***************************************************
   * Returns a view corresponding to the given range. 
   */ 
 /*
@@ -604,10 +674,7 @@ public class DoubleTable extends GroovyObjectSupport{
 		int col = getColIdx(colStr);
 		return(new DoubleVector(matrix.viewColumn(col),rowNames,rowName2Idx));
 	}
-	
-	
-	
-	
+				
 	public DoubleVector getRow(String rowStr){
 		int row = getRowIdx(rowStr);
 		return(new DoubleVector(matrix.viewRow(row),colNames,colName2Idx));
@@ -650,7 +717,15 @@ public class DoubleTable extends GroovyObjectSupport{
 
 
 
-	/***
+//import org.codehaus.groovy.runtime.DefaultGroovyMethodsSupport.RangeInfo;
+
+// KJD GroovyLab and the Matrix package might be mature enough that this should be 
+// backed with that.  Basically end up having a Table as a frame for a Matrix like in R. 
+// http://code.google.com/p/groovylab/
+
+
+
+	/**
 	* Provide support for iterating over table by rows...
 	public DoubleTable each(Closure closure) {
 		for (int r = 0;r < numRows;r++) {
@@ -663,7 +738,7 @@ public class DoubleTable extends GroovyObjectSupport{
 	}
 
 
-	/***
+	/**
 	* Provide support for iterating over table by rows...
 
 	public DoubleTable eachByRows(Closure closure) {
@@ -678,7 +753,7 @@ public class DoubleTable extends GroovyObjectSupport{
 		*/
 
 
-	/***
+	/**
 	* Provide support for iterating over table by columns...
 	public DoubleTable eachByCols(Closure closure) {
 		for (int c = 0;c < numCols;c++) {
@@ -692,7 +767,7 @@ public class DoubleTable extends GroovyObjectSupport{
 		*/
 			
 
-	/***
+	/**
 	* Provide support for iterating over columns
 	*
 	* Note: I should be able to provide my own
@@ -710,7 +785,7 @@ public class DoubleTable extends GroovyObjectSupport{
 	}
 	*/
 	
-	/***
+	/**
 	* Provide support for iterating over rows
 
 	public DoubleTable eachRow(Closure closure) {
