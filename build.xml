@@ -10,14 +10,18 @@
         <delete dir="doc/"/>
     </target>
 
-	
-	<mkdir dir="${env.HOME}/.groovy/lib"/>
 
+ <!--	
+	<mkdir dir="${env.HOME}/.groovy/lib"/>
+-->
+	 
+	<mkdir dir="${user.home}/.groovy/lib"/>
+	 
 	<fileset id="groovylib.jars" dir="${env.GROOVY_HOME}/lib/">
 		<include name="**/*.jar"/>
 	</fileset>
 	
-	<fileset id="mygroovylib.jars" dir="${env.HOME}/.groovy/lib/">
+	<fileset id="mygroovylib.jars" dir="${user.home}/.groovy/lib/">
 		<include name="**/*.jar"/>
 	</fileset>
 	
@@ -51,16 +55,16 @@
   </target>
 
 	 <target name="qinstall" depends="jar">
- 		<copy file="target/jar/durbinlib.jar" tofile="${env.HOME}/.groovy/lib/durbinlib.jar"/>
- 		<copy todir="${env.HOME}/.groovy/lib/">
+ 		<copy file="target/jar/durbinlib.jar" tofile="${user.home}/.groovy/lib/durbinlib.jar"/>
+ 		<copy todir="${user.home}/.groovy/lib/">
 			<fileset dir="lib/"/>
 		</copy>
     </target>
 
 
     <target name="install" depends="clean,jar">
- 		<copy file="target/jar/durbinlib.jar" tofile="${env.HOME}/.groovy/lib/durbinlib.jar"/>
- 		<copy todir="${env.HOME}/.groovy/lib/">
+ 		<copy file="target/jar/durbinlib.jar" tofile="${user.home}/.groovy/lib/durbinlib.jar"/>
+ 		<copy todir="${user.home}/.groovy/lib/">
 			<fileset dir="lib/"/>
 		</copy>
     </target>
