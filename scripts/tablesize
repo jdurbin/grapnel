@@ -20,4 +20,4 @@ new File(fileName).withReader{r->
 	numCols = fields.size() -1	
 }
 
-println "$fileName is $numRows x $numCols table."
+println "$fileName: $numRows x $numCols"
