@@ -34,6 +34,11 @@ options = ParseOptions(args)
 if (options.separator) sep = options.separator
 else sep = FileUtils.determineSeparator(options.fileName)
 
+if (options.qregex){
+	sep = /,(?=([^\"]|\"[^\"]*\")*$)/
+}
+
+
 // Read the data in as a Table...
 dt = new Table(options.fileName,sep,bFirstColInTable=true)
 
@@ -217,6 +222,7 @@ def ParseOptions(args){
 	try{ 
 		parser.with{
 			optional 's','separator',[description: 'Force separator to be this character.']
+			flag 'q','qregex',[default:false,description: 'Use regex to capture quoted comma lists as single field.']
 	  	flag 'h','help',[default:false,description: 'Print script help.']
 			remainder{			
 				if(!it) throw new Exception("Must specify a file.");
