@@ -37,6 +37,13 @@ class OnlineTable{
 	// No separator given, try to figure it out...
 	def OnlineTable(String f){
 		sep = FileUtils.determineSeparator(f)
+		
+		// If separator is a comma, use regex that allows commas inside 
+		// of quotes to not split into fields. 
+		if (sep == ","){
+			sep = /,(?=([^\"]|\"[^\"]*\")*$)/
+		}
+						
 		fileName = f
 		getHeader(f)
 	}			
@@ -47,7 +54,9 @@ class OnlineTable{
 			r.eachLine{rowStr->
 				def rfields = rowStr.split(sep,-1)
 				row = [:]
-				rfields.eachWithIndex{f,i->row[headings[i]]=f}
+				rfields.eachWithIndex{f,i->
+					row[headings[i]]=f
+				}
 				c(row)
 			}
 		}

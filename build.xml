@@ -57,7 +57,7 @@
 
 
 			<!-- Installs durbinlib and dependencies into ~/.groovy/lib/ -->
-			<target name="install" depends="clean,jar">
+			<target name="localinstall" depends="clean,jar">
 				<copy file="target/jar/durbinlib.jar" tofile="${user.home}/.groovy/lib/durbinlib.jar"/>
 				<copy todir="${user.home}/.groovy/lib/">
 					<fileset dir="lib/"/>
@@ -65,7 +65,7 @@
 			</target>
 
 			<!-- Installs durbinlib to target/jar/	-->
-			<target name="localinstall" depends="clean,jar">
+			<target name="install" depends="clean,jar">
 				<copy todir="target/jar/">
 					<fileset dir="lib/"/>
 				</copy>
