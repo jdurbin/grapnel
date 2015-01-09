@@ -43,6 +43,8 @@
 * 
 */
 public class Make{
+
+	def scriptObj;
 	
 	/**
 	* Runs the commands specified in args. 
@@ -51,6 +53,9 @@ public class Make{
 	* @param args  The command line arguments to use. 
 	*/ 
 	static def runCommands(obj,args){		
+		
+		scriptObj = obj
+		
 		// Go through the arguments invoking each one in turn. 
 		// This allows syntax like ./make clean mask blastz 
 		// 
@@ -68,7 +73,21 @@ public class Make{
 		}		
 	}
 	
-	
+	static def printTargets(){
+		def sc = scriptObj
+		List<String> declaringClassOnlyMethods = sc.metaClass.methods.findAll { MetaMethod method ->
+			if(method.declaringClass.name == sc.class.name) {
+				method.name
+			}
+		}
+
+		println "Available targets:"
+
+		declaringClassOnlyMethods.each{
+			if (it.name.contains("swapInit") || it.name.contains("main")|| it.name.contains("targets")) return;
+			println "\t"+it.name
+		}
+	}	
 	
 	// Applies a closure to each input file writing the output
 	// to a corresponding output file...
