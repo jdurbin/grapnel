@@ -50,7 +50,7 @@ public class Make{
 	* @param obj   The object containing the methods (usually this script object)
 	* @param args  The command line arguments to use. 
 	*/ 
-	def static runCommands(obj,args){			
+	def static runCommands(obj,args){							
 		
 		// Go through the arguments invoking each one in turn. 
 		// This allows syntax like ./make clean mask blastz 
@@ -63,8 +63,14 @@ public class Make{
 				def varValue = obj."$varName"
 				obj.invokeMethod(methodName,varValue)
 			}else{
-				def methodName = arg
-				obj.invokeMethod(methodName,null)
+				
+				// If the method name is targets, print the targets, 
+				// otherwise execute the command. 
+				if (arg == "targets") printTargets(obj)
+				else{				
+					def methodName = arg
+					obj.invokeMethod(methodName,null)
+				}
 			}
 		}		
 	}
