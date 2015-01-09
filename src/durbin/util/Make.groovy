@@ -54,7 +54,7 @@ public class Make{
 	*/ 
 	static def runCommands(obj,args){		
 		
-		scriptObj = obj
+		def scriptObj = obj
 		
 		// Go through the arguments invoking each one in turn. 
 		// This allows syntax like ./make clean mask blastz 
