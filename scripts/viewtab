@@ -102,6 +102,17 @@ def popupMenuItems = {
 			histogramSelectedCols(thetab,selectedCols)
 		}
 	})
+	
+	menuItem(text:"Scatterplot Selection",actionPerformed:{
+		if (bRowSelection){
+			err.println "scatterplot rows not yet implemented"
+			//selectedRows = thetab.getSelectedRows()
+			//scatterPlotSelectedRows(thetab,selectedRows)
+		}else{
+			selectedCols = thetab.getSelectedColumns()
+			scatterPlotSelectedCols(thetab,selectedCols)
+		}
+	})
 }
 
 
@@ -116,8 +127,11 @@ def isOSX() {
 	return osName.contains("OS X");
 }
 
-def histogramSelectedRows(thetab,selectedRows){
-	selectedRows.each{rowIdx->
+def histogramSelectedRows(thetab,selectedRows){	
+	selectedRows.each{rowIdx->	
+		// Get the name of the row...
+		rowName = thetab.getValueAt(rowIdx,0)
+		
 		cols = thetab.getColumnCount();
 		values = []
 		for(int col = 0;col < cols;col++){
@@ -127,43 +141,80 @@ def histogramSelectedRows(thetab,selectedRows){
 				values.add(v)
 			}catch(Exception e){
 				// Don't do anything...
-				err.println "Can't histogram, column contains non-numeric values."
-				return;
+				err.println "WARNING: row $rowName contains non-numeric values."
 			}					
 		}
-	
-		// Get the name of the row...
-		rowName = thetab.getValueAt(rowIdx,0)
-		println "rowName = $rowName"
+			
 		hist = hist(rowName,values)
 		showTableChart(hist,"Histogram of $rowName")	
 	}
 }
 
-def histogramSelectedCols(thetab,selectedCols){
+def histogramSelectedCols(thetab,selectedCols){			
 	selectedCols.each{colIdx->
-		rows = thetab.getRowCount();
-		values = []
-		for(int row = 0;row < rows;row++){
-			o = thetab.getValueAt(row,colIdx)
-			try{
-				v = o as double
-				values.add(v)
-			}catch(Exception e){				
-				// Don't do anything...
-				err.println "Can't histogram, column contains non-numeric values."
-				return;
-			}			
-		}
-	
 		// Get the name of the column...
 		th = thetab.getTableHeader();  
 		tcm = th.getColumnModel(); 
 		tc = tcm.getColumn(colIdx)
-		colName = tc.getHeaderValue()		
+		colName = tc.getHeaderValue()	
+				
+		rows = thetab.getRowCount();
+		values = getRowValues(thetab,colIdx)
+		
+		if (values.size() == 0) return;
+		
 		hist = hist(colName,values)
 		showTableChart(hist,"Histogram of $colName")	
 	}
+}
+
+def scatterPlotSelectedCols(thetab,selectedCols){			
+	
+	if(selectedCols.size() != 2){
+		err.println "ERROR: Can only scatter plot exactly two columns."
+		return;
+	}
+	
+	col0 = selectedCols[0]
+	colName0 = getColName(thetab,col0)
+	
+	col1 = selectedCols[1]
+	colName1 = getColName(thetab,col1)
+
+	values0 = getRowValues(thetab,col0)
+	values1 = getRowValues(thetab,col1)
+
+	if (values0.size() != values1.size()){
+		err.println "ERROR: columns do not contain same number of values."
+	}
+		
+	scatter = xyplot("$colName0 vs $colName1",colName0,colName1,values0,values1)
+	showTableChart(scatter,"Scatterplot of $colName0 vs $colName1")	
+}
+
+
+def getColName(thetab,colIdx){
+	th = thetab.getTableHeader();  
+	tcm = th.getColumnModel(); 
+	tc = tcm.getColumn(colIdx)
+	colName = tc.getHeaderValue()	
+	return(colName)
+}
+
+def getRowValues(thetab,colIdx){
+	def values = []		
+	def rows = thetab.getRowCount();
+	for(int row = 0;row < rows;row++){
+		o = thetab.getValueAt(row,colIdx)
+		try{
+			v = o as double
+			values.add(v)
+		}catch(Exception e){				
+			// Don't do anything...
+			err.println "WARNING: column ${getColName(colIdx)} contains non-numeric values."
+		}			
+	}
+	return(values)
 }
 
 /****

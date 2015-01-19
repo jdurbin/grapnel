@@ -16,6 +16,12 @@ new File(fileName).withReader{r->
 	else if (line.contains("\t")) sep = "\t"
 	else {err.println "$fileName does not appear to be a csv or tab file.";System.exit(1)}
 	
+	// If it's a csv, go ahead and handle quoted comma lists too... not sure how
+	// much this slows it down. 
+	if (sep ==","){
+		sep = /,(?=([^\"]|\"[^\"]*\")*$)/
+	}
+	
 	fields = line.split(sep)
 	numCols = fields.size() -1	
 }

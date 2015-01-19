@@ -6,18 +6,28 @@ err = System.err
 
 if (args.size() < 2){
 	err.println """
-	cutbyname fileName columnName
+	cutbyname fileName columnName {columnName2,columnName3...}
 	
-	Cuts a single column out of a table file.  To cut multiple columns check out csvsql.
+	Cuts one or more columns out of a table file.  For more complex queries see csvsql.
 	
-	e.g. cutbyname BRCA.clin days_to_death.
+	e.g. 
+	
+	cutbyname BRCA.clin days_to_death.
+	
+	cutbyname BRCA.clin patient days_to_death
 	"""
 	System.exit(0)
 }
 
 fileName = args[0]
-cutName = args[1]
+cutNames = args[1..-1]
 sep = FileUtils.determineSeparator(fileName) as String
+
+// If it's a csv, go ahead and handle quoted comma lists too...
+if (sep ==","){
+	sep = /,(?=([^\"]|\"[^\"]*\")*$)/
+}
+
 
 new File(fileName).withReader{r->
 	headerStr = r.readLine()
@@ -25,9 +35,20 @@ new File(fileName).withReader{r->
 	name2IdxMap = [:]
 	headings.eachWithIndex{h,i->name2IdxMap[h] = i}
 	
-	cutIdx = name2IdxMap[cutName]
-	println headings[cutIdx]
+	headingElements = []
+	indices = []
+	cutNames.each{cutName->
+		cutIdx = name2IdxMap[cutName]
+		indices<<cutIdx
+		headingElements << headings[cutIdx]
+	}
+	println headingElements.join(sep)
+					
 	r.splitEachLine(sep){fields->
-		println fields[cutIdx]
+		allfields = []
+		indices.each{i->
+			allfields<<fields[i]
+		}
+		println allfields.join(sep)
 	}	
 }
