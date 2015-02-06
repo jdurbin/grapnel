@@ -13,6 +13,10 @@ class TableUtils{
 		def allRowNames = [] as Set
 		def allColNames = [] as Set
 		fileNames.each{file->
+			if (!file.exists() || (file.length() == 0)){
+				err.println "$file does not exist or has size 0."
+				return;
+			}			
 			err.println "Pre-scanning $file..."
 			new File(file).withReader{r->
 				def colNames = parseColNamesFromHeading(r.readLine())
