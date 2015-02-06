@@ -185,8 +185,9 @@ public class Table extends GroovyObjectSupport{
 	}	
 		
 	/**
-		* Add a column to this table
-		*/ 
+	* Add a column to this table.  
+	* Inefficient convenience function. Creates a new table and copies all the values!
+	*/ 
 	public Table addCol(Collection<Object> col,int colIdx,String colName){
 		Table newt = new Table(rows(),cols()+1);
 		newt.rowNames = rowNames.clone();

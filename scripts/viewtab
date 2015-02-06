@@ -1,5 +1,14 @@
 #!/usr/bin/env groovy 
 
+/*
+	TODO Detect 99% numeric columns and perform numeric sort on those columns
+	TODO Add overall descriptive statistics (at least to the plots)
+	TODO "Pin" plots so that you can select different rows and plot will update. 
+	TODO Run functions on rows... for example BimodalityFilter, and get some kind of output. 
+	TODO Move some of this code into a library so that it can get more complex. 
+	TODO Add search facility (e.g. search row names for PTEN)
+*/
+
 import groovy.swing.SwingBuilder
 import javax.swing.JTable
 import javax.swing.*

@@ -44,7 +44,7 @@ files.each{file->
 			if (gene.contains("?")) return; // Skip genes with ? in name...
 			//gene = "${gene}_nonsyn" as String// hack to fix gene names...
 			vals.eachWithIndex{v,i->
-				if ((v == null) || (v == "null")) v="NA"
+				if ((v == null) || (v == "null")) v=options.defaultValue
 				combinedTable.set(gene,patients[i],v)
 			}
 		}
