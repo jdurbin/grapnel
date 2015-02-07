@@ -12,13 +12,14 @@ class TableUtils{
 		// scanning the input files...	
 		def allRowNames = [] as Set
 		def allColNames = [] as Set
-		fileNames.each{file->
+		fileNames.each{fileName->
+			def file = new File(fileName)
 			if (!file.exists() || (file.length() == 0)){
-				err.println "$file does not exist or has size 0."
+				err.println "$fileName does not exist or has size 0."
 				return;
 			}			
-			err.println "Pre-scanning $file..."
-			new File(file).withReader{r->
+			err.println "Pre-scanning $fileName ..."
+			file.withReader{r->
 				def colNames = parseColNamesFromHeading(r.readLine())
 				allColNames.addAll(colNames)
 				r.eachLine{line->
@@ -43,10 +44,14 @@ class TableUtils{
 
 		// Initialize table to contain the specified null value. 
 		combinedTable.assign(defaultValue)
-
-		files.each{file->
-			err.println "Processing $file..."
-			new File(file).withReader{r->
+		files.each{fileName->
+			def file = new File(fileName)
+			if (!file.exists() || (file.length() == 0)){
+				err.println "$fileName does not exist or has size 0."
+				return;
+			}			
+			err.println "Processing $fileName..."
+			file.withReader{r->
 				def colNames = parseColNamesFromHeading(r.readLine())
 				r.eachLine{line->
 					def rowName,vals
