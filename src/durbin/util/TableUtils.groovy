@@ -4,10 +4,13 @@ class TableUtils{
 
 	def err = System.err
 
-	def defaultValue = "NA"
+	def defaultValue = "?"
 		
-		
-	def prescanTables(fileNames){
+	/**
+	* Finds the union of all column names and all row names for the given list of 
+	* tables. 
+	*/ 
+	def unionTableIDs(fileNames){
 		// Figure out the size of the output table we're going to need by 
 		// scanning the input files...	
 		def allRowNames = [] as Set
@@ -39,7 +42,14 @@ class TableUtils{
 	* rowNames is the union of all rowNames and colNames is the union of all column names. 
 	* Assumes the files have been pre-scanned to determine the union size. 
 	*/ 
-	def combineTables(files,combinedRowNames,combinedColNames){			
+	def combineTables(files,combinedRowNames,combinedColNames){		
+		
+		def rowSet = [] as Set
+		def colSet = [] as Set
+		
+		rowSet.addAll(combinedRowNames)
+		colSet.addAll(combinedColNames)
+			
 		def combinedTable = new Table(combinedRowNames as ArrayList,combinedColNames as ArrayList)
 
 		// Initialize table to contain the specified null value. 
@@ -54,10 +64,18 @@ class TableUtils{
 			file.withReader{r->
 				def colNames = parseColNamesFromHeading(r.readLine())
 				r.eachLine{line->
-					def rowName,vals
+					def rowName,vals										
 					(rowName,vals) = parseRowValuesFromLine(line,colNames)
+					
+					// Skip rows we encounter that aren't in our rowSet
+					if (!rowSet.contains(rowName)) return;
+					
 					vals.eachWithIndex{v,i->
 						if ((v == null) || (v == "null")) v=defaultValue
+						
+						// Skip any columns not in our colset
+						// Optimization: This buried test might cost us... 
+						if (!colSet.contains(colNames[i])) return;						
 						combinedTable.set(rowName,colNames[i],v)
 					}
 				}
