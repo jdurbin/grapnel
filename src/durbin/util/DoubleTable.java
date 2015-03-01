@@ -339,6 +339,10 @@ public class DoubleTable extends GroovyObjectSupport{
 			
 	}
 	
+	public void assign(Double d){		
+		matrix.assign(d);		
+	}
+	
 	/**
   * Parse the column names from a line. 
   */ 
