@@ -286,7 +286,23 @@ public class DoubleTable extends GroovyObjectSupport{
 		DoubleMatrix2D diceView = matrix.viewDice();
 		ttable.matrix = (DenseDoubleMatrix2D) diceView.copy();
 		return(ttable);
-	}	
+	}
+	
+	public DoubleTable subset(int row,int col,int height, int width){
+		DoubleTable ttable = new DoubleTable(height,width);
+		DoubleMatrix2D partView = matrix.viewPart(row,col,height,width);
+		ttable.matrix = (DenseDoubleMatrix2D) partView.copy();
+		ttable.rowNames = new String[height];
+		ttable.colNames = new String[width];
+		for(int i = 0;i < height;i++){
+			ttable.rowNames[i] = rowNames[row+i];			
+		}
+		for(int i = 0;i < width;i++){
+			ttable.colNames[i] = colNames[col+i];
+		}		
+		return(ttable);		
+	}
+		
 	
 	/**
 	* Returns a new DoubleTable with rows reordered according to the given list.
@@ -585,6 +601,9 @@ public class DoubleTable extends GroovyObjectSupport{
 		return(matrix);
 		
 	}
+	
+	
+	
 
 	public Double get(int row,int col) {
 		return(matrix.getQuick(row,col));
