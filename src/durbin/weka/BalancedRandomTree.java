@@ -585,12 +585,13 @@ WeightedInstancesHandler, Randomizable, Drawable {
    *             if something goes wrong or the data doesn't fit
    */
   public void buildClassifier(Instances fullData) throws Exception {
+	  System.err.println("buildClassifier on "+fullData.numInstances()+" instances.");
 	
 		// Create a balanced subsample of the fullData... either by downsampling the major class
 		// or resampling the minor class. 		
 		Instances data;
 		
-		/** KJD KJD KJD TEMPORARY FOR TESTING 
+		// KJD KJD KJD TEMPORARY FOR TESTING 
 		if (m_DownsampleMajor){
 			data = BalancedSubsampler.balanceSubsampleMinorMajor(fullData,m_BootstrapFraction,m_rng);
 		}else{
@@ -602,7 +603,6 @@ WeightedInstancesHandler, Randomizable, Drawable {
 			resampleFilter.setRandomSeed(m_rng.nextInt());
 			data = Filter.useFilter(fullData,resampleFilter);
 		}
-		*/
 		data = fullData;
 	
     // Make sure K value is in range
