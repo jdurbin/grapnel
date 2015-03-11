@@ -544,18 +544,18 @@ throws Exception {
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
 			Instances train = CVUtils.trainCV(data,foldSet,i);
 			
-			//System.err.println("Eval: train.size="+train.numInstances());
+			System.err.println("Eval: train.size="+train.numInstances());
 			
 			Instances test = CVUtils.testCV(data,foldSet,i);		
-			//System.err.println("\t\tDEBUG Test/Train instances created:");
+			System.err.println("\t\tDEBUG Test/Train instances created:");
 			//printHeapSpace();
-			//System.err.println("Eval: evalsingle fold...");
+			System.err.println("Eval: evalsingle fold...");
 			
     	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
 			
-			//System.err.println("Eval: evalsingle fold DONE.");
+			System.err.println("Eval: evalsingle fold DONE.");
 			
-			//System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
+			System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
 			//printHeapSpace();
   	}
 	}
