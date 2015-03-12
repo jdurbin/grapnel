@@ -554,9 +554,7 @@ throws Exception {
 			System.err.println("\t\t\tDEBUG Test/Train instances created:"+test.numInstances());
 			//printHeapSpace();
 			System.err.println("\t\t\tEval: evalsingle fold...");
-			
-			// KJD... this part seems to go pretty snappily with Balanced Random Forest...
-			// but there is a big pause getting to here...
+						
     		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
 			
 			System.err.println("Eval: evalsingle fold DONE.");
@@ -821,7 +819,8 @@ throws Exception {
 * 
 */ 
 public void evaluateSingleFold(Instances data, Instances train,Instances test,Classifier classifier,Object... forPredictionsPrinting) throws Exception{
-		
+	
+	System.err.println("\t\t\t\tevalSingleFold (setPriors,copyClassifier)")	
 	// Create a list to store classifiers (Evaluation2)
 	setPriors(train);
 	
@@ -836,9 +835,9 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//}	
 	
 	// copiedClassifier is a FilteredClassifier...
-	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;
+	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;	
 	
-	//System.err.println("asClassifier.toStroing():"+asClassifier.toString());	
+	System.err.println("asClassifier.toString():"+asClassifier.toString());	
 	AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
 	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2	
 	ASEvaluation eval = asClassifier.getEvaluator();
@@ -851,19 +850,23 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	// so we extract just what we need to know from each attributeSelection and save that...
 	// Attribute selection is performed on training set so provide training set as reference for 
 	// the meaning of attribute selection indices...
+	System.err.print("\t\t\t\tLight weight attribute selection....");
 	LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
+	System.err.println("done");
 
 	//double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
 	//LightWeightAttributeSelection thinAttributes = new LightWeightAttributeSelection(rankedAttrs);
 	//System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
   m_cvAttributeSelections.add(lwAttributes);
 	
+	  System.err.print("\t\t\t\t evaluateModel....");
 	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+	  System.err.println("done.");
 	
 	// If there is a non-null fourth element, it is assumed to be a second buffer to store the evaluations on the 
 	// training samples.  This is a bit of a hack, but allows me to touch as little of the code as possible...
 	if (forPredictionsPrinting[3] != null){
-
+		System.err.println("!!!Evaluating model on training data...");
 		trainingEval = new Evaluation2(data);
 		
 		StringBuffer saveTestBuf = (StringBuffer)forPredictionsPrinting[0]; // Save the test buffer...
@@ -871,6 +874,7 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 		trainingEval.evaluateModel(copiedClassifier,train,forPredictionsPrinting); // evaluate model on training data. 
 		forPredictionsPrinting[3] = forPredictionsPrinting[0]; // redundant, but makes me feel better. 
 		forPredictionsPrinting[0] = saveTestBuf;  // Restore test buffer
+		System.err.println("!!!done");
 	}
 	
 	copiedClassifier = null; // Encourage garbage collection.
