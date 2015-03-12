@@ -136,11 +136,13 @@ public class TableFileLoader {
 	*/ 
 	public static Instances readNumeric(String fileName,String relationName,String delimiter) throws Exception {		
 		
+		System.err.println("HEY!");
+		
 		int numAttributes = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
 		String[] attrNames = new String[numAttributes];
     
 		// Read the col headings and figure out the number of columns in the table..
-		BufferedReader reader = new BufferedReader(new FileReader(fileName));
+		BufferedReader reader = new BufferedReader(new FileReader(fileName),4194304);
 		String line = reader.readLine();
 		String[] instanceNames = parseColNames(line,delimiter);
 		int numInstances = instanceNames.length;
@@ -148,29 +150,32 @@ public class TableFileLoader {
 		System.err.print("reading "+numAttributes+" x "+numInstances+" table..");
 		
 		// Create an array to hold the data as we read it in...
-		double dataArray[][] = new double[numAttributes][numInstances];
+		double dataArray[][] = new double[numAttributes][numInstances];	
 			
 		// Populate the matrix with values...
 		String valToken="";		
 		try{
 			int rowIdx = 0;
-			while ((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {				
+							
 				String[] tokens = line.split(delimiter,-1);
 				attrNames[rowIdx] = tokens[0].trim();
-		  	for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
+				for(int colIdx = 0;colIdx < (tokens.length-1);colIdx++){
 					valToken = tokens[colIdx+1];
-					double value;									
+					double value;
+					
 					if (valToken.equals("null")){
 						value = Instance.missingValue();
 					} else if (valToken.equals("?")){
 						value = Instance.missingValue();
 					}else if (valToken.equals("NA")){
-						value = Instance.missingValue();
+						 value = Instance.missingValue();
 					}else if (valToken.equals("")){
 						value = Instance.missingValue();
-					}else value = Double.parseDouble(valToken);
+					}else value = DoubleParser.lightningParse(valToken); // faster double parser with MANY assumptions
+					//}else value = Double.parseDouble(valToken);										
 					dataArray[rowIdx][colIdx] = value;
-				}     
+				} 
 				rowIdx++;
 			}	
 		}catch(NumberFormatException e){
@@ -198,7 +203,8 @@ public class TableFileLoader {
 		// Fill the instances with data...	
 		// For each instance...
 		for (int c = 0;c < numInstances;c++) {
-			double[] vals = new double[data.numAttributes()];	// Even nominal values are stored as double pointers.      
+			double[] vals = new double[data.numAttributes()];	// Even nominal values are stored as double pointers. 
+									     
 			for (int r = 0;r < numAttributes;r++) {			    
 				double val = dataArray[r][c];
 				vals[r] = val;

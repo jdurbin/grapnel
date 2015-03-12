@@ -67,7 +67,7 @@ import weka.attributeSelection.*
 *	
 *	pipeline.appendSummary(out,jobIdx,instances)
 *	pipeline.appendFeatures(fout,jobIdx,instances,options.maxFeaturesOut as Integer)
-*	pipeline.APPENDsAMPLEs(sout, jobIdx,instances)
+*	pipeline.appendSamples(sout, jobIdx,instances)
 *	
 *}
 *</pre>
@@ -1016,10 +1016,10 @@ class WekaMine{
     err.print "Loading data from $dataFileName..."
     TableFileLoader loader = new TableFileLoader()
     loader.setAddInstanceNamesAsFeatures(true)
-		def relationName = dataFileName;
+	def relationName = dataFileName;
 		
-		Instances data = loader.readNumeric(dataFileName,relationName,"\t");		
-		err.println "done."
+	Instances data = loader.readNumeric(dataFileName,relationName,"\t");		
+	err.println "done."
     return(data)
   }
  	
