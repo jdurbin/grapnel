@@ -828,6 +828,10 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//try{
 	copiedClassifier = Classifier.makeCopy(classifier);
 	
+	System.err.println("\t\t\t\tClassifier.toString = "+copiedClassifier.toString());
+	
+	// All the slowness is concentrated here.... however.... Building each of the
+	// random trees of the forest goes very very quickly... so.. what is it?
 	System.err.println("\t\t\t\t TRAIN CLASSIFIER on "+train.numInstances()+" samples...");	
 	copiedClassifier.buildClassifier(train);
 	System.err.println("\t\t\t\t DONE TRAIN CLASSIFIER");
