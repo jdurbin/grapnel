@@ -837,11 +837,12 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	// copiedClassifier is a FilteredClassifier...
 	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;	
 	
-	System.err.println("asClassifier.toString():"+asClassifier.toString());	
+	System.err.print("\t\t\t\tGet attribute selected classifier...");
 	AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
 	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2	
 	ASEvaluation eval = asClassifier.getEvaluator();
 	ASSearch search = asClassifier.getSearch();
+	System.err.println("done.");
 	
 	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
 	//System.err.println("transformedHeader:"+pceval.transformedHeader());
