@@ -603,7 +603,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
 			resampleFilter.setRandomSeed(m_rng.nextInt());
 			data = Filter.useFilter(fullData,resampleFilter);
 		}
-		System.err.println("After subsampling: "+data.numInstances()+" instances.");
+		System.err.println("\t\t\t\t\tAfter subsampling: "+data.numInstances()+" instances.");
 		//data = fullData;
 	
     // Make sure K value is in range

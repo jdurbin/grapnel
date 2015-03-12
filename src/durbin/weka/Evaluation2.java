@@ -826,9 +826,11 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	
 	Classifier copiedClassifier=null;
 	//try{
-		copiedClassifier = Classifier.makeCopy(classifier);
-		
-		copiedClassifier.buildClassifier(train);
+	copiedClassifier = Classifier.makeCopy(classifier);
+	
+	System.err.println("\t\t\t\t TRAIN CLASSIFIER on "+train.numInstances()+" samples...");	
+	copiedClassifier.buildClassifier(train);
+	System.err.println("\t\t\t\t DONE TRAIN CLASSIFIER");
 	//}catch(Exception e){
 	//	System.err.println("DEBUG2 Exception occurred:\n"+e);
 	//	System.err.println(train);

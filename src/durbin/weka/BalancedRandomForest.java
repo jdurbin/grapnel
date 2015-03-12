@@ -516,12 +516,16 @@ public class BalancedRandomForest
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
+	System.err.print("\t\t\t\tDelete with missing class...");
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+    System.err.println("done.");
+	
+	System.err.print("\t\t\t\t new BalancedRandomTree");
     m_bagger = new Bagging();
-		m_rng = new Random();
+	m_rng = new Random();
     BalancedRandomTree rTree = new BalancedRandomTree(m_DownsampleMajor,m_BootstrapFraction,m_rng);
+	System.err.println("done.");
 
     // set up the random tree options
     m_KValue = m_numFeatures;
@@ -535,9 +539,9 @@ public class BalancedRandomForest
     m_bagger.setNumIterations(m_numTrees);
     m_bagger.setCalcOutOfBag(true);
 	
-	System.err.println("BalancedRandomForest m_bagger.buildClassifier...");
+	System.err.println("\t\t\t\tBalancedRandomForest m_bagger.buildClassifier...");
     m_bagger.buildClassifier(data);
-	System.err.println("BalancedRandomForest done.");
+	System.err.println("\t\t\t\tBalancedRandomForest done.");
   }
 
   /**
