@@ -820,7 +820,7 @@ throws Exception {
 */ 
 public void evaluateSingleFold(Instances data, Instances train,Instances test,Classifier classifier,Object... forPredictionsPrinting) throws Exception{
 	
-	System.err.println("\t\t\t\tevalSingleFold (setPriors,copyClassifier)")	
+	System.err.println("\t\t\t\tevalSingleFold (setPriors,copyClassifier)");	
 	// Create a list to store classifiers (Evaluation2)
 	setPriors(train);
 	
