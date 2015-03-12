@@ -136,7 +136,6 @@ public class TableFileLoader {
 	*/ 
 	public static Instances readNumeric(String fileName,String relationName,String delimiter) throws Exception {		
 		
-		System.err.println("HEY!");
 		
 		int numAttributes = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
 		String[] attrNames = new String[numAttributes];
