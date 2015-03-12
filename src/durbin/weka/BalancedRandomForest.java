@@ -534,7 +534,10 @@ public class BalancedRandomForest
     m_bagger.setSeed(m_randomSeed);
     m_bagger.setNumIterations(m_numTrees);
     m_bagger.setCalcOutOfBag(true);
+	
+	System.err.println("BalancedRandomForest m_bagger.buildClassifier...");
     m_bagger.buildClassifier(data);
+	System.err.println("BalancedRandomForest done.");
   }
 
   /**

@@ -585,7 +585,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
    *             if something goes wrong or the data doesn't fit
    */
   public void buildClassifier(Instances fullData) throws Exception {
-	  System.err.println("buildClassifier on "+fullData.numInstances()+" original instances.");
+	  System.err.println("\t\t\t\tBalancedRandomTree buildClassifier on "+fullData.numInstances()+" original instances.");
 	
 		// Create a balanced subsample of the fullData... either by downsampling the major class
 		// or resampling the minor class. 		

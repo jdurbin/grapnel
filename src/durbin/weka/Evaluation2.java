@@ -501,7 +501,7 @@ public double[][] confusionMatrix() {
 public void crossValidateModelWithGivenFolds(Classifier classifier,
 Instances data, FoldSets allFoldSets,Object... forPredictionsPrinting) 
 throws Exception {
-	
+
   // We assume that the first element is a StringBuffer, the second a Range (attributes
   // to output) and the third a Boolean (whether or not to output a distribution instead
   // of just a classification)
@@ -542,16 +542,22 @@ throws Exception {
   	for (int i = 0; i < numFolds; i++) {
 			//printHeapSpace();
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
+			System.err.println("*****Delay??? CVUtils.trainCV");
 			Instances train = CVUtils.trainCV(data,foldSet,i);
+			System.err.println("*****Delay???");
 			
-			System.err.println("Eval: train.size="+train.numInstances());
+			System.err.println("\t\t\tEval: train.size="+train.numInstances());
 			
+			System.err.println("*****Delay??? CVUtils.testCV");
 			Instances test = CVUtils.testCV(data,foldSet,i);		
-			System.err.println("\t\tDEBUG Test/Train instances created:");
+			System.err.println("*****Delay???");
+			System.err.println("\t\t\tDEBUG Test/Train instances created:"+test.numInstances());
 			//printHeapSpace();
-			System.err.println("Eval: evalsingle fold...");
+			System.err.println("\t\t\tEval: evalsingle fold...");
 			
-    	evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
+			// KJD... this part seems to go pretty snappily with Balanced Random Forest...
+			// but there is a big pause getting to here...
+    		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
 			
 			System.err.println("Eval: evalsingle fold DONE.");
 			
