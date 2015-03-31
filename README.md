@@ -5,7 +5,7 @@
 * **durbin.charts:**  Support for common kinds of charts: line chart, xyplot, hist.  Based on [JFreeChart](http://www.jfree.org/jfreechart/) but includes lots of sugar to make it easier to make commonly used charts and support for saving them in various formats. Also has support for creating a chart and displaying it in a GUI with a single command. 
 
 * **durbin.stat:**  Statistical classes.  
-    * **BimodalMixtureModel** Class to compute parameters of a mixture model given data (based on [SSJ](http://www.iro.umontreal.ca/~simardr/ssj/indexe.html)) and a bimodality index from that. 
+    * **MixtureModel** Class to compute parameters of a mixture model given data (based on [SSJ](http://www.iro.umontreal.ca/~simardr/ssj/indexe.html)), and to classify data into most-likely mixtures. 
     * **KolmogorovSmirnov** class to compute KolmogorovSmirnov statistics from data.<br><br>
 * **durbin.util:** Core functionality of durbinlib.  
     * **DoubleTable**  Implements a high-performance 2D table of doubles accessible by index or name. Backed by [colt] (http://acs.lbl.gov/software/colt/) DenseDoubleMatrix.  Includes syntatic sugar to allow [] notation, eachRow closures, etc. from Groovy and functionality to read/write tables to files in a fairly high performance way. 
@@ -27,7 +27,7 @@
     * **BimodalityIndexFilter** Model attributes as a mixture model, replace each value with a bimodality index based on that model.
 <br><br>
 * **scripts** Collection of command-line scripts (groovy). 
-    * **[csvsql](https://github.com/jdurbin/durbinlib/wiki/csvsql)**  Fairly polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
+    * **[csvsql](https://github.com/jdurbin/durbinlib/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
  
         ```sql
         csvsql "select score from people.csv where age < 40"
