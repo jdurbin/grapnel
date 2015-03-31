@@ -171,8 +171,8 @@ public class TableFileLoader {
 						 value = Instance.missingValue();
 					}else if (valToken.equals("")){
 						value = Instance.missingValue();
-					}else value = DoubleParser.lightningParse(valToken); // faster double parser with MANY assumptions
-					//}else value = Double.parseDouble(valToken);										
+						//}else value = DoubleParser.lightningParse(valToken); // faster double parser with MANY assumptions
+					}else value = Double.parseDouble(valToken);										
 					dataArray[rowIdx][colIdx] = value;
 				} 
 				rowIdx++;

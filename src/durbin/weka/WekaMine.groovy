@@ -118,9 +118,22 @@ class WekaMine{
 		instances.insertAttributeAt(new Attribute("ID",(FastVector)null),0)
 		int attrIdx = instances.attribute("ID").index(); // Paranoid... should be 0
 		
-		instanceNames.eachWithIndex{name,i->
-			instances.instance(i).setValue(attrIdx,name)
+		instanceNames.eachWithIndex{name,i->			
+			instances.instance(i).setValue(attrIdx,name)			
 		}
+		
+		// Some filters (e.g. SMOTE and other processes add instances.  In these cases need tosimply
+		// add some placeholder ID for those instances.  Instances are added at the end, so 
+		// the other names should still map appropriately. 							
+		if (instances.numInstances() > instanceNames.size()){
+			def numNames = instanceNames.size()
+			def syntheticCount = instances.numInstances() - numNames
+			for(int i = 0;i < syntheticCount;i++){
+				def synName = "synthetic_$i"
+				// 25 names, 30 instances, first new name is idx=25+0=25
+				instances.instance(i+numNames).setValue(attrIdx,synName) 
+			}
+		}		
 		return(instances);
 	}
 	
@@ -311,12 +324,13 @@ class WekaMine{
 	*/ 
 	static def cleanUpInstances(instances){	
 		// Remove any attributes that don't vary at all..
-  	instances = removeUselessAttributes(instances)
+		err.println "WARNING: removeUselessAttributes disabled for performance."
+		//instances = removeUselessAttributes(instances)
     
-  	// Remove any instances whose class value is missingValue(). 
+  		// Remove any instances whose class value is missingValue(). 
 		// KJD.. use of this method hasn't been tested...
 		err.print "Removing instances with missing class value. Before: ${instances.numInstances()}..."
-  	instances.deleteWithMissingClass();
+		instances.deleteWithMissingClass();
 		err.println "done.  After: ${instances.numInstances()}"
 
 		return(instances)
@@ -784,11 +798,13 @@ class WekaMine{
 								
 		// If there is an ID attribute, remove it before filtering since attribute 
 		// evaluators and classifiers choke on it. If no ID, just filter...
-		def filteredInstances
+		def filteredInstances			
+				
 		def nameSet = instances.attributeNames() as Set
 		if (nameSet.contains("ID")){	
 			def instNames = instances.attributeValues("ID")
 			def noIDinstances = WekaMine.removeInstanceID(instances)
+
 
 			// Apply the filter to instances...
 			//noIDinstances = WekaMine.applyUnsupervisedFilter(noIDinstances,options.filter)
@@ -799,6 +815,8 @@ class WekaMine{
 			// KJD: Note that addID below assumes same number of instances in same order. 
 			// KJD: This assumption may not always hold for filters... need to think of how to handle this.
 			filteredInstances = WekaMine.addID(noIDinstances,instNames)
+						
+			
 		}else{
 			err.println "WARNING: this code branch is associated with some coding issues.  Please proceed with caution."
 			filter.setInputFormat(instances);				
@@ -808,15 +826,22 @@ class WekaMine{
 		err.println("done.")
 		
 		return(filteredInstances)
-	}
+	}	
 	
-	
+	/**
+	* Actually can be supervised or unsupervised.  
+	* TODO: Need to refactor this name.
+	*/ 
 	static Instances applyUnsupervisedFilterFromName(instances,String filterName){
+		err.println("Before instances: ${instances.numInstances()} attributes: ${instances.numAttributes()}")
+				
 		err.print("Apply unsupervised filter $filterName...")
 		def filter = filterFromSpec(filterName)
 		filter.setInputFormat(instances);	
 		def filteredInstances = Filter.useFilter(instances,filter)
 		err.println("done.")
+		err.println("After instances: ${filteredInstances.numInstances()} attributes: ${filteredInstances.numAttributes()}")
+				
 		return(filteredInstances)
 	}
 

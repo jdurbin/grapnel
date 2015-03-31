@@ -14,36 +14,36 @@ import java.io.*;
 public class SaveTab{
 	
 	/***
-  *  Return a vector of the values for a named attribute. 
-  */
+		*  Return a vector of the values for a named attribute. 
+		*/
 	static FastVector attributeValues(Instances instances,Attribute attribute){
 			
 		FastVector rvals = new FastVector();
 
-    if (attribute.isNumeric()){
+		if (attribute.isNumeric()){
 			double[] rdouble = instances.attributeToDoubleArray(attribute.index());
 			for(int i = 0;i < rdouble.length;i++){
 				rvals.addElement(rdouble[i]);
 			}
-    }else if (attribute.isNominal()){
+		}else if (attribute.isNominal()){
 			for(int i = 0;i < instances.numInstances();i++){
 				Instance instance = instances.instance(i);
-        String value = instance.toString(attribute);
-        rvals.addElement(value);
+				String value = instance.toString(attribute);
+				rvals.addElement(value);
 			}
-    }else if (attribute.isString()){
+		}else if (attribute.isString()){
 			for(int i = 0;i < instances.numInstances();i++){		
-        Instance instance = instances.instance(i);
-        String value = instance.stringValue(attribute); 
-        rvals.addElement(value);
-      }
-    }
-    return(rvals);      
-  }
+				Instance instance = instances.instance(i);
+				String value = instance.stringValue(attribute); 
+				rvals.addElement(value);
+			}
+		}
+		return(rvals);      
+	}
 
 	/***
-	* takes a set of instances and creates a tab file from them...
-	*/ 
+		* takes a set of instances and creates a tab file from them...
+		*/ 
 	static void saveDataFromInstances(String fileName,Instances instances) throws Exception{
 				
 		PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(fileName)));
@@ -63,6 +63,46 @@ public class SaveTab{
 		int classIdx = instances.classIndex();
 		for(int i = 0;i < instances.numAttributes();i++){
 			if ((i != 0) && (i != classIdx)){
+				String attName = instances.attribute(i).name();
+				Attribute attribute = instances.attribute(i);						
+			
+				FastVector atValues = attributeValues(instances,attribute);
+				pw.print(attName);
+				pw.print("\t");
+				for(int v = 0;v < atValues.size()-1;v++){
+					pw.print(atValues.elementAt(v));
+					pw.print("\t");
+				}
+				pw.print(atValues.elementAt(atValues.size()-1));
+				pw.print("\n");
+			}
+		}
+		pw.close();
+	}
+	
+  
+	/***
+		* takes a set of instances and creates a tab file from them...
+		*/ 
+	static void saveClinFromInstances(String fileName,Instances instances) throws Exception{
+				
+		PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(fileName)));
+		
+		
+		// Write header...
+		Attribute IDAttribute = instances.attribute("ID");
+		FastVector instNames = attributeValues(instances,IDAttribute);		
+		pw.write("Features\t");
+		for(int i = 0;i < instNames.size()-1;i++){
+			pw.print(instNames.elementAt(i));
+			pw.print("\t");
+		}
+		pw.print(instNames.elementAt(instNames.size()-1));
+		pw.print("\n");
+		
+		int classIdx = instances.classIndex();
+		for(int i = 0;i < instances.numAttributes();i++){
+			if ((i != 0) && (i == classIdx)){
 				String attName = instances.attribute(i).name();
 				Attribute attribute = instances.attribute(i);						
 			

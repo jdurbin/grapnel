@@ -22,11 +22,14 @@ public class DoubleParser {
 	/**
 		For my microarray data I have numbers like:  1.1769075281072365	0.7136970655700063
 		I could just multiply everything by 1000 and store them as integers.  Hmmm... worth a thought...
+		Actually waste of time since weka stores everything as double's anyway...
 		
 		But in the mean time I can just hard code a parser that assumes no exponent, no +/-, 
 		no corner case values, no 
+		
+		This is actually quite problematic, for example simply 0.8 will fail beause it doesn't have 4 digits.
+		Need to be sure to alert user that this routine is being used too.
 	*/
-
     public static double lightningParse(String str){
 		int sign = 1;
 		if (str.charAt(0) == '-'){
@@ -40,7 +43,7 @@ public class DoubleParser {
 
 		Double out = 0.0;
 		out +=Integer.parseInt(intPartStr);
-		out +=0.1*(fracStr.charAt(0)-48);
+		out +=0.1*(fracStr.charAt(0)-48);		
 		out +=0.01*(fracStr.charAt(1)-48);			
 		out +=0.001*(fracStr.charAt(2)-48);
 		out +=0.0001*(fracStr.charAt(3)-48);

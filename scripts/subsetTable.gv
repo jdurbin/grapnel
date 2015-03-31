@@ -1,0 +1,27 @@
+#!/usr/bin/env groovy 
+
+import durbin.util.*
+
+if (args.size() < 3){
+	println """
+	Cuts a rectangular subset out of a tab delimited file, preserving row/col names.  Output is 
+	written to stdout. 
+	
+	subsetTable row col height width fileName
+	
+	Example:
+	
+	subsetTable 0 0 10 20 LUSC_HGU133A.tab > LUSC_subset.tab
+	"""
+	System.exit(1)
+}
+
+row = args[0] as int
+col = args[1] as int
+height = args[2] as int
+width = args[3] as int
+t = new DoubleTable(args[4])
+
+t2 = t.subset(row,col,height,width)
+
+println t2

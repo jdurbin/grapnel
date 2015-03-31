@@ -34,8 +34,7 @@ public class WekaAdditions{
 	* are executed before you try to 
 	*/ 
   static enable(){  
-	  
-		
+	  		
 		/***
 		* Return the indexed attribute value
 		*/ 
