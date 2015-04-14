@@ -6,6 +6,7 @@ class TableUtils{
 
 	def defaultValue = "?"
 		
+		
 	/**
 	* Finds the union of all column names and all row names for the given list of 
 	* tables. 
@@ -36,11 +37,12 @@ class TableUtils{
 		allRowNames = allRowNames.sort()
 		return([allRowNames,allColNames])
 	}
+	
 		
 	/**
 	* Combines several tables into one larger table, doing a union of both rows and columns. 
 	* rowNames is the union of all rowNames and colNames is the union of all column names. 
-	* Assumes the files have been pre-scanned to determine the union size. 
+	* Assumes the files have been pre-scanned to determine the combined column and row names.  
 	*/ 
 	def combineTables(files,combinedRowNames,combinedColNames){		
 		

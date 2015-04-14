@@ -13,22 +13,32 @@ options = ParseOptions(args)
 // scanning the input files...	
 allGenes = [] as Set
 allPatients = [] as Set
+geneIntersection = [] as Set
 files = options.fileNames
 files.each{file->
 	err.println "Pre-scanning $file..."
+	filegenes = []
 	new File(file).withReader{r->
 		patients = parsePatientsFromHeading(r.readLine())
 		allPatients.addAll(patients)
 		r.eachLine{line->
-		(gene,vals) = parseGeneValuesFromLine(line)
-			if (gene.contains("?")) return; // Skip genes with ? in name...
-			//gene = "${gene}_nonsyn" as String// hack to fix gene names...
-			allGenes << gene
+			fields = line.split("\t",-1) // -1 ensures that trailing delimiters are split
+			gene = fields[0]
+			filegenes << gene
 		}
-	}		
+	}
+	allGenes.addAll(filegenes)
+	if (geneIntersection.size() == 0) geneIntersection.addAll(filegenes)
+	else geneIntersection.retainAll(filegenes)
 }	
+
+if (options.rowIntersection){
+	allGenes = geneIntersection
+}	
+
 err.println "Total columns: ${allPatients.size()}.  Total rows: ${allGenes.size()}"
 	
+
 // Now fill in the table with the information from these files...	
 combinedTable = new Table(allGenes as ArrayList,allPatients as ArrayList)
 
@@ -41,8 +51,7 @@ files.each{file->
 		patients = parsePatientsFromHeading(r.readLine())
 		r.eachLine{line->
 			(gene,vals) = parseGeneValuesFromLine(line)
-			if (gene.contains("?")) return; // Skip genes with ? in name...
-			//gene = "${gene}_nonsyn" as String// hack to fix gene names...
+			if (!allGenes.contains(gene)) return; // skip genes not in our gene list. 
 			vals.eachWithIndex{v,i->
 				if ((v == null) || (v == "null")) v=options.defaultValue
 				combinedTable.set(gene,patients[i],v)
@@ -89,8 +98,9 @@ def ParseOptions(args){
 	union of the rows and columns. (row,col) pairs that do not appear in any file are 
 	assigned a defaultValue which can be specified with the -v option.  
 	
-	NOTE: This script currently also removes anything after a '|' character in the row names. 
-	  
+	-r option allows rows to be limited to the intersection of the inputs instead of the union. 
+	
+	NOTE: This script currently also removes anything after a '|' character in the row names. 	  
 	
 	Written by: James Durbin (kdurbin@ucsc.edu)
 	
@@ -106,6 +116,7 @@ def ParseOptions(args){
 		optional 'p','prefixes',[
 							description: 'Comma separated list of prefixes to append to row names from each input file respectively.',
 							validate:{it.split(",")}]
+	  flag 'r','rowIntersection',[default:false,description: 'Restrict the output to the intersection of rows instead of the union of rows.']
 	  flag 'h','help',[default:false,description: 'Print script help.']
 		remainder{
 			if(!it) throw new IllegalArgumentException("Must specify a list of files");
