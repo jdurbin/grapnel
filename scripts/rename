@@ -1,5 +1,15 @@
 #!/usr/bin/env groovy 
 
+if (args.size() < 2){
+	println """
+	rename pattern replace file1 file2 ...
+	
+	Example:
+	
+	rename ".tab" ".tsv"  *.tab 
+	"""
+}
+
 pattern = args[0]
 replace = args[1]
 

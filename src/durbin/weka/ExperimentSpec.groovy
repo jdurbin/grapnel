@@ -75,7 +75,8 @@ class ExperimentSpec{
    def ExperimentSpec(String line,headings2Cols){
     def fields = line.split("\t")
 
-		//System.err.println "DEBUG: "+headings2Cols
+	System.err.println "DEBUG fields: "+fields
+	System.err.println "DEBUG headings2cols: "+headings2Cols
     classifierStr = fields[headings2Cols['classifier']]
 
     try{
