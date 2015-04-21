@@ -562,20 +562,27 @@ public class TableFileLoader {
 	/***
 	* Create a FastVector containing the set of values found in the given col...
 	*/ 
-	public FastVector getColValues(Table t,int colIdx){				
+	public FastVector getColValues(Table t,int colIdx){	
 		HashSet<String> valSet = new HashSet<String>();
 		for(int r = 0;r < t.rows();r++){
 			String val = (String)t.matrix.getQuick(r,colIdx);
+			
+			if (val == null){
+				 System.err.println("\nDEBUG r="+r+"\tc="+colIdx+"\tval="+val);			
+				 System.err.println("\nDEBUG r="+t.rowNames[r]+"\tc="+t.colNames[colIdx]);			
+			 }
+			
 			// Don't want to include "missing value" as one of the nominal values...
-			if (!val.equals("?")){
-				valSet.add(val);
+			if (val != null){
+				if (!val.equals("?")){
+					valSet.add(val);
+				}						
 			}
-		}
-		
+		}		
 		FastVector attVals = new FastVector();		
 		for(Object v : valSet){
 			attVals.addElement(v);
-		}
+		}		
 		return(attVals);
 	}
 

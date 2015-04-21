@@ -4,32 +4,17 @@ import durbin.util.*
 
 err = System.err
 
-if (args.size() < 2){
-	err.println """
-	cutbyname fileName columnName {columnName2,columnName3...}
-	
-	Cuts one or more columns out of a table file.  For more complex queries see csvsql.
-	
-	e.g. 
-	
-	cutbyname BRCA.clin days_to_death.
-	
-	cutbyname BRCA.clin patient days_to_death
-	"""
-	System.exit(0)
-}
+options = ParseOptions(args)
 
-fileName = args[0]
-cutNames = args[1..-1]
-sep = FileUtils.determineSeparator(fileName) as String
+// Determine separator to use...
+if (options.separator) sep = options.separator
+else sep = FileUtils.determineSeparator(options.fileName)
 
-// If it's a csv, go ahead and handle quoted comma lists too...
-if (sep ==","){
+if (options.qregex){
 	sep = /,(?=([^\"]|\"[^\"]*\")*$)/
 }
 
-
-new File(fileName).withReader{r->
+new File(options.fileName).withReader{r->
 	headerStr = r.readLine()
 	headings = headerStr.split(sep)
 	name2IdxMap = [:]
@@ -37,7 +22,7 @@ new File(fileName).withReader{r->
 	
 	headingElements = []
 	indices = []
-	cutNames.each{cutName->
+	options.cutNames.each{cutName->
 		cutIdx = name2IdxMap[cutName]
 		indices<<cutIdx
 		headingElements << headings[cutIdx]
@@ -51,4 +36,43 @@ new File(fileName).withReader{r->
 		}
 		println allfields.join(sep)
 	}	
+}
+
+
+/****************************************************
+* Parse the command line options, checking validity, printing help if needed. 
+*/ 
+def ParseOptions(args){
+	parser = new Parser(description: '''	
+	cutbyname fileName columnName {columnName2,columnName3...}
+	
+	Cuts one or more columns out of a table file.  For more complex queries see csvsql.
+	
+	e.g. 
+	
+	cutbyname -d BRCA.clin days_to_death.
+	
+	cutbyname -d BRCA.clin patient days_to_death
+
+	''');
+
+	try{ 
+		parser.with{
+			required 'd','fileName',[description:'Data table.']
+			optional 's','separator',[description: 'Force separator to be this character.']
+			flag 'q','qregex',[default:false,description: 'Use regex to capture quoted comma lists as single field in csv.']
+	  		flag 'h','help',[default:false,description: 'Print script help.']
+			remainder{			
+				if(!it) throw new Exception("Must specify at least one column");
+				it
+			}
+		}
+	
+		options = parser.parse(args); 
+		options.cutNames = parser.remainder
+	}catch(Exception e){
+		System.err << parser.usage;
+		System.exit(1)
+	}		
+	return(options)
 }
