@@ -15,8 +15,9 @@ package durbin.util;
 */
 class OnlineTable{			
 
-	File file = null
-	InputStream inStream;
+	//File file = null
+	//InputStream inStream;
+	Reader r
 	String sep = null;
 	
 	def headings
@@ -24,46 +25,49 @@ class OnlineTable{
 
 	def OnlineTable(InputStream s,String delimiter){
 		sep = delimiter
-		headings = getHeader(s)
+		r = s.newReader()
+		headings = getHeader()
 	}
 		
-	def OnlineTable(String f,String delimiter){
-		fileName = f
+	def OnlineTable(String fileName,String delimiter){
 		sep = delimiter	
-		file = new File(fileName)	
+		file = new File(fileName)
 		inStream = file.newInputStream()
-		headings = getHeader(inStream)
+		r = inStream.newReader()
+		headings = getHeader()
 	}	
 	
 	// Get the headers 
-	def getHeader(InputStream instream){
-		def r = instream.newReader()
+	def getHeader(){
+		//r = instream.newReader()
 		def headingStr = r.readLine()
 		def h = headingStr.split(sep,-1)
 		return(h)		
 	}
-	
-	
+		
 	// Get the headers 
+	/*
 	static def getHeader(String f){
 		def tempsep = FileUtils.determineSeparator(f)
-		def r = new File(f).newReader()
+		r = new File(f).newReader()
 		def headingStr = r.readLine()
 		def h = headingStr.split(tempsep,-1)
 		return(h)
 	}
+	*/
 	
 	// Sometimes a stream input won't have a heading, so give one
 	// explicitly..
 	def OnlineTable(InputStream s,ArrayList h,String delimiter){		
-		inStream = s
+		r = s.newReader()
 		headings = h
 		sep = delimiter
 	}
 	
 	
 	// No separator given, try to figure it out...
-	def OnlineTable(String f){		
+	def OnlineTable(String f){	
+					
 		sep = FileUtils.determineSeparator(f)
 		
 		// If separator is a comma, use regex that allows commas inside 
@@ -71,27 +75,24 @@ class OnlineTable{
 		if (sep == ","){
 			sep = /,(?=([^\"]|\"[^\"]*\")*$)/
 		}		
-		file = new File(f) 
-		inStream = file.newInputStream()
-		headings = getHeader(inStream)
+		r = new File(f).newReader()
+		headings = getHeader()
+		//headings = getHeader(inStream)
+		//System.err.println "headings="+headings		 this is there ok.
 	}
 		
 	/**
 	* Assumes inStream has already advanced past the header. 
 	* Stream will be closed after this closure. 
 	*/ 			
-	def eachRow(Closure c){
-		inStream.withReader{r->
-		//new File(fileName).withReader{r->
-			def temp = r.readLine() // consume header.
-			r.eachLine{rowStr->
-				def rfields = rowStr.split(sep,-1)
-				row = [:]
-				rfields.eachWithIndex{f,i->
-					row[headings[i]]=f
-				}
-				c(row)
+	def eachRow(Closure c){									
+		r.eachLine{rowStr->
+			def rfields = rowStr.split(sep,-1)
+			row = [:]
+			rfields.eachWithIndex{f,i->
+				row[headings[i]]=f
 			}
+			c(row)
 		}
 	}	
 	
@@ -101,22 +102,18 @@ class OnlineTable{
 	*/
 	def collect(Closure c){
 		def list = []
-		inStream.withReader{r->
-		//new File(fileName).withReader{r->
-			def temp = r.readLine() // consume header.
-			r.eachLine{rowStr->
-				def rfields = rowStr.split(sep,-1)
-				row = [:]
-				rfields.eachWithIndex{f,i->
-					row[headings[i]]=f
-				}
-				list << c(row)
+		def temp = r.readLine() // consume header.
+		r.eachLine{rowStr->
+			def rfields = rowStr.split(sep,-1)
+			row = [:]
+			rfields.eachWithIndex{f,i->
+				row[headings[i]]=f
 			}
-		}
+			list << c(row)
+		}		
 		return(list)
 	}
-	
-	
+		
 	def headings(){
 		return(headings)
 	}	

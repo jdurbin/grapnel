@@ -2,6 +2,7 @@ import weka.core.*
 import durbin.weka.*
 
 import hep.aida.bin.DynamicBin1D;
+import hep.aida.bin.QuantileBin1D;
 
 /**
 * A class to store and create a null model.
@@ -23,14 +24,18 @@ class BootstrapNullModel implements Serializable{
 	//def instances
 	static def err = System.err // sugar
 
-	ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()		
+	// DynamicBin1D saves entire distribution.  QuantileBin1D stores a compression
+	// that can be used to compute approximate quantiles.  
+	//ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()		
+	ArrayList<QuantileBin1D> nullDistribution = new ArrayList<QuantileBin1D>()		
 	ArrayList<String> classValues = new ArrayList<String>()
 
 	def BootstrapNullModel(classValues){
 		this.classValues = classValues		
 		def numClassValues = classValues.size()
 		for(i in 0..<numClassValues){
-			nullDistribution << new DynamicBin1D()
+			// epsilon = maximum allowed approximation error quantiles.  
+			nullDistribution << new QuantileBin1D(0.001) 
 		}
 		
 		//nullDistribution.each{

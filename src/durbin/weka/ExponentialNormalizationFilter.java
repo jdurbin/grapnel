@@ -5,8 +5,11 @@ import weka.core.Capabilities.*;
 import weka.core.Capabilities.Capability;
 import weka.filters.*;
 
-import org.apache.commons.math.stat.ranking.*;
-import org.apache.commons.math.distribution.*;
+//import org.apache.commons.math.stat.ranking.*;
+//import org.apache.commons.math.distribution.*;
+
+import org.apache.commons.math3.distribution.*;
+import org.apache.commons.math3.stat.ranking.*;
 
 public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 
@@ -47,7 +50,7 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 	protected Instances process(Instances instances) throws Exception {
 	
 		Instances result = new Instances(determineOutputFormat(instances), 0);
-		ExponentialDistributionImpl exp = new ExponentialDistributionImpl(1.0);
+		ExponentialDistribution exp = new ExponentialDistribution(1.0);
 		
 		// Save rank lists for each attribute...
 		NaturalRanking ranking = new NaturalRanking(NaNStrategy.FIXED,TiesStrategy.MAXIMUM);						

@@ -1,0 +1,19 @@
+#!/usr/bin/env groovy
+
+
+new File(args[0]).withReader{r->
+	heading = r.readLine()
+	println heading
+	
+	r.splitEachLine("\t"){fields->
+		
+		newfields = []
+		fields[1..-1].each{value->
+		 	dvalue = value as double
+			newvalue = dvalue.round(4)
+			newfields << newvalue
+		}
+		println "${fields[0]}\t"+newfields.join("\t")
+	}	
+}
+

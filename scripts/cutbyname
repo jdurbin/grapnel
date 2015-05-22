@@ -71,7 +71,7 @@ def ParseOptions(args){
 		options = parser.parse(args); 
 		options.cutNames = parser.remainder
 	}catch(Exception e){
-		System.err << parser.usage;
+		err << parser.usage;
 		System.exit(1)
 	}		
 	return(options)

@@ -164,16 +164,26 @@ m.printTable("\t","null")
 //m.writeTableQuick("writetest.out","\t","null")
 //m.writeTableQuick2("writetest.out","\t","null")
 
+println "======== ONLINE TABLE BEGIN ============"
+rowCount = 0;
 new OnlineTable("beer.tab").eachRow{row->
 	println "brand: "+row.brand
 	println "calories:"+row.calories
+	if (rowCount == 0){
+		assert row.brand == "BrooklynBrand"
+		assert row.price == "6.24"
+	}
+	rowCount++
 }
+assert rowCount == 69
+
+println "======== ONLINE TABLE END ============"
 
 //=================================================================
 
 // New table class based on Google Guava HashBasedTable
 err.println "Test DynamicTable"
-beer = new DynamicTable("beer_missingdata.tab","\t")
+beer = new DynamicTable("beer_missingval.tab","\t")
 assert beer.numCols() == 5
 assert beer.numRows() == 67
 assert beer['BrooklynBrand']['price'] as double == 6.24

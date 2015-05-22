@@ -642,8 +642,17 @@ public class DoubleTable extends GroovyObjectSupport{
 		
 	public double[] getColAsDoubleArray(int col){
 	  return(matrix.viewColumn(col).toArray());
+	}	
+	
+	public double[] getRowAsDoubleArray(String rowName){
+		int row = getRowIdx(rowName);
+		return(matrix.viewRow(row).toArray());
 	}
 		
+	public double[] getColAsDoubleArray(String colName){
+		int col = getColIdx(colName);		
+	  	return(matrix.viewColumn(col).toArray());
+	}		
 
 	public DoubleVector getAt(int ridx){
     return(getRow(ridx));

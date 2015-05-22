@@ -1,0 +1,100 @@
+#!/usr/bin/env groovy 
+
+import durbin.util.*
+
+err = System.err
+
+options = ParseOptions(args)
+
+// Use forced separator or infer it...
+if (options.separator) sep = options.separator
+else if (options.qregex){
+	sep = /,(?=([^\"]|\"[^\"]*\")*$)/
+}else{
+	sep = FileUtils.determineSeparator(options.fileName)
+}
+
+nonNumeric = [] as Set
+mismatchCount = 0;
+lineCount = 0;
+new File(options.fileName).withReader{r->
+	headingStr = r.readLine()
+	if (options.regularout) println headingStr
+	
+	headings = headingStr.split(sep,-1)
+	columnCount = headings.size()
+	
+	r.eachLine{line->
+		fields = line.split(sep,-1)
+		if (fields.size() != columnCount){
+			if (options.lines) err.println "MISMATCH on line $lineCount row: ${fields[0]} has size ${fields.size()} should be ${columnCount}"
+			if (options.fields){
+				err.println "\nMISMATCH on line $lineCount row: ${fields[0]} has size ${fields.size()} should be ${columnCount}"
+				err.println fields
+			}
+			mismatchCount++;
+		}else{
+			if (options.regularout) println line
+		}
+		
+		if (options.numeric)
+			fields[1..-1].each{
+				try{
+					x = it as double // try to convert it to a double
+				}catch(Exception e){
+					if (options.lines){
+						// only print out the first occurrence of a type
+						if (!nonNumeric.contains(it)) err.println "NONNUMBER $it on line $lineCount row: ${fields[0]}"
+					}						
+					nonNumeric.add(it)
+				}
+			}
+	lineCount++;
+	}				
+}	
+
+err.println "TOTAL MISMATCHING LINES: $mismatchCount"
+
+if (options.numeric){
+	err.println "NONNUMERIC STRINGS FOUND IN BODY:"
+	nonNumeric.each{
+		err.println "\t'$it'"
+	}
+}
+
+
+/****************************************************
+* Parse the command line options, checking validity, printing help if needed. 
+*/ 
+def ParseOptions(args){
+	parser = new Parser(description: '''	
+	Checks a csv or tab file for sanity in various ways.  
+	Will optionally check to see if a numeric file is all numeric. 
+	
+	Performance: ~ 22sec to validate a  11650 x 5372 numeric file. 
+	''');
+
+	try{ 
+		parser.with{
+			optional 's','separator',[description: 'Force separator to be this character.']
+			flag 'n','numeric',[default:false,description: 'File should be numeric.  Report all non-numeric values found.']
+			flag 'l','lines',[default:false,description: 'Report all the lines containing anomalies, vs just summary.']
+			flag 'f','fields',[default:false,description: 'Show the fields from lines with anomalies.']
+			flag 'r','regularout',[default:false,description:'Output regular lines,lines that match header, to stdout.']
+			flag 'q','qregex',[default:false,description: 'Use regex to capture quoted comma lists as single field.']
+	  		flag 'h','help',[default:false,description: 'Print script help.']
+			remainder{			
+				if(!it) throw new Exception("Must specify a file.");
+				it
+			}
+		}
+	
+		options = parser.parse(args); 
+		options.fileName = parser.remainder[0]
+	}catch(Exception e){
+		System.err << parser.usage;
+		System.exit(1)
+	}		
+	return(options)
+}
+

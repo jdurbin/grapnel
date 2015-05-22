@@ -1,6 +1,7 @@
 package durbin.weka;
 
 import weka.core.*
+import weka.classifiers.evaluation.*
 
 // Package up distForInstance with the associated class names
 class Classification{						
@@ -11,6 +12,7 @@ class Classification{
 	
 	def prForValues = []
 	def classValues = []
+	def nompred
 	
 	def prForName(name){
 		classValues.eachWithIndex{cname,i->
@@ -146,6 +148,10 @@ class WekaMineModel implements Serializable{
 			// Package dist up in a Classification while we have the instance
 			// handy, just be sure we don't mix them up. 
 			def classification = new Classification(prForValues,classValues)
+									
+			def nompred = new NominalPrediction(instance.classValue(),prForValues,instance.weight());
+			classification.nompred = nompred
+			
 			rval.add(classification)
 		}
 		return(rval)		
@@ -255,7 +261,7 @@ class WekaMineModel implements Serializable{
 		names.eachWithIndex{n,i->
 			name2Call[n] = classValues[i]
 		}
-		
+										
 		//println "id\tcall\tactual\tmatch"
 		def newStrings = []
 		def matchCount = 0;
@@ -302,7 +308,15 @@ class WekaMineModel implements Serializable{
 		newStrings.each{
 			out << "$it\t$matchFraction\t$majorityFrac"
 			out << "\n"
-		}								
+		}	
+		
+		FastVector predictions = new FastVector()
+		results.each{r->predictions.addElement(r.nompred)}
+		ThresholdCurve tc = new ThresholdCurve();
+		Instances result = tc.getCurve(predictions,0);
+		result.each{println it}
+		def roc = ThresholdCurve.getROCArea(result);
+		System.err.println "ROC: $roc"									
 	}
 	
 	def getMaxIdx(list){

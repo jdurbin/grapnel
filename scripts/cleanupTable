@@ -1,0 +1,91 @@
+#!/usr/bin/env groovy 
+
+import durbin.util.*
+
+err = System.err
+
+options = ParseOptions(args)
+
+// Use forced separator or infer it...
+if (options.separator) sep = options.separator
+else{
+	sep = FileUtils.determineSeparator(options.fileName)
+}
+
+// 
+if (sep == ","){
+	rsep = /,(?=([^\"]|\"[^\"]*\")*$)/
+}else{
+	rsep = sep
+}
+
+new File(options.fileName).withReader{r->
+	headingStr = r.readLine()
+	headings = headingStr.split(rsep,-1)
+	cleanheadings = headings.collect{f->
+		f = f.replaceAll(", ","_")		
+		f = f.replaceAll(" ,","_")		
+		f = f.replaceAll(",","_")
+		if (options.removeSpace){
+			f = f.replaceAll(" ","_")			
+		}
+		if (options.tolower){
+			f = f.toLowerCase()
+		}
+		f = f.replaceAll('"','')
+		f
+	}
+	println cleanheadings.join(sep)
+	
+	r.eachLine{line->
+		fields = line.split(rsep,-1)
+		cleanfields = fields.collect{f->
+			f = f.replaceAll(", ","_")		
+			f = f.replaceAll(" ,","_")		
+			f = f.replaceAll(",","_")
+			if (options.removeSpace){
+				f = f.replaceAll(" ","_")			
+			}
+			if (options.tolower){
+				f = f.toLowerCase()
+			}
+			f = f.replaceAll('"','')
+			f
+		}
+		println cleanfields.join(sep)
+	}
+}	
+
+
+
+/****************************************************
+* Parse the command line options, checking validity, printing help if needed. 
+*/ 
+def ParseOptions(args){
+	parser = new Parser(description: '''	
+	Cleans up commas and spaces in field names. 
+	''');
+
+	def options
+	try{ 
+		parser.with{
+			optional 's','separator',[description: 'Force separator to be this character.']
+			flag 'r','removeSpace',[default:false,description: 'Replaces all spaces in fields with _']
+			flag 'l','tolower',[default:false,description: 'Convert all letters to lower case']			
+	  		flag 'h','help',[default:false,description: 'Print script help.']
+			remainder{			
+				if(!it) throw new Exception("Must specify a file.");
+				it
+			}
+		}
+	
+		options = parser.parse(args); 
+		options.fileName = parser.remainder[0]
+	}catch(Exception e){
+		System.err.println options
+		System.err << parser.usage;
+		System.exit(1)
+	}		
+	return(options)
+}
+

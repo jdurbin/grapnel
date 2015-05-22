@@ -36,12 +36,14 @@ if (options.rowIntersection){
 	allGenes = geneIntersection
 }	
 
+
+
 err.println "Total columns: ${allPatients.size()}.  Total rows: ${allGenes.size()}"
 	
 
 // Now fill in the table with the information from these files...	
 combinedTable = new Table(allGenes as ArrayList,allPatients as ArrayList)
-w
+
 // Initialize table to contain the specified null value. 
 combinedTable.assign(options.defaultValue)
 
