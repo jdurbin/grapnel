@@ -23,8 +23,8 @@ new File(options.fileName).withReader{r->
 	headingStr = r.readLine()
 	headings = headingStr.split(rsep,-1)
 	cleanheadings = headings.collect{f->
-		f = f.replaceAll(", ","_")		
-		f = f.replaceAll(" ,","_")		
+		f = f.replaceAll(", ",",")		
+		f = f.replaceAll(" ,",",")		
 		f = f.replaceAll(",","_")
 		if (options.removeSpace){
 			f = f.replaceAll(" ","_")			
@@ -40,8 +40,8 @@ new File(options.fileName).withReader{r->
 	r.eachLine{line->
 		fields = line.split(rsep,-1)
 		cleanfields = fields.collect{f->
-			f = f.replaceAll(", ","_")		
-			f = f.replaceAll(" ,","_")		
+			f = f.replaceAll(",",",")		
+			f = f.replaceAll(" ,",",")		
 			f = f.replaceAll(",","_")
 			if (options.removeSpace){
 				f = f.replaceAll(" ","_")			
