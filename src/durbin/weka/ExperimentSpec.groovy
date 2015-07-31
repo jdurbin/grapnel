@@ -65,6 +65,10 @@ class ExperimentSpec{
 	}
 
     
+	def ExperimentSpec(String line){
+		ExperimentSpec(line,WekaMineResult.defaultHeadingMap())
+	}
+	
 		/***
 		* Takes a comma separated string and creates an experiment from it. 
 		* headings2Cols gives the index of the column where the given field is derived from

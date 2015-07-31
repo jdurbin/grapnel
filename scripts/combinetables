@@ -98,7 +98,8 @@ def ParseOptions(args){
 	parser = new Parser(description: '''	
 	combinetables combines multiple tab delimited tables into one larger table, doing a
 	union of the rows and columns. (row,col) pairs that do not appear in any file are 
-	assigned a defaultValue which can be specified with the -v option.  
+	assigned a defaultValue which can be specified with the -v option.  Automaticall resolves
+	gene names like: TTF2|8458 to TTF2. 
 	
 	-r option allows rows to be limited to the intersection of the inputs instead of the union. 
 	

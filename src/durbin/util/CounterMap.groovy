@@ -44,7 +44,12 @@ class CounterMap extends HashMap{
 		}else{
 			this.put(key,1)
 		}
-	}		
+	}	
+	
+	
+	def incAll(keys){
+		keys.each{inc(it)}
+	}	
 	
 	// return a default value if none given...
 	def getAt(key){

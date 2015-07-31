@@ -35,26 +35,43 @@ class Charts{
 		err.print "saving done."
 	}
 	
-	/**
-	* Displays chart in a window. 
-	*/ 
-	static showChart(chart){
-		def title = chart.getTitle().getText()
-		showChart(chart,title);
-	}
-			
 	/***
 	* Creates a window and displays the chart. Window has title chartTitle
 	*/ 
-	static showChart(chart,chartTitle){
+	static showChart(params=[:]){
+		def mychart = params.chart
+		def chartTitle = params.title ?: mychart.getTitle().getText()
+		def chartSize = params.chartSize ?: new java.awt.Dimension(400,200)
+
 		def swing = new SwingBuilder()
 		def frame = swing.frame(title:chartTitle,
-														defaultCloseOperation:WC.EXIT_ON_CLOSE,
-														pack:true,show:true) {
+								defaultCloseOperation:WC.EXIT_ON_CLOSE,
+								pack:true,show:true) {														
 			borderLayout()
-			panel(new ChartPanel(chart),preferredSize: new java.awt.Dimension(500, 270),mouseWheelEnabled:true)
+			panel(new ChartPanel(mychart),preferredSize: chartSize,mouseWheelEnabled:true)
 		}
 		return(swing)		
+	}
+	
+	static def showCharts(params=[:]){
+
+		def charts = params.charts
+		def chartsTitle = params.title ?: "Chart Window"
+		def chartSize = params.chartSize ?: new Dimension(400,200)
+		def orientation = params.orientation ?: "HORIZONTAL"
+
+		def swing = new SwingBuilder()
+		def frame = swing.frame(title:chartsTitle,
+								defaultCloseOperation:WC.EXIT_ON_CLOSE,
+								pack:true,show:true) {														
+		
+			if (orientation=="HORIZONTAL") gridLayout(rows:1,columns:charts.size())
+			else gridLayout(rows:charts.size(),columns:1)
+			charts.each{chart->													
+				panel(new ChartPanel(chart),preferredSize: chartSize,mouseWheelEnabled:true)
+			}
+		}
+		return(swing)			
 	}
 	 
   /**
@@ -101,7 +118,6 @@ class Charts{
     dataset.addSeries(series1);    
     return(dataset);
   }
-  
   
   /**
   * Returns a default line chart with data in a LinkedHashMap. 
@@ -294,27 +310,20 @@ class Charts{
     return chart;
   }
 
-
-	/**
-	* Create a dual histogram from two series. 
-	*/ 
-	static dualhistogram(values1,series1name,values2,series2name,cName){
-		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,20))
-	}
-
-	/**
-	* Create a dual histogram from two series. 
-	*/ 
-	static dualhistogram(values1,series1name,values2,series2name,cName,bins){
-		 return(dualhistogram(values1,series1name,Color.blue,values2,series2name,Color.green,cName,bins))
-	}
-
-
 	/***
 	* Create a histogram from two sets of values in arbitrary collection...
 	*/ 						
-	static dualhistogram(values1,series1name,color1,values2,series2name,color2,cName,bins){
-
+	static dualhist(params=[:]){
+		
+		def cName = params.title ?: "Dual Histogram"
+		def series1name = params.series1name ?: "Series1"
+		def series2name = params.series2name ?: "Series2"
+		def values1 = params.series1 ?: [1,2,3]
+		def values2 = params.series2 ?: [2,4,6]
+		
+		def color1 = params.color1 ?: Color.blue
+		def color2 = params.color2 ?: Color.green
+						
 		double binmax1 = values1.max()
 		double binmax2 = values2.max()
 		double binmin1 = values1.min()
@@ -339,7 +348,7 @@ class Charts{
 
 		XYPlot plot = (XYPlot) chart.getPlot();
 		plot.setBackgroundPaint(Color.WHITE);  // For the plot
-    plot.setForegroundAlpha(0.60f);
+    	plot.setForegroundAlpha(0.60f);
 
 		def renderer = plot.getRenderer();
 		renderer.setSeriesPaint(0, color1);
