@@ -1,0 +1,59 @@
+#!/usr/bin/env groovy 
+
+import durbin.util.* 
+
+if (args.size() < 3){
+	System.err.println """
+	Splits a tab delimited table along columns into multiple smaller tables. 
+	
+	splitColumnChunks file outputPrefix chunkSize
+	
+	Example:
+
+		splitColumnChunks BRCA.tab BRCA 50
+	
+	Will split the file BRCA.tab into chunks of 50 columns, 
+	each chunk will have names BRCA_0, BRCA_1, etc. 
+	"""
+}
+
+t = new DoubleTable(args[0])
+fileRoot = args[1]
+chunkSize = args[2] as int
+
+numCols = t.cols()
+numRows = t.rows()
+
+def numChunks = (double)numCols/(double)chunkSize	
+System.err.println "numChunks: $numChunks"
+
+int colStart = 0
+int colEnd = chunkSize -1;
+(0..<numChunks).each{chunk->
+	System.err.println "0,$colStart,$numRows,${colEnd-colStart+1}"
+	tout = t.subset(0,colStart,numRows,colEnd-colStart+1,)
+	fname = "${fileRoot}_$chunk"
+	tout.write(fname,"\t")  
+	colStart += chunkSize
+	colEnd += chunkSize				
+}
+
+def lastCol = (colEnd-chunkSize)
+
+System.err.println "lastChunk: colstart: $colStart, colend: $colEnd, $lastCol"
+System.err.println "lastCol $lastCol < numCols: $numCols"
+if (lastCol < numCols-1){
+  colStart = lastCol+1
+  colEnd = numCols-1
+
+  if (colEnd < colStart) colEnd = colStart
+  System.err.println "0,$colStart,$numRows,${colEnd-colStart+1}"
+  tout = t.subset(0,colStart,numRows,colEnd-colStart+1)
+  int numChunksI = numChunks
+  fname = "${fileRoot}_${numChunksI+1}"
+  tout.write(fname,"\t")
+}	
+
+
+
+

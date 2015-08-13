@@ -1,0 +1,34 @@
+#!/usr/bin/env groovy
+
+import durbin.util.*
+import static durbin.charts.Charts.*
+import java.awt.*
+
+beer = new DoubleTable("beer.tab")
+
+alcohol = beer.getCol("alcohol")
+price = beer.getCol("price")
+
+hist1 = dualhist(title:"Price vs Alcohol",
+				series1:alcohol,
+				series1name:"Alcohol",
+				series2:price,
+				series2name:"Price")
+				
+hist2 = dualhist(title:"Price vs Alcohol2",
+				series1:alcohol,
+				series1name:"Alcohol",
+				series2:price,
+				series2name:"Price")
+								
+hist3 = dualhist(title:"Price vs Alcohol3",
+				series1:alcohol,
+				series1name:"Alcohol",
+				series2:price,
+				series2name:"Price")
+		  
+
+showCharts(title:"Lung/Expression Atlas",
+		   charts:[hist1,hist2,hist3],
+		   orientation:"HORIZONTAL",
+		   chartSize:new Dimension(150,75))
