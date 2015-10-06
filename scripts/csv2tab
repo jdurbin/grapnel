@@ -2,11 +2,14 @@
 
 err = System.err
 
+// To handle commas inside quotes (bastards... why do they do that?)
+sep = /,(?=([^\"]|\"[^\"]*\")*$)/
+
 new File(args[0]).withReader{r->
 	heading = r.readLine()
-  newheading = heading.replaceAll(",","\t")
+	newheading = heading.replaceAll(sep,"\t")
 	println newheading
 	r.eachLine{line->
-		if (line != null) println line.replaceAll(",","\t")
+		if (line != null) println line.replaceAll(sep,"\t")
 	}
 }

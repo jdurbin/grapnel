@@ -776,89 +776,97 @@ WeightedInstancesHandler, Randomizable, Drawable {
       + resultBuff.toString() + "\n}\n";
       return result;
     } catch (Exception e) {
+	  System.err.println(e);
       return null;
     }
   }
 
   /**
-   * Outputs one node for graph.
-   * 
-   * @param text
-   *            the buffer to append the output to
-   * @param num
-   *            unique node id
-   * @return the next node id
-   * @throws Exception
-   *             if generation fails
-   */
+	  * Outputs one node for graph.
+	  * 
+	  * @param text
+	  *            the buffer to append the output to
+	  * @param num
+	  *            unique node id
+	  * @return the next node id
+	  * @throws Exception
+	  *             if generation fails
+	  */
   public int toGraph(StringBuffer text, int num) throws Exception {
+	  System.err.println("CHECK1");
+	  int maxIndex = Utils.maxIndex(m_ClassDistribution); // This returns null pointer for some reason???
+	  System.err.println("CHECK2");
+	  String classValue = m_Info.classAttribute().value(maxIndex);	
+	  System.err.println("CHECK3");
+	  System.err.println("toGraph: classValue:"+classValue);
 
-    int maxIndex = Utils.maxIndex(m_ClassDistribution);
-    String classValue = m_Info.classAttribute().value(maxIndex);
-
-    num++;
-    if (m_Attribute == -1) {
-      text.append("N" + Integer.toHexString(hashCode()) + " [label=\""
-          + num + ": " + classValue + "\"" + "shape=box]\n");
-    } else {
-      text.append("N" + Integer.toHexString(hashCode()) + " [label=\""
-          + num + ": " + classValue + "\"]\n");
-      for (int i = 0; i < m_Successors.length; i++) {
-        text.append("N" + Integer.toHexString(hashCode()) + "->" + "N"
-            + Integer.toHexString(m_Successors[i].hashCode())
-            + " [label=\"" + m_Info.attribute(m_Attribute).name());
-        if (m_Info.attribute(m_Attribute).isNumeric()) {
-          if (i == 0) {
-            text.append(" < "
-                + Utils.doubleToString(m_SplitPoint, 2));
-          } else {
-            text.append(" >= "
-                + Utils.doubleToString(m_SplitPoint, 2));
-          }
-        } else {
-          text.append(" = " + m_Info.attribute(m_Attribute).value(i));
-        }
-        text.append("\"]\n");
-        num = m_Successors[i].toGraph(text, num);
-      }
-    }
-
-    return num;
+	  num++;
+	  if (m_Attribute == -1) {
+		  System.err.println("DEBUG mAttribute == -1");
+		  text.append("N" + Integer.toHexString(hashCode()) + " [label=\"" + num + ": " + classValue + "\"" + "shape=box]\n");
+	  } else {
+		  System.err.println("A: DEBUG mAttribute != -1");
+		  text.append("N" + Integer.toHexString(hashCode()) + " [label=\""  + num + ": " + classValue + "\"]\n");
+		  System.err.println("DEBUG: m_Successors.length="+m_Successors.length); // 2
+		  for (int i = 0; i < m_Successors.length; i++) {
+			  System.err.println("DEBUG i="+i);
+			  text.append("N" + Integer.toHexString(hashCode()) + "->" + "N" + Integer.toHexString(m_Successors[i].hashCode())+ " [label=\"" + m_Info.attribute(m_Attribute).name());
+			  System.err.println("text so far: \n"+text);
+			  if (m_Info.attribute(m_Attribute).isNumeric()) {
+				  System.err.println("B: DEBUG isNumeric");
+				  if (i == 0) {
+					  System.err.println("C: DEBUG i==0");
+					  text.append(" < "+ Utils.doubleToString(m_SplitPoint, 2));
+					  System.err.println("text so far: \n"+text);
+				  } else {
+					  System.err.println("DEBUG i!=0");
+					  text.append(" >= "+ Utils.doubleToString(m_SplitPoint, 2));
+				  }
+			  } else {
+				  System.err.println("DEBUG is not Numeric");
+				  text.append(" = " + m_Info.attribute(m_Attribute).value(i));
+			  }
+			  text.append("\"]\n");
+			  System.err.println("DFS");
+			  num = m_Successors[i].toGraph(text, num);
+		  }
+	  }
+	  return num;
   }
 
   /**
-   * Outputs the decision tree.
-   * 
-   * @return a string representation of the classifier
-   */
+	  * Outputs the decision tree.
+	  * 
+	  * @return a string representation of the classifier
+	  */
   public String toString() {
 
-    // only ZeroR model?
-    if (m_ZeroR != null) {
-      StringBuffer buf = new StringBuffer();
-      buf
-      .append(this.getClass().getName().replaceAll(".*\\.", "")
-          + "\n");
-      buf.append(this.getClass().getName().replaceAll(".*\\.", "")
-          .replaceAll(".", "=")
-          + "\n\n");
-      buf
-      .append("Warning: No model could be built, hence ZeroR model is used:\n\n");
-      buf.append(m_ZeroR.toString());
-      return buf.toString();
-    }
+	  // only ZeroR model?
+	  if (m_ZeroR != null) {
+		  StringBuffer buf = new StringBuffer();
+		  buf
+			  .append(this.getClass().getName().replaceAll(".*\\.", "")
+				  + "\n");
+		  buf.append(this.getClass().getName().replaceAll(".*\\.", "")
+			  .replaceAll(".", "=")
+				  + "\n\n");
+		  buf
+			  .append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+		  buf.append(m_ZeroR.toString());
+		  return buf.toString();
+	  }
 
-    if (m_Successors == null) {
-      return "BalancedRandomTree: no model has been built yet.";
-    } else {
-      return "\nBalancedRandomTree\n==========\n"
-      + toString(0)
-      + "\n"
-      + "\nSize of the tree : "
-      + numNodes()
-      + (getMaxDepth() > 0 ? ("\nMax depth of tree: " + getMaxDepth())
-          : (""));
-    }
+	  if (m_Successors == null) {
+		  return "BalancedRandomTree: no model has been built yet.";
+	  } else {
+		  return "\nBalancedRandomTree\n==========\n"
+			  + toString(0)
+				  + "\n"
+					  + "\nSize of the tree : "
+						  + numNodes()
+							  + (getMaxDepth() > 0 ? ("\nMax depth of tree: " + getMaxDepth())
+								  : (""));
+	  }
   }
 
   /**

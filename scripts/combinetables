@@ -2,10 +2,18 @@
 
 import durbin.util.*
 
-// getMAF.R gets MAF data from Synapse. 
-//
-
 err = System.err
+
+// Performance...
+// Combining files is pretty slow when the output file gets large. 
+// Profiling reveals that about half the time goest to Table.set
+// and half the time to String.split in parseGeneValuesFromLine
+// Table.set, in turn, has most of it's time going to getColIdx,getRowIdx
+//
+// Can try Guava Splitter: https://code.google.com/p/guava-libraries/wiki/StringsExplained#Splitter
+// This might be faster and/or nicer in the long run.  
+// 
+
 
 options = ParseOptions(args)
 

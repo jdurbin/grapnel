@@ -853,6 +853,9 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
 	//System.err.println("transformedHeader:"+pceval.transformedHeader());
 
+//KJD: 	lwAttributes = WekaClassifierInfo.getFeatures(classifier)
+	
+	
 	// attributeSelection is too heavy-weight, saving instances and so on, to save many copies of it
 	// so we extract just what we need to know from each attributeSelection and save that...
 	// Attribute selection is performed on training set so provide training set as reference for 
