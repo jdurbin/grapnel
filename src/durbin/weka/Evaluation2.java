@@ -97,6 +97,7 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.LinkedHashMap;
 
 import java.util.ArrayList;
 
@@ -745,6 +746,74 @@ throws Exception {
 }
 */
 
+/**
+* Performs a (stratified if class is nominal) cross-validation 
+* for a classifier on a set of instances. Now performs
+* a deep copy of the classifier before each call to 
+* buildClassifier() (just in case the classifier is not
+* initialized properly).
+*
+* @param classifier the classifier with any options set.
+* @param data the data on which the cross-validation is to be 
+* performed 
+* @param numFolds the number of folds for the cross-validation
+* @param random random number generator for randomization 
+* @param forPredictionsString varargs parameter that, if supplied, is
+* expected to hold a StringBuffer to print predictions to, 
+* a Range of attributes to output and a Boolean (true if the distribution
+* is to be printed)
+* Added additional buffer to print out the results from the training 
+* set, if asked for (seems meaningless to me, but some want to see it)
+* @throws Exception if a classifier could not be generated 
+* successfully or the class is not defined
+*/
+public void crossValidateModelSingleCellSim(LinkedHashMap<String,Double> geneFreqMap,boolean bTestOnly,Classifier classifier,
+	Instances data, int numFolds, Random random,
+		Object... forPredictionsPrinting) 
+throws Exception {
+	
+	// Make a copy of the data we can reorder
+	data = new Instances(data);
+	data.randomize(random);
+	if (data.classAttribute().isNominal()) {
+		data.stratify(numFolds);
+	}
+	
+	// We assume that the first element is a StringBuffer, the second a Range (attributes
+	// to output) and the third a Boolean (whether or not to output a distribution instead
+	// of just a classification)
+	if (forPredictionsPrinting.length > 0) {
+		System.err.println("forPredictionsPringing.length="+forPredictionsPrinting.length);
+		
+		// print the header first    
+		StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
+		Range attsToOutput = (Range)forPredictionsPrinting[1];
+		boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+		printClassificationsHeader(data, attsToOutput, printDist, buff);
+	}
+
+	// Do the folds	
+	for (int i = 0; i < numFolds; i++) {		
+		System.err.println("\tFold: "+i);
+		Instances train = data.trainCV(numFolds, i, random);
+		Instances test = data.testCV(numFolds, i);
+		
+		//  Replace genes 
+		if (bTestOnly){
+			test = SingleCellSim.removegenes(geneFreqMap,test);
+		}else{
+			test = SingleCellSim.removegenes(geneFreqMap,test);
+			train = SingleCellSim.removegenes(geneFreqMap,train);
+		}								
+			
+		// This function potentially needs to produce a new Evaluation2 object using the data
+		// from the training insances, thus data1.  It only does this when saving training instance
+		// performance.  That should be moved out of this function to this level. 
+		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
+
+	}
+	m_NumFolds = numFolds;
+}
 
 
 /**
@@ -769,49 +838,49 @@ throws Exception {
 * successfully or the class is not defined
 */
 public void crossValidateModel(Classifier classifier,
-Instances data, int numFolds, Random random,
-Object... forPredictionsPrinting) 
+	Instances data, int numFolds, Random random,
+		Object... forPredictionsPrinting) 
 throws Exception {
 	
-	System.err.println("CHECK3");
+	System.err.println("DEBUG CHECK3");
 
-  // Make a copy of the data we can reorder
-  data = new Instances(data);
-  data.randomize(random);
-  if (data.classAttribute().isNominal()) {
-    data.stratify(numFolds);
-  }
+	// Make a copy of the data we can reorder
+	data = new Instances(data);
+	data.randomize(random);
+	if (data.classAttribute().isNominal()) {
+		data.stratify(numFolds);
+	}
 	
 	System.err.println("CHECK4");
 
-  // We assume that the first element is a StringBuffer, the second a Range (attributes
-  // to output) and the third a Boolean (whether or not to output a distribution instead
-  // of just a classification)
-  if (forPredictionsPrinting.length > 0) {
+	// We assume that the first element is a StringBuffer, the second a Range (attributes
+	// to output) and the third a Boolean (whether or not to output a distribution instead
+	// of just a classification)
+	if (forPredictionsPrinting.length > 0) {
 		System.err.println("forPredictionsPringing.length="+forPredictionsPrinting.length);
 		
-    // print the header first    
-    StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
-    Range attsToOutput = (Range)forPredictionsPrinting[1];
-    boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
-    printClassificationsHeader(data, attsToOutput, printDist, buff);
-  }
+		// print the header first    
+		StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
+		Range attsToOutput = (Range)forPredictionsPrinting[1];
+		boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+		printClassificationsHeader(data, attsToOutput, printDist, buff);
+	}
 
 	System.err.println("CHECK5");
 
-  // Do the folds	
-  for (int i = 0; i < numFolds; i++) {		
-			System.err.println("\tFold: "+i);
-    	Instances train = data.trainCV(numFolds, i, random);
-    	Instances test = data.testCV(numFolds, i);					
+	// Do the folds	
+	for (int i = 0; i < numFolds; i++) {		
+		System.err.println("\tFold: "+i);
+		Instances train = data.trainCV(numFolds, i, random);
+		Instances test = data.testCV(numFolds, i);					
 			
-			// This function potentially needs to produce a new Evaluation2 object using the data
-			// from the training insances, thus data1.  It only does this when saving training instance
-			// performance.  That should be moved out of this function to this level. 
-			evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
+		// This function potentially needs to produce a new Evaluation2 object using the data
+		// from the training insances, thus data1.  It only does this when saving training instance
+		// performance.  That should be moved out of this function to this level. 
+		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);
 
-  }
-  m_NumFolds = numFolds;
+	}
+	m_NumFolds = numFolds;
 }
 
 /***

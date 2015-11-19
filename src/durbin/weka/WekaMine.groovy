@@ -107,9 +107,6 @@ class WekaMine{
 		WekaAdditions.enable()
 	}	
 	
-	
-	
-	
 	//=================================================================================
 	// *********                  Pipeline Steps.                          ***********
 	//=================================================================================
@@ -546,6 +543,37 @@ class WekaMine{
 	/***
 	* Create an attribute selected classifier. 
 	*/ 
+	/*
+	def createAttributeSelectedClassifierSingleCell(geneFreqFile){
+
+	  def asClassifier
+	  if (exp.attributeEval == null) asClassifier = exp.classifier
+	  else{
+
+	    // Wrap classifier in an AttributeSelectedClassifier2 (modified from weka to 
+	    // provide API to expose the actual attributes selected). 
+	    asClassifier = new AttributeSelectedClassifier2();
+		asClassifier.m_SpecialExperiment = geneFreqFile
+		
+
+	    def search = exp.attributeSearch
+	    // Only Ranker (? right??) allows an overt numAttributes cutoff. 
+	    // At least, BestFirst search does not. 
+	    if (search.class == Ranker){
+	      search.setNumToSelect(exp.numAttributes);
+	    }
+
+	    asClassifier.setClassifier(exp.classifier);
+	    asClassifier.setEvaluator(exp.attributeEval);
+	    asClassifier.setSearch(search);                
+	  }
+		return(asClassifier)
+	}
+	*/
+	
+	/***
+	* Create an attribute selected classifier. 
+	*/ 
 	def createAttributeSelectedClassifier(){
 
 	  def asClassifier
@@ -669,6 +697,34 @@ class WekaMine{
 		//else trainResults = null
 						
 		return(eval);		
+	}
+	
+	/***
+	* TEMP EXPERIMENT
+	* cross validate model with generated folds. 
+	*/ 
+	def crossValidateModelSingleCellSim(geneFreqMap,bTestOnly,classifier,data,cvFolds,rng,evalTraining){
+		
+		def filteredClassifier = getFilteredClassifier(classifier);	
+
+		// Perform cross-validation of the model..
+		eval = new Evaluation2(data)
+		def predictions = new StringBuffer()
+		
+		def trainPredictions = null;
+		if (evalTraining) trainPredictions = new StringBuffer()
+	
+		err.println "CHECK1"
+		//eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions)
+		
+		// gene names passed in because, by this point, names have been stripped out of data...
+		eval.crossValidateModelSingleCellSim(geneFreqMap,bTestOnly,filteredClassifier,data,cvFolds,rng,predictions,new Range("first,last"),false,trainPredictions)
+		//testResults = CVUtils.parsePredictions(predictions)
+				
+		//if (trainPredictions != null) trainResults = CVUtils.parsePredictions(trainPredictions)
+		//else trainResults = null
+		
+		return(eval)		
 	}
 	
 
@@ -880,7 +936,6 @@ class WekaMine{
 
 		return(instances_atsel)
 	}
-
 	
 	/**
   *  Remove attributes that don't vary. 

@@ -29,6 +29,8 @@ import weka.core.WeightedInstancesHandler;
 */
 public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
     
+  //String m_SpecialExperiment = null;	
+	
   /***  
   */ 
   public AttributeSelection getAttributeSelection(){
@@ -104,8 +106,16 @@ public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
       resampledData = newData;
     }
 	System.err.println("done.");
-
-    m_AttributeSelection = new AttributeSelection();
+	
+	// SINGLE CELL SIMULATION 
+	// Handle special case for simulation. 
+	//if (m_SpecialExperiment != null){
+	//	mAttributeSelection = new SingleCellSimulationSelection(m_SpecialExperiment);				
+	//}else{
+	//	m_AttributeSelection = new AttributeSelection();
+	//}
+	
+	m_AttributeSelection = new AttributeSelection();
     m_AttributeSelection.setEvaluator(m_Evaluator);
     m_AttributeSelection.setSearch(m_Search);
 	System.err.println("\t\t\t\t\tSelect attributes with "+m_Evaluator.toString());
