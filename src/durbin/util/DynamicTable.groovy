@@ -85,19 +85,46 @@ class DynamicTable {
 		}
 	}		
 	
+	/***
+	*  Writes out a DynamicTable as a tab file.  Since there may be missing 
+	*  row,column pairs, it tests each row to see if it has as many values as 
+	*  the column.  If it doesn't it figures out which values are missing and fills
+	*  them in with defaultValue.  If the sizes match it just writes them out. 
+	*  Performance is good (7s to read and write out 10k x 300 table) when there
+	*  are no missing values, but degrades heavily in the face of missing values 
+	*  (many minutes if each row has a missing value).  
+	*/ 
 	def write(fileName,delimiter){
 		
 		new File(fileName).withWriter{w->
 		
 			def colKeys = delegate.columnKeySet()
+			def numCols = colKeys.size()
 			def rowKeys = delegate.rowKeySet()
 			w.write "Features$delimiter"
 			w.writeLine colKeys.join(delimiter)		
 
 			rowKeys.each{r->		
 				w.write "${r}$delimiter"
-				def rowvals = colKeys.collect{c->delegate.get(r,c) ?: defaultVal}
-				w.writeLine rowvals.join(delimiter)
+				def rowmap = delegate.row(r)
+				
+				// 206 x 295  33.5s
+				//def rowvals = colKeys.collect{c->
+				//	rowmap[c] ?: defaultVal					
+				//}				
+				
+				// If sizes match just write it out, otherwise find the missing values
+				// and replace them with default values. 
+				// In case where there are no missing values, this takes 7s.  9803x295
+				// Time will go up dramatically with missing values. 
+				if (rowmap.size() == numCols){
+					w.writeLine rowmap.values().join(delimiter)
+				}else{
+					def rowvals = colKeys.collect{c->
+						rowmap[c] ?: defaultVal					
+					}
+					w.writeLine rowvals.join(delimiter)					
+				}							
 			}
 		}
 	}
