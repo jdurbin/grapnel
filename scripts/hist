@@ -1,0 +1,13 @@
+#!/usr/bin/env groovy 
+
+import durbin.util.*
+import static durbin.charts.Charts.*
+
+vals = []
+System.in.eachLine(){line->
+	val = line as double
+	vals << val
+}
+
+h = hist("Distribution",vals)
+showChart(chart:h)
