@@ -182,12 +182,20 @@ public class TableFileLoader {
 			System.err.println("Parsing line: "+line);
 			System.err.println("Parsing token: "+valToken);
 		}
+		
 			
 		// Set up attributes, which for colInstances will be the rowNames...
 		FastVector atts = new FastVector();
 		for(int a = 0; a < numAttributes;a++){
 			atts.addElement(new Attribute(attrNames[a]));
 		}	
+
+		// In Weka 3-7 this has been changed to take an ArrayList of attributes
+		// instead of a FastVector
+		//ArrayList<Attribute> atts = new ArrayList<Attribute>();
+		//for(int a = 0; a < numAttributes;a++){
+		//	atts.add(new Attribute(attrNames[a]));
+		//}	
 		
 		// Create Instances object..
 		Instances data = new Instances(relationName,atts,0);

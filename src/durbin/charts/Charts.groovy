@@ -312,6 +312,7 @@ class Charts{
 
 	/***
 	* Create a histogram from two sets of values in arbitrary collection...
+	* KJD TODO: change hist and other chart functions to take named parameters. 
 	*/ 						
 	static dualhist(params=[:]){
 		
