@@ -75,6 +75,7 @@ import weka.attributeSelection.AttributeSelection;
 import durbin.weka.AttributeSelectedClassifier2;
 import weka.classifiers.meta.FilteredClassifier;
 import durbin.weka.NominalPredictionPlus;
+import durbin.weka.WekaClassifierInfo;
 
 
 import java.beans.BeanInfo;
@@ -922,24 +923,24 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
 	//System.err.println("transformedHeader:"+pceval.transformedHeader());
 
-//KJD: 	lwAttributes = WekaClassifierInfo.getFeatures(classifier)
-	
-	
 	// attributeSelection is too heavy-weight, saving instances and so on, to save many copies of it
 	// so we extract just what we need to know from each attributeSelection and save that...
 	// Attribute selection is performed on training set so provide training set as reference for 
 	// the meaning of attribute selection indices...
-	System.err.print("\t\t\t\tLight weight attribute selection....");
-	LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
-	System.err.println("done");
+	//System.err.print("\t\t\t\tLight weight attribute selection....");
+	//LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
+	//System.err.println("done");
+
+	// Get the attributes directly form the trained classifier
+	LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(WekaClassifierInfo.getFeatures(classifier));
 
 	//double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
 	//LightWeightAttributeSelection thinAttributes = new LightWeightAttributeSelection(rankedAttrs);
 	//System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
-  m_cvAttributeSelections.add(lwAttributes);
+	 m_cvAttributeSelections.add(lwAttributes);
 	
 	  System.err.print("\t\t\t\t evaluateModel....");
-	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+		evaluateModel(copiedClassifier, test, forPredictionsPrinting);
 	  System.err.println("done.");
 	
 	// If there is a non-null fourth element, it is assumed to be a second buffer to store the evaluations on the 

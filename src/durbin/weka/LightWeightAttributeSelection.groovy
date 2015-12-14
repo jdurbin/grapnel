@@ -11,6 +11,10 @@ import weka.core.*
 public class LightWeightAttributeSelection{
 	def selectedAttributes = [:]
 	
+	def LightWeightAttributeSelection(attributeMap){
+		selectedAttributes = attributeMap
+	}
+	
 	def LightWeightAttributeSelection(Instances data,AttributeSelection attributeSelection,ASSearch search){
 				
 		// data is the data as seen by Evaluation2 as a training set.  However, by the time that the
