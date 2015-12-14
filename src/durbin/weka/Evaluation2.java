@@ -932,7 +932,8 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//System.err.println("done");
 
 	// Get the attributes directly form the trained classifier
-	LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(WekaClassifierInfo.getFeatures(classifier));
+	LightWeightAttributeSelection lwAttributes = 
+		new LightWeightAttributeSelection(WekaClassifierInfo.getFeatures(asClassifier));
 
 	//double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
 	//LightWeightAttributeSelection thinAttributes = new LightWeightAttributeSelection(rankedAttrs);

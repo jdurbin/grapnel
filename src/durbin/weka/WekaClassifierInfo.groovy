@@ -14,21 +14,34 @@ class WekaClassifierInfo{
 	*/ 
 	static def getFeatures(classifier){
 		
-		switch(classifier){
+		// Base classifier might be wrapped in a filtered or attribute selected classifier
+		def baseClassifier
+		if (classifier instanceof weka.classifiers.meta.FilteredClassifier){
+			baseClassifier = classifier.getClassifier()
+			if (baseClassifier instanceof durbin.weka.AttributeSelectedClassifier2){
+				baseClassifier = baseClassifier.getClassifier()
+			}						
+		}else if (classifier instanceof durbin.weka.AttributeSelectedClassifier2){
+			baseClassifier = classifier.getClassifier()
+		}else{	
+			baseClassifier = classifier
+		}
+		
+		switch(baseClassifier){
 			case {it instanceof durbin.weka.BalancedRandomForest}:
 			case {it instanceof weka.classifiers.trees.RandomForest}:
-			def features2weights = getRFFeatures(classifier)
+			def features2weights = getRFFeatures(baseClassifier)
 			return(features2weights)
 			break;
 			
 			case {it instanceof weka.classifiers.functions.SimpleLogistic}:
-			def features2weights = getLogisticFeatures(classifier)
+			def features2weights = getLogisticFeatures(baseClassifier)
 			return(features2weights)
 			break;
 			
 			case {it instanceof weka.classifiers.functions.SMO}:
-			if (classifier.m_KernelIsLinear){
-				def features2weights = getSMOFeatures(classifier);
+			if (baseClassifier.m_KernelIsLinear){
+				def features2weights = getSMOFeatures(baseClassifier);
 				return(features2weights);
 			}else{
 				System.err.println "ERROR: Unsupported non-linear kernel for WekaClassifierInfo"
@@ -36,7 +49,7 @@ class WekaClassifierInfo{
 			break;
 
 			default:
-			System.err.println "ERROR: Unsupported classifier type in WekaClassifierInfo"
+			System.err.println "ERROR: Unsupported classifier type in WekaClassifierInfo"+baseClassifier.class
 			break;
 		}
 		def features2weights = ["NA":0]

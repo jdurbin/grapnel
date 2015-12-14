@@ -1,7 +1,7 @@
 package durbin.weka;
 import durbin.weka.*
 import weka.clusterers.SimpleKMeans
-import weka.clusterers.HierarchicalClusterer
+//import weka.clusterers.HierarchicalClusterer
 
 /***
 * Class to encapsulate nicer versions of WekaMine functions. 
@@ -44,12 +44,15 @@ class WM{
 		return(km)
 	}
 	
+	/* This doesn't exist in weka-3-6-1
+	   KJD However, newer versions do not tolerate duplicate IDs in attributes which happens 
+	   briefly in merge data and clinical... so remove this until ID issue is sorted out. 
 	static def HierarchicalClusterer(params=[:]){
 		def hc = new HierarchicalClusterer()
 		hc.setOptions(params2Options(params))
 		return(hc)
 	}
-	
+	*/
 			
 	
 	
