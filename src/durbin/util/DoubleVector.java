@@ -40,30 +40,26 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
 
 	public DenseDoubleMatrix1D getData(){return(data);}
 
-	public DoubleVector(int n,String[] theNames,HashMap<String,Integer> nameMap){
+	public DoubleVector(int n,HashMap<String,Integer> nameMap){
 		data = new DenseDoubleMatrix1D(n);
-		names = theNames;
 		name2Idx = nameMap;		
 	}
 
-  public DoubleVector(DoubleMatrix1D dom,String[] theNames,HashMap<String,Integer> nameMap){
+  public DoubleVector(DoubleMatrix1D dom,HashMap<String,Integer> nameMap){
     data = (DenseDoubleMatrix1D) dom;
-		names = theNames;
-		name2Idx = nameMap;
+	name2Idx = nameMap;
   }
 
-	public DoubleVector(ArrayList<Double> vec,String[] theNames,HashMap<String,Integer> nameMap){
+	public DoubleVector(ArrayList<Double> vec,HashMap<String,Integer> nameMap){
 		data = new DenseDoubleMatrix1D(vec.size());
 		for(int i = 0;i < vec.size();i++){
 			data.setQuick(i,vec.get(i));
 		}
-		names = theNames;
 		name2Idx = nameMap;
 	}
 	
-	public DoubleVector(double[] values,String[] theNames,HashMap<String,Integer> nameMap){
+	public DoubleVector(double[] values,HashMap<String,Integer> nameMap){
 		data = new DenseDoubleMatrix1D(values);
-		names = theNames;
 		name2Idx = nameMap;
 	}
 
@@ -147,7 +143,7 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
 
  	public Double getAt(String name){
 		int idx = name2Idx.get(name);
-    return(data.getQuick(idx));
+		return(data.getQuick(idx));
   }
 
 
@@ -230,5 +226,17 @@ public class DoubleVector extends GroovyObjectSupport implements Iterable{
 	    name2IdxMap.put(names[i],i);
 	  }
 	}
+	
+	/**
+	* Provide support for iterating over rows
+
+	public DoubleVector each(Closure closure) {
+		for (int c = 0;c < numCols;c++) {
+			DoubleVector row = new DoubleVector(matrix.viewRow(r),colName2Idx);
+			closure.call(row);
+		}
+		return this;
+	}	
+		*/
 
 }

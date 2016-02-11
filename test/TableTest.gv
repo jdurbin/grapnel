@@ -33,6 +33,11 @@ assert beer['BrooklynBrand']["price"] == 6.24
 err.println "TRANSPOSE:"
 err.println beer.transpose()
 
+// Access by rows...
+beer.eachRow{r->
+	println r["price"]
+}
+
 // So I'm going to have to handle case of null getAt() as special case... next...
 // beer[]['price']  should return a column vector
 //

@@ -695,24 +695,22 @@ public class DoubleTable extends GroovyObjectSupport{
 	
 	public DoubleVector getRow(int row){
 			// When return a row, want to have names for columns within the row...
-	   return(new DoubleVector(matrix.viewRow(row),colNames,colName2Idx));
+	   return(new DoubleVector(matrix.viewRow(row),colName2Idx));
 	}
 	
 	public DoubleVector getCol(int col){
-	   return(new DoubleVector(matrix.viewColumn(col),rowNames,rowName2Idx));
+	   return(new DoubleVector(matrix.viewColumn(col),rowName2Idx));
 	}
 	
 	public DoubleVector getCol(String colStr){
 		int col = getColIdx(colStr);
-		return(new DoubleVector(matrix.viewColumn(col),rowNames,rowName2Idx));
+		return(new DoubleVector(matrix.viewColumn(col),rowName2Idx));
 	}
 				
 	public DoubleVector getRow(String rowStr){
 		int row = getRowIdx(rowStr);
-		return(new DoubleVector(matrix.viewRow(row),colNames,colName2Idx));
+		return(new DoubleVector(matrix.viewRow(row),colName2Idx));
 	}
-	
-	
 	
 	//==========================================================
 	
@@ -743,6 +741,20 @@ public class DoubleTable extends GroovyObjectSupport{
 	  }
 	  return(rvals);
 	}
+	
+	
+	/**
+	* Provide support for iterating over rows
+    */
+	public DoubleTable eachRow(Closure closure) {
+		for (int r = 0;r < numRows;r++) {
+			//Double[] row = matrix.viewRow(r).toArray();  bit costly to make a copy...
+			DoubleVector row = new DoubleVector(matrix.viewRow(r),colName2Idx);
+			row.names = colNames;
+			closure.call(row);
+		}
+		return this;
+	}	
 	
 }
 
@@ -816,17 +828,7 @@ public class DoubleTable extends GroovyObjectSupport{
 		return this;
 	}
 	*/
+			
 	
-	/**
-	* Provide support for iterating over rows
 
-	public DoubleTable eachRow(Closure closure) {
-		for (int r = 0;r < numRows;r++) {
-			//Double[] row = matrix.viewRow(r).toArray();  bit costly to make a copy...
-			Vector row = new Vector(matrix.viewRow(r));
-			closure.call(new Double[] {row});
-		}
-		return this;
-	}
-		*/
 	
