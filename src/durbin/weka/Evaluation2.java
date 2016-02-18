@@ -244,6 +244,8 @@ import java.lang.management.*;
       protected double m_WithClass;
 
       /** Array for storing the confusion matrix. */
+	  /** KJD:  Rows are actual values, columns are predicted values. **/
+	  /** So m_ConfusionMatrix[A][B] is the number of actual A's that were called B's */
       protected double [][] m_ConfusionMatrix;
 
       /** The names of the classes. */
