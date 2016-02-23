@@ -67,19 +67,14 @@ class swiftml{
 		attrSel.numAttributes = params.numAttributes
 		return(attrSel)
 	}
-	
-	
-	/*
+		
 	static def selectAttributes(attributeSelection,withIDInstances){
 		def noIDInstances = removeID(withIDInstances)
-		def IDs = instances.attributeValues("ID")
+		def IDs = withIDInstances.attributeValues("ID")
 		selectedInstances = Filter.useFilter(noIDInstances,attributeSelection)	
-		selectedInstances.
-	
-		wmAttributeSelection removes IDs, performs selection, then adds ID back in...
-		This seems dubious... why would removed attribute names be in the given order???	
+		newWithIDInstances = WekaMine.addID(selectedInstances,IDs)
+		return(newWithIDInstances)
 	}
-	*/
 	
 	
 	/***********

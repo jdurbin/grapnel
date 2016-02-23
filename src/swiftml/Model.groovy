@@ -7,9 +7,15 @@ package swiftml
 	- other preprocessing steps...
 */
 class Model implements Serializable{
-	def classifier 
+	static final long serialVersionUID = 1L; 
 	
-	def Model(cl){
+	def classifier 
+	def attributes
+	def className
+	
+	def Model(cl,className,attr){
 		classifier = cl
+		className = cn
+		attributes = attr
 	}
 }
