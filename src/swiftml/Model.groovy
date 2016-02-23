@@ -13,7 +13,7 @@ class Model implements Serializable{
 	def attributes
 	def className
 	
-	def Model(cl,className,attr){
+	def Model(cl,cn,attr){
 		classifier = cl
 		className = cn
 		attributes = attr

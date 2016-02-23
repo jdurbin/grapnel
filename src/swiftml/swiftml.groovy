@@ -8,6 +8,8 @@ import weka.attributeSelection.Ranker
 import weka.attributeSelection.InfoGainAttributeEval
 import weka.classifiers.Evaluation
 import weka.filters.*
+import weka.filters.supervised.attribute.AttributeSelection
+
 
 /***
 * Class to encapsulate nicer versions of WekaMine functions. 
@@ -60,7 +62,7 @@ class swiftml{
 	* Attribute Selection
 	*/ 
 	static def InformationGain(params=[:]){
-		def attrSel = new AttributeSelection()
+		def attrSel = new AttributeSelectionWrapper()
 		attrSel.attributeEval= new InfoGainAttributeEval()
 		attrSel.attributeSearch = new Ranker()
 		attrSel.attributeSearch.setNumToSelect(params.numAttributes)
@@ -69,9 +71,13 @@ class swiftml{
 	}
 		
 	static def selectAttributes(attributeSelection,withIDInstances){
-		def noIDInstances = removeID(withIDInstances)
+		AttributeSelection atSel = new AttributeSelection();
+		atSel.setEvaluator(attributeSelection.attributeEval)
+		atSel.setSearch(attributeSelection.attributeSearch)		
 		def IDs = withIDInstances.attributeValues("ID")
-		def selectedInstances = Filter.useFilter(noIDInstances,attributeSelection)	
+		def noIDInstances = removeID(withIDInstances)
+		atSel.setInputFormat(noIDInstances)
+		def selectedInstances = Filter.useFilter(noIDInstances,atSel)	
 		def newWithIDInstances = WekaMine.addID(selectedInstances,IDs)
 		return(newWithIDInstances)
 	}
