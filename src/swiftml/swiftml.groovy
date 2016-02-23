@@ -7,7 +7,7 @@ import weka.classifiers.trees.RandomForest
 import weka.attributeSelection.Ranker
 import weka.attributeSelection.InfoGainAttributeEval
 import weka.classifiers.Evaluation
-
+import weka.filters.*
 
 /***
 * Class to encapsulate nicer versions of WekaMine functions. 
@@ -49,6 +49,12 @@ class swiftml{
 		return(rf)
 	}
 	
+	static def BalancedRandomForest(params=[:]){
+		def brf = new BalancedRandomForest()
+		brf.setOptions(params2Options(params))
+		return(brf)
+	}
+	
 	
 	/**********
 	* Attribute Selection
@@ -61,6 +67,20 @@ class swiftml{
 		attrSel.numAttributes = params.numAttributes
 		return(attrSel)
 	}
+	
+	
+	/*
+	static def selectAttributes(attributeSelection,withIDInstances){
+		def noIDInstances = removeID(withIDInstances)
+		def IDs = instances.attributeValues("ID")
+		selectedInstances = Filter.useFilter(noIDInstances,attributeSelection)	
+		selectedInstances.
+	
+		wmAttributeSelection removes IDs, performs selection, then adds ID back in...
+		This seems dubious... why would removed attribute names be in the given order???	
+	}
+	*/
+	
 	
 	/***********
 	* CLASSIFICATION
@@ -87,8 +107,8 @@ class swiftml{
 		def classifications = []	
 		noIDInstances.eachWithIndex{instance,i->		
 			def classification = new Classification()
-			classification.instanceID = instances.instance(i).stringValue(0) // get the ID
-			def distribution = rf.distributionForInstance(instance)
+			classification.instanceID = withIDInstances.instance(i).stringValue(0) // get the ID
+			def distribution = classifier.distributionForInstance(instance)
 			distribution.eachWithIndex{p,j->
 				classification.values[classValues[j]] = p
 			}
