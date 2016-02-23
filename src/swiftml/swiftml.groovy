@@ -71,8 +71,8 @@ class swiftml{
 	static def selectAttributes(attributeSelection,withIDInstances){
 		def noIDInstances = removeID(withIDInstances)
 		def IDs = withIDInstances.attributeValues("ID")
-		selectedInstances = Filter.useFilter(noIDInstances,attributeSelection)	
-		newWithIDInstances = WekaMine.addID(selectedInstances,IDs)
+		def selectedInstances = Filter.useFilter(noIDInstances,attributeSelection)	
+		def newWithIDInstances = WekaMine.addID(selectedInstances,IDs)
 		return(newWithIDInstances)
 	}
 	
