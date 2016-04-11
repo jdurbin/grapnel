@@ -18,12 +18,8 @@ class Parasol{
 		RunBash.enable()
 		RunBash.bEchoCommand = false
 		
-		def paraCmd
-		if (maxJobs == -1){
-			paraCmd = "para push"
-		}else
-			paraCmd = "para push -maxJob=$maxJobs"
-	    }
+		def paraCmd = "para push"
+		if (maxJobs > 0) paraCmd = "para push -maxJob=$maxJobs"
 		
 		"""
 		cd $jobdir

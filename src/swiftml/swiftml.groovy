@@ -4,6 +4,9 @@ import durbin.weka.*
 import weka.clusterers.SimpleKMeans
 //import weka.clusterers.HierarchicalClusterer
 import weka.classifiers.trees.RandomForest
+import weka.classifiers.functions.SMO
+import weka.classifiers.functions.SimpleLogistic
+import weka.classifiers.functions.supportVector.RBFKernel
 import weka.attributeSelection.Ranker
 import weka.attributeSelection.InfoGainAttributeEval
 import weka.classifiers.Evaluation
@@ -53,6 +56,27 @@ class swiftml{
 		def brf = new BalancedRandomForest()
 		brf.setOptions(params2Options(params))
 		return(brf)
+	}	
+	
+	static def svm_rbf(params=[:]){
+		def svm = new SMO()
+		def kernel = new RBFKernel()
+		//kernel.setGamma()
+		svm.setKernel(kernel)
+		svm.setOptions(params2Options(params))
+		return(svm)
+	}	
+	
+	static def svm(params=[:]){
+		def svm = new SMO()
+		svm.setOptions(params2Options(params))
+		return(svm)
+	}
+	
+	static def logistic(params=[:]){
+		def log = new SimpleLogistic()
+		log.setOptions(params2Options(params))
+		return(log)
 	}	
 	
 	/**********
