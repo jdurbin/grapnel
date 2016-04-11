@@ -28,11 +28,10 @@ class Para{
 			cd $jobdir
 			para check
 		""".bash()
-		checkout = checkout.toString()
 		
 		def numOK
 		def numInBatch 
-		fields = checkout.split("\n")
+		def fields = checkout.split("\n")
 		fields.each{f->
 			if (f.contains("ranOk")){
 				numOK = f.split(":")[1] as int
