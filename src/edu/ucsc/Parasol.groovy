@@ -11,6 +11,7 @@ class Parasol{
 	*/ 
 	static def runjobs(jobname,jobdir){
 		RunBash.enable()
+		RunBash.bEchoCommand = false
 		
 		"""
 		cd $jobdir
@@ -34,6 +35,7 @@ class Parasol{
 	
 	static def paraCheck(jobdir){
 		RunBash.enable()
+		RunBash.bEchoCommand = false
 		
 		def checkout = """
 			cd $jobdir
@@ -55,6 +57,9 @@ class Parasol{
 	}
 	
 	static def done(jobdir){
+		RunBash.enable()
+		RunBash.bEchoCommand = false
+		
 		def doneout = """
 			cd $jobdir
 			para stop
