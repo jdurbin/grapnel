@@ -6,6 +6,10 @@ import durbin.util.*
 * Minimal support for running parasol jobs on cluster. 
 */
 class Parasol{
+	
+	static def checkDelay = 10000	// 10 seconds delay between status checks. 
+	static def maxStaticChecks = 90 // If it goes 15 minutes without change, kill it.
+	
 	/**
 	* Run parasol jobs...
 	*/ 
@@ -21,10 +25,20 @@ class Parasol{
 		
 		def numOK = 0
 		def numInBatch = 9999
-		while(numOK < numInBatch){
+		def lastOK = numOK
+		def lastInBatch = numInBatch
+		def staticCount = 0
+		while((numOK < numInBatch) && (staticCount < maxStaticChecks)){
 			(numOK,numInBatch) = paraCheck(jobdir)
+			
+			if ((numOK == lastOK) && (lastInBatch == numInBatch)) staticCount++
+			
 			println "para numInBatch: $numInBatch \tnumOK: $numOK"
-			sleep(10000) // check status every ten seconds.
+			sleep(checkDelay) 						
+		}
+		
+		if (staticCount >= maxStaticChecks){
+			System.err.println "WARNING: JOBS KILLED DUE TO BEING STATIC FOR TOO LONG."
 		}
 		
 		// TODO:  detect hung jobs
