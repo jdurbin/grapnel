@@ -5,7 +5,7 @@ import durbin.util.*
 /****
 * Minimal support for running parasol jobs on cluster. 
 */
-class Para{
+class Parasol{
 	/**
 	* Run parasol jobs...
 	*/ 
