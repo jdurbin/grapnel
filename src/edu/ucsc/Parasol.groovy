@@ -29,7 +29,7 @@ class Para{
 		// TODO:  detect hung jobs
 		// TODO:  detect failed jobs and return some kind of error status
 		
-		paraDone(jobdir)
+		done(jobdir)
 	}
 	
 	static def paraCheck(jobdir){
@@ -54,7 +54,7 @@ class Para{
 		return([numOK,numInBatch])
 	}
 	
-	static def paraDone(jobdir){
+	static def done(jobdir){
 		def doneout = """
 			cd $jobdir
 			para stop
