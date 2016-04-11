@@ -9,6 +9,7 @@ class Parasol{
 	
 	static def checkDelay = 10000	// 10 seconds delay between status checks. 
 	static def maxStaticChecks = 90 // If it goes 15 minutes without change, kill it.
+	static def maxJobs = -1
 	
 	/**
 	* Run parasol jobs...
@@ -17,10 +18,17 @@ class Parasol{
 		RunBash.enable()
 		RunBash.bEchoCommand = false
 		
+		def paraCmd
+		if (maxJobs == -1){
+			paraCmd = "para push"
+		}else
+			paraCmd = "para push -maxJob=$maxJobs"
+	    }
+		
 		"""
 		cd $jobdir
 		para create $jobname
-		para push 
+		$paraCmd 
 		""".bash()	
 		
 		def numOK = 0
