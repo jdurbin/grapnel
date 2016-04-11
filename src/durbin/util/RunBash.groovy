@@ -60,7 +60,7 @@ class RunBash{
 			pb = null;
 			shell = null;
 		} catch (IOException ignoreMe) {}
-		return(stdbuf)	
+		return(stdbuf.toString())	
 	}
 }
 		
