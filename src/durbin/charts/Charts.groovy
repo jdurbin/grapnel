@@ -243,8 +243,8 @@ class Charts{
 	*/ 						
 	static hist(cName,values){
 		
-		def binmax = values.max()
-		def binmin = values.min()
+		def binmax = Collections.max(values) //values.max()
+		def binmin = Collections.min(values) //values.min()
 		
 		//err.println "createHistogramFromValues"
 		def series = new HistogramDataset()

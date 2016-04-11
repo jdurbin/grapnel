@@ -139,6 +139,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
 
 	// Balanced subsampling parameters. 
 	protected double m_BootstrapFraction = 1;
+	protected double m_UniformBias = 1.0;
 	protected boolean m_DownsampleMajor = false;
 
 	// Variance based informativeness parameters
@@ -148,9 +149,10 @@ WeightedInstancesHandler, Randomizable, Drawable {
 
 	public BalancedRandomTree(){}
 
-	public BalancedRandomTree(boolean subsampleMajor,double bootstrapFraction,Random rng){
+	public BalancedRandomTree(boolean subsampleMajor,double bootstrapFraction,double uniformBias,Random rng){
 		m_DownsampleMajor = subsampleMajor;
 		m_BootstrapFraction = bootstrapFraction;
+		m_UniformBias = uniformBias;
 		m_rng = rng;
 	}
 
@@ -222,6 +224,10 @@ WeightedInstancesHandler, Randomizable, Drawable {
 
 	public double getBootstrapFraction(){
 		return m_BootstrapFraction;
+	}
+	
+	public double getUniformBias(){
+		return m_UniformBias;
 	}
 
   /**
@@ -516,13 +522,20 @@ WeightedInstancesHandler, Randomizable, Drawable {
       m_MinNum = 1;
     }
 
-		tmpStr = Utils.getOption('B', options);
+	tmpStr = Utils.getOption('B', options);
     if (tmpStr.length() != 0) {
       m_BootstrapFraction = Double.parseDouble(tmpStr);
     } else {
       m_BootstrapFraction = 1;
     }
-
+	
+	tmpStr = Utils.getOption('u',options);
+	if (tmpStr.length() != 0){
+		m_UniformBias = Double.parseDouble(tmpStr);
+	}else {
+		m_UniformBias = 1.0;
+	}
+	
     tmpStr = Utils.getOption('S', options);
     if (tmpStr.length() != 0) {
       setSeed(Integer.parseInt(tmpStr));
@@ -585,25 +598,31 @@ WeightedInstancesHandler, Randomizable, Drawable {
    *             if something goes wrong or the data doesn't fit
    */
   public void buildClassifier(Instances fullData) throws Exception {
-	  System.err.println("\t\t\t\tBalancedRandomTree buildClassifier on "+fullData.numInstances()+" original instances.");
+	 // System.err.println("\t\t\t\tBalancedRandomTree buildClassifier on "+fullData.numInstances()+" original instances.");
 	
 		// Create a balanced subsample of the fullData... either by downsampling the major class
 		// or resampling the minor class. 		
 		Instances data;
 		
 		// KJD KJD KJD TEMPORARY FOR TESTING 
+		
+		//System.err.println("data BEFORE:"+fullData);
 		if (m_DownsampleMajor){
+		//	System.err.println("m_DownSampleMajor==true Balanced Subsampler");
 			data = BalancedSubsampler.balanceSubsampleMinorMajor(fullData,m_BootstrapFraction,m_rng);
 		}else{
+		//	System.err.println("m_DownSampleMajor==false Weka Resample m_UniformBias:"+m_UniformBias+" m_BootstrapFraction="+m_BootstrapFraction);
 			Resample resampleFilter = new Resample();
 			resampleFilter.setNoReplacement(false);
-			resampleFilter.setBiasToUniformClass(1.0); // Uniform distribution of class
-			resampleFilter.setSampleSizePercent(100.0);
+			resampleFilter.setBiasToUniformClass(m_UniformBias); // Uniform distribution of class
+			double resamplePercent = m_BootstrapFraction*100;
+			resampleFilter.setSampleSizePercent(resamplePercent); // Here bootstrap fraction is sample size
 			resampleFilter.setInputFormat(fullData);
 			resampleFilter.setRandomSeed(m_rng.nextInt());
 			data = Filter.useFilter(fullData,resampleFilter);
 		}
-		System.err.println("\t\t\t\t\tAfter subsampling: "+data.numInstances()+" instances.");
+		//System.err.println("\t\t\t\t\tAfter subsampling: "+data.numInstances()+" instances.");
+		//System.err.println("data AFTER:"+data);
 		//data = fullData;
 	
     // Make sure K value is in range
@@ -696,6 +715,8 @@ WeightedInstancesHandler, Randomizable, Drawable {
    *             if computation fails
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
+
+	  //System.err.println("DEBUG distributionForInstance BalancedRandomTree");
 
     // default model?
     if (m_ZeroR != null) {

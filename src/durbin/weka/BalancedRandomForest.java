@@ -108,6 +108,7 @@ public class BalancedRandomForest
              AdditionalMeasureProducer, TechnicalInformationHandler {
 
 	protected double m_BootstrapFraction = 1;
+	protected double m_UniformBias = 1.0;
 	protected boolean m_DownsampleMajor = false;
 
   /** for serialization */
@@ -188,6 +189,10 @@ public class BalancedRandomForest
 
 	public double getBootstrapFraction(){
 		return m_BootstrapFraction;
+	}
+	
+	public double getUniformBias(){
+		return m_UniformBias;
 	}
 
 
@@ -458,7 +463,13 @@ public class BalancedRandomForest
     } else {
       m_BootstrapFraction = 1;
     }
-
+	
+	tmpStr = Utils.getOption('u', options);
+	if (tmpStr.length() != 0) {
+ 	   m_UniformBias = Double.parseDouble(tmpStr);
+	}else{
+  	  m_UniformBias = 1.0;
+	}
 
     tmpStr = Utils.getOption('I', options);
     if (tmpStr.length() != 0) {
@@ -516,16 +527,16 @@ public class BalancedRandomForest
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-	System.err.print("\t\t\t\tDelete with missing class...");
+//	System.err.print("\t\t\t\tDelete with missing class...");
     data = new Instances(data);
     data.deleteWithMissingClass();
-    System.err.println("done.");
+ //   System.err.println("done.");
 	
-	System.err.print("\t\t\t\t new BalancedRandomTree");
+//	System.err.print("\t\t\t\t new BalancedRandomTree");
     m_bagger = new Bagging();
 	m_rng = new Random();
-    BalancedRandomTree rTree = new BalancedRandomTree(m_DownsampleMajor,m_BootstrapFraction,m_rng);
-	System.err.println("done.");
+    BalancedRandomTree rTree = new BalancedRandomTree(m_DownsampleMajor,m_BootstrapFraction,m_UniformBias,m_rng);
+//	System.err.println("done.");
 
     // set up the random tree options
     m_KValue = m_numFeatures;
@@ -539,9 +550,9 @@ public class BalancedRandomForest
     m_bagger.setNumIterations(m_numTrees);
     m_bagger.setCalcOutOfBag(true);
 	
-	System.err.println("\t\t\t\tBalancedRandomForest m_bagger.buildClassifier...");
+//	System.err.println("\t\t\t\tBalancedRandomForest m_bagger.buildClassifier...");
     m_bagger.buildClassifier(data);
-	System.err.println("\t\t\t\tBalancedRandomForest done.");
+//	System.err.println("\t\t\t\tBalancedRandomForest done.");
   }
 
   /**

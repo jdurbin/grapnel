@@ -56,12 +56,21 @@ public class Make{
 		// This allows syntax like ./make clean mask blastz 
 		// 
 		args.each{arg->
-			if (arg.contains(",")){
+			// Kind of crude... better to have a property-list that matches to 
+			// variable names.  along with that have some graceful error handling and 
+			// print out the desired variable names with target
+			if (arg.contains(":")){
+				def fields = arg.split(":")
+				def methodName = fields[0]
+				def margs = fields[1..-1] // remaining fields are arguments
+				if (margs.size() == 1) margs = margs[0] // if just one argument, pass in value not list
+				obj.invokeMethod(methodName,margs)
+			}else if (arg.contains(",")){
 				def fields = arg.split(",")
 				def methodName = fields[0]						
 				def varName = fields[1]
-				def varValue = obj."$varName"
-				obj.invokeMethod(methodName,varValue)
+				def varValue = obj."$varName"   // global variable?
+				obj.invokeMethod(methodName,varValue) // what?  
 			}else{
 				
 				// If the method name is targets, print the targets, 

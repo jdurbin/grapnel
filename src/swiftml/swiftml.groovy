@@ -10,7 +10,6 @@ import weka.classifiers.Evaluation
 import weka.filters.*
 import weka.filters.supervised.attribute.AttributeSelection
 
-
 /***
 * Class to encapsulate nicer versions of WekaMine functions. 
 * Change WekaMine itself into WekaMinePipeline or some such...
@@ -39,8 +38,7 @@ class swiftml{
 	
 	static def removeID(data){
 		return(WekaMine.removeInstanceID(data))
-	}
-		
+	}		
 	
 	/**********
 	* CLASSIFIERS 
@@ -55,8 +53,7 @@ class swiftml{
 		def brf = new BalancedRandomForest()
 		brf.setOptions(params2Options(params))
 		return(brf)
-	}
-	
+	}	
 	
 	/**********
 	* Attribute Selection
@@ -81,8 +78,7 @@ class swiftml{
 		def newWithIDInstances = WekaMine.addID(selectedInstances,IDs)
 		return(newWithIDInstances)
 	}
-	
-	
+		
 	/***********
 	* CLASSIFICATION
 	*/ 
@@ -102,11 +98,11 @@ class swiftml{
 	
 	static def classify(classifier,withIDInstances){
 		def classValues = getClassValues(withIDInstances)
-	
+			
 		// test to see if it has string attributes.
 		def noIDInstances = removeID(withIDInstances)
 		def classifications = []	
-		noIDInstances.eachWithIndex{instance,i->		
+		noIDInstances.eachWithIndex{instance,i->							
 			def classification = new Classification()
 			classification.instanceID = withIDInstances.instance(i).stringValue(0) // get the ID
 			def distribution = classifier.distributionForInstance(instance)
@@ -164,8 +160,6 @@ class swiftml{
 	}
 	*/
 			
-	
-	
 	static def params2Options(params){
 		def options = []
 		params.each{k,v->
