@@ -1,5 +1,7 @@
 package edu.ucsc
 
+import durbin.util.*
+
 /****
 * Minimal support for running parasol jobs on cluster. 
 */
@@ -8,6 +10,8 @@ class Para{
 	* Run parasol jobs...
 	*/ 
 	static def runjobs(jobname,jobdir){
+		RunBash.enable()
+		
 		"""
 		cd $jobdir
 		para create $jobname
@@ -21,9 +25,16 @@ class Para{
 			println "para numInBatch: $numInBatch \tnumOK: $numOK"
 			sleep(10000) // check status every ten seconds.
 		}
+		
+		// TODO:  detect hung jobs
+		// TODO:  detect failed jobs and return some kind of error status
+		
+		paraDone(jobdir)
 	}
 	
 	static def paraCheck(jobdir){
+		RunBash.enable()
+		
 		def checkout = """
 			cd $jobdir
 			para check
@@ -42,4 +53,14 @@ class Para{
 		}
 		return([numOK,numInBatch])
 	}
+	
+	static def paraDone(jobdir){
+		def doneout = """
+			cd $jobdir
+			para stop
+			rm -f batch* para*
+			para freeBatch
+		""".bash()
+		return(doneout)
+	}	
 }
