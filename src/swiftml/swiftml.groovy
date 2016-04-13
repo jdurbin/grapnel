@@ -125,10 +125,15 @@ class swiftml{
 			
 		// test to see if it has string attributes.
 		def noIDInstances = removeID(withIDInstances)
-		def classifications = []	
+		def classifications = []		
+		
+		// Make instances attributes match model attributes...
+		
+		
 		noIDInstances.eachWithIndex{instance,i->							
 			def classification = new Classification()
-			classification.instanceID = withIDInstances.instance(i).stringValue(0) // get the ID
+			classification.instanceID = withIDInstances.instance(i).stringValue(0) // get the ID			
+			
 			def distribution = classifier.distributionForInstance(instance)
 			distribution.eachWithIndex{p,j->
 				classification.values[classValues[j]] = p

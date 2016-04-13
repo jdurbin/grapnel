@@ -7,6 +7,50 @@ import weka.core.*
 
 class WekaClassifierInfo{
 
+	static def getSummary(classifier){
+		def summary		
+		// Base classifier might be wrapped in a filtered or attribute selected classifier
+		def baseClassifier
+		if (classifier instanceof weka.classifiers.meta.FilteredClassifier){
+			baseClassifier = classifier.getClassifier()
+			if (baseClassifier instanceof durbin.weka.AttributeSelectedClassifier2){
+				baseClassifier = baseClassifier.getClassifier()
+			}						
+		}else if (classifier instanceof durbin.weka.AttributeSelectedClassifier2){
+			baseClassifier = classifier.getClassifier()
+		}else{	
+			baseClassifier = classifier
+		}
+		
+		switch(baseClassifier){
+			case {it instanceof durbin.weka.BalancedRandomForest}:
+				def trees = baseClassifier.m_bagger.m_Classifiers
+				def numTrees = trees.size()
+				return("Balanced Random Forest.  NumTrees: $numTrees")
+			case {it instanceof weka.classifiers.trees.RandomForest}:
+				def trees = baseClassifier.m_bagger.m_Classifiers
+				def numTrees = trees.size()
+				return("Random Forest.  NumTrees: $numTrees")		
+			break;
+			
+			case {it instanceof weka.classifiers.functions.SimpleLogistic}:
+			return("Logistic Regression")
+			break;
+			
+			case {it instanceof weka.classifiers.functions.SMO}:
+			if (baseClassifier.m_KernelIsLinear){
+				return("SVM linear kernel.")
+			}else{
+				return("SVM Non-linear kernel.")
+			}
+			break;
+
+			default:
+				return("${baseClassifier.class}")
+			break;
+		}
+	}
+
 	/**
 	* Returns a map from features to weights for the features used by this classifier. 
 	* Some classifiers use all the features, some use only a subset.  Some have obvious 
