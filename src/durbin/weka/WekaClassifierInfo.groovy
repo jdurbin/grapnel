@@ -90,10 +90,12 @@ class WekaClassifierInfo{
 			}else{
 				System.err.println "ERROR: Unsupported non-linear kernel for WekaClassifierInfo"
 			}
+				return(null);
 			break;
 
 			default:
 			System.err.println "ERROR: Unsupported classifier type in WekaClassifierInfo"+baseClassifier.class
+				return(null);
 			break;
 		}
 		def features2weights = ["NA":0]
