@@ -36,7 +36,7 @@
         csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
         ```   
 
-    * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on your 30,000 rows x 2,000 columns tables?  Then viewtab is for you! Just for viewing, sorting, and plotting histograms of data now, but stay tuned.  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html)
+    * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on your 30,000 rows x 2,000 columns tables?  Then viewtab is for you!  View, sort data, plot histograms, scatter plot pairs of rows or columns.  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html)
     ![viewtab](https://raw.github.com/jdurbin/durbinlib/master/img/viewtab.jpg)         
     * **cutbyname** Like cut, but cuts columns by column name. 
     * **rename** Rename batch of files based on regular expression find and replace. 
