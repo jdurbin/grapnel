@@ -198,6 +198,7 @@ public class TableFileLoader {
 		//}	
 		
 		// Create Instances object..
+		// for weka-3.7 atts needs to be 
 		Instances data = new Instances(relationName,atts,0);
 		data.setRelationName(relationName);
 			

@@ -756,6 +756,22 @@ public class DoubleTable extends GroovyObjectSupport{
 		return this;
 	}	
 	
+
+	/**
+	* Provide support for iterating over columns
+	*
+	* Note: I should be able to provide my own
+	* column view object that supports iteration so
+	* that I don't have to pay the cost of making a toArray
+	* copy.
+	*/
+	public DoubleTable eachColumn(Closure closure) {
+		for (int c = 0;c < numCols;c++) {
+			double[] column = matrix.viewColumn(c).toArray();						
+			closure.call(column);
+		}
+		return this;
+	}	
 }
 
 

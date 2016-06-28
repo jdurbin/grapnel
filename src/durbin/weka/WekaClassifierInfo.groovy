@@ -56,7 +56,7 @@ class WekaClassifierInfo{
 	* Some classifiers use all the features, some use only a subset.  Some have obvious 
 	* weights, some less so. 
 	*/ 
-	static def getFeatures(classifier){
+	static HashMap getFeatures(classifier){
 		
 		// Base classifier might be wrapped in a filtered or attribute selected classifier
 		def baseClassifier

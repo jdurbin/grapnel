@@ -99,6 +99,7 @@ import java.util.Random;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.LinkedHashMap;
+import java.util.*;
 
 import java.util.ArrayList;
 
@@ -933,13 +934,14 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
 	//System.err.println("done");
 
+	LightWeightAttributeSelection lwAttributes;
 	HashMap features2weights = WekaClassifierInfo.getFeatures(asClassifier);
 	if (features2weights == null){
 		// For non-linear classifiers, get attributes from attribute selection. 
-		LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
+		lwAttributes = new LightWeightAttributeSelection(train,attributeSelection,search);
 	}else {
 		// Get the attributes directly form the trained classifier
-		LightWeightAttributeSelection lwAttributes = new LightWeightAttributeSelection(features2weights);
+		lwAttributes = new LightWeightAttributeSelection(features2weights);
 	}
 			
 	//double[][] rankedAttrs = attributeSelection.rankedAttributes(); // this is a double[][]
