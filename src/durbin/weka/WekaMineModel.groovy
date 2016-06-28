@@ -70,41 +70,6 @@ class WekaMineModel implements Serializable{
 	def setNullModel(BootstrapNullModel nullmodel){
 		bnm = nullmodel;
 	}
-				
-/*				
-	def WekaMineModel(instances,classifier){		
-		this.classifier = classifier		
-		this.discretization = "none"
-		attributes = instances.attributeNames()	
-		attributes = attributes - "ID" // Don't save ID if there is one. 
-				
-		className = instances.className()
-		attributes = attributes - className	
-		
-		classValues = []
-		def classAttr = instances.attribute(className)
-		for(i in (0..<classAttr.numValues())){
-			classValues.add(classAttr.value(i))
-		}		
-	}
-	
-	def WekaMineModel(instances,classifier,discretization){		
-		this.classifier = classifier		
-		this.discretization = discretization
-		attributes = instances.attributeNames()	
-		attributes = attributes - "ID" // don't save ID if there is one. 
-		
-		// Want to keep class attribute separate from attributes.
-		className = instances.className()
-		attributes = attributes - className	
-
-		classValues = []
-		def classAttr = instances.attribute(className)
-		for(i in (0..<classAttr.numValues())){
-			classValues.add(classAttr.value(i))
-		}				
-	}	
-*/
 	
 	
 	def WekaMineModel(instances,classifier,discretization,filter){
@@ -182,13 +147,14 @@ class WekaMineModel implements Serializable{
 									
 		// Generate the desired number of permutations of the model...
 		for(i in 0..<nullModelIterations){
-			err.print "Null model iteration $i..."
+			err.print "Null model iteration $i permuting attribute values..."
 			//def pinstances = bnm.permuteClassLabels(instances)
 			def pinstances = bnm.permuteAttributeValues(instances)
 			
 			// Apply classifier to these instances...
 			// one result per instance, each result is a distribution for instance...
 			// Note: it is assumed that instances have already been cleaned up. 
+			err.print "apply classifier..."
 			ArrayList<Classification> results = classify(pinstances)
 			
 			// Will need to have a null distribution for each class value... 						
@@ -413,6 +379,40 @@ class WekaMineModel implements Serializable{
 			return([tp,tn,fp,fn])
 	}
 	
+				
+	/*				
+		def WekaMineModel(instances,classifier){		
+			this.classifier = classifier		
+			this.discretization = "none"
+			attributes = instances.attributeNames()	
+			attributes = attributes - "ID" // Don't save ID if there is one. 
+				
+			className = instances.className()
+			attributes = attributes - className	
+		
+			classValues = []
+			def classAttr = instances.attribute(className)
+			for(i in (0..<classAttr.numValues())){
+				classValues.add(classAttr.value(i))
+			}		
+		}
+	
+		def WekaMineModel(instances,classifier,discretization){		
+			this.classifier = classifier		
+			this.discretization = discretization
+			attributes = instances.attributeNames()	
+			attributes = attributes - "ID" // don't save ID if there is one. 
+		
+			// Want to keep class attribute separate from attributes.
+			className = instances.className()
+			attributes = attributes - className	
 
+			classValues = []
+			def classAttr = instances.attribute(className)
+			for(i in (0..<classAttr.numValues())){
+				classValues.add(classAttr.value(i))
+			}				
+		}	
+	*/
 					
 }

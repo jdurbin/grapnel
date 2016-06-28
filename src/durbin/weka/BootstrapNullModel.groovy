@@ -26,8 +26,9 @@ class BootstrapNullModel implements Serializable{
 
 	// DynamicBin1D saves entire distribution.  QuantileBin1D stores a compression
 	// that can be used to compute approximate quantiles.  
-	//ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()		
-	ArrayList<QuantileBin1D> nullDistribution = new ArrayList<QuantileBin1D>()		
+	ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()		
+	
+	//ArrayList<QuantileBin1D> nullDistribution = new ArrayList<QuantileBin1D>()		
 	ArrayList<String> classValues = new ArrayList<String>()
 
 	def BootstrapNullModel(classValues){
@@ -35,7 +36,8 @@ class BootstrapNullModel implements Serializable{
 		def numClassValues = classValues.size()
 		for(i in 0..<numClassValues){
 			// epsilon = maximum allowed approximation error quantiles.  
-			nullDistribution << new QuantileBin1D(0.001) 
+			//nullDistribution << new QuantileBin1D(0.001) 
+			nullDistribution << new DynamicBin1D() 
 		}
 		
 		//nullDistribution.each{
@@ -86,14 +88,13 @@ class BootstrapNullModel implements Serializable{
 			newData.eachWithIndex{instance,instanceIdx->
 				instance.setValue(attrIdx,attrVals[instanceIdx])
 			}					
-		}
-				
+		}		
 		return(newData)
 	}
 		
 	/****
 	*  Permuting the class labels will leave each gene vector as a "real" gene 
-	*  vector.  Some think this is less useful than permuting attribute values. 
+	*  vector.  Not too useful since we're predicting the class labels... 
 	*/ 			
 	static def permuteClassLabels(data){
 		
