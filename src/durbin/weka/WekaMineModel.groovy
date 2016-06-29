@@ -141,20 +141,27 @@ class WekaMineModel implements Serializable{
 	**/ 
 	def computeBootstrapNullModel(instances,nullModelIterations){						
 
+		//err.println "pinstances: "+instances.numInstances()+" instances.attrs: "+instances.numAttributes()
+		//err.println "instances.attrNames:"+instances.attributeNames()
+
 		def rng = new Random();
 		
 		bnm = new BootstrapNullModel(classValues)
 									
 		// Generate the desired number of permutations of the model...
 		for(i in 0..<nullModelIterations){
-			err.print "Null model iteration $i permuting attribute values..."
-			//def pinstances = bnm.permuteClassLabels(instances)
-			def pinstances = bnm.permuteAttributeValues(instances)
+			err.print "Null model iteration $i "
+			err.print "permute.."
+			def pinstances = bnm.permuteAttributeValues(instances)						
+			pinstances.setClassName(instances.className())
 			
 			// Apply classifier to these instances...
 			// one result per instance, each result is a distribution for instance...
 			// Note: it is assumed that instances have already been cleaned up. 
 			err.print "apply classifier..."
+			//err.println "pinstances: "+pinstances.numInstances()+" pinstances.attrs: "+pinstances.numAttributes()
+			//err.println "pinstances.attrNames:"+pinstances.attributeNames()
+						
 			ArrayList<Classification> results = classify(pinstances)
 			
 			// Will need to have a null distribution for each class value... 						

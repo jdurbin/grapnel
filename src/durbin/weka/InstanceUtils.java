@@ -8,6 +8,7 @@ import weka.filters.unsupervised.attribute.Remove;
 
 // KJD:  Perhaps I should make my own Instances class that has this functionality? 
 // Of course, when I get Instances back from some weka function, it won't come with this...
+// I could use groovy MOP to add these features to instances...
 
 
 /***
