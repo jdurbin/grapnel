@@ -36,6 +36,13 @@
 
 class CounterMap extends HashMap{
 	
+	/***
+	* Synonym for inc
+	*/ 
+	def add(key){
+		inc(key)
+	}
+	
 	def inc(key){
 		if (this.containsKey(key)){
 			int value = this.get(key)

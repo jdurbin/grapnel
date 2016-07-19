@@ -1,0 +1,19 @@
+#!/usr/bin/env groovy
+
+import durbin.util.*
+
+/***
+* Count the number of terms from stdin...
+*/ 
+
+System.in.withReader{r->
+	s = new CounterMap()
+	int total = 0;
+	r.eachLine(){
+		s.inc(it)
+		total++
+	}	
+	sorteds = s.sort{it.value}	
+	sorteds.each{k,v->println "$k\t$v"}
+	println "Total:\t$total"
+}
