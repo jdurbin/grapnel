@@ -39,14 +39,12 @@ public class WekaNames{
 	*
 	*/ 
 	static def isNonlinearSMO(classifier){
-		def isNonLinearSMO(classifier){
-			if (classifier.contains("RBFKernel")) return(true);
-			if (classifier.contains("PolyKernel")){
-				if (classifier.contains("-E 1")) return(false);
-				else return(true);
-			}
-			return(false);
-		}		
+		if (classifier.contains("RBFKernel")) return(true);
+		if (classifier.contains("PolyKernel")){
+			if (classifier.contains("-E 1")) return(false);
+			else return(true);
+		}
+		return(false);
 	}	
 }
 
