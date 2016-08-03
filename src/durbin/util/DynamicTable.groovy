@@ -69,6 +69,18 @@ class DynamicTable {
 			}
 	}
 	
+	// Treats table as a vector of counts 
+	def increment(rowKey,colKey){
+		def val = this[rowKey][colKey]
+		if (val == null) {
+			this[rowKey][colKey] = 1
+			return(1)
+		}else {
+			this[rowKey][colKey] = val+1
+			return(val+1)
+		}
+ 	}
+	
 	
 	/***
 	* Print the table to stdout
@@ -83,7 +95,25 @@ class DynamicTable {
 			def rowvals = colKeys.collect{c->delegate.get(r,c) ?: defaultVal}
 			println rowvals.join("\t")
 		}
-	}		
+	}	
+	
+	/***
+	* Print sorted
+	*/ 
+	def printSorted(){
+		def colKeys = delegate.columnKeySet()
+		def rowKeys = delegate.rowKeySet()
+		
+		colKeys = colKeys.sort()
+		rowKeys = rowKeys.sort()		
+	 	print "Features\t"
+		println colKeys.join("\t")				
+		rowKeys.each{r->		
+			print "${r}\t"
+			def rowvals = colKeys.collect{c->delegate.get(r,c) ?: defaultVal}
+			println rowvals.join("\t")
+		}	
+	}	
 	
 	/***
 	*  Writes out a DynamicTable as a tab file.  Since there may be missing 
@@ -94,13 +124,52 @@ class DynamicTable {
 	*  are no missing values, but degrades heavily in the face of missing values 
 	*  (many minutes if each row has a missing value).  
 	*/ 
-	def write(fileName,delimiter){
-		
+	def write(fileName,delimiter){		
 		new File(fileName).withWriter{w->
 		
 			def colKeys = delegate.columnKeySet()
 			def numCols = colKeys.size()
 			def rowKeys = delegate.rowKeySet()
+			w.write "Features$delimiter"
+			w.writeLine colKeys.join(delimiter)		
+
+			rowKeys.each{r->		
+				w.write "${r}$delimiter"
+				def rowmap = delegate.row(r)
+				
+				// 206 x 295  33.5s
+				//def rowvals = colKeys.collect{c->
+				//	rowmap[c] ?: defaultVal					
+				//}				
+				
+				// If sizes match just write it out, otherwise find the missing values
+				// and replace them with default values. 
+				// In case where there are no missing values, this takes 7s.  9803x295
+				// Time will go up dramatically with missing values. 
+				if (rowmap.size() == numCols){
+					w.writeLine rowmap.values().join(delimiter)
+				}else{
+					def rowvals = colKeys.collect{c->
+						rowmap[c] ?: defaultVal					
+					}
+					w.writeLine rowvals.join(delimiter)					
+				}							
+			}
+		}
+	}
+	
+	// grab rowmap and write out rowmap.values  9803x295 in 6.9 sec. 
+	// 
+	def writeSorted(fileName,delimiter){		
+		new File(fileName).withWriter{w->
+		
+			def colKeys = delegate.columnKeySet()
+			def numCols = colKeys.size()
+			def rowKeys = delegate.rowKeySet()
+			
+			colKeys = colKeys.sort()
+			rowKeys = rowKeys.sort()
+			
 			w.write "Features$delimiter"
 			w.writeLine colKeys.join(delimiter)		
 
@@ -147,5 +216,4 @@ class DynamicTable {
 		}
 		return(this)
 	}
-
 }
