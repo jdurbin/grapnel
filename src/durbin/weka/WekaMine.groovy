@@ -857,9 +857,7 @@ class WekaMine{
 		def filteredInstances			
 				
 		def nameSet = instances.attributeNames() as Set
-		
-		println "CHECK1"
-		
+				
 		/* TODO: FIX THIS HACK.  SpreadSubsample doesn't return same number of samples so our 
 		*  crude ID fix doesn't work. However, since it doesn't look at attributes it doesn't
 		*  actually mind that there is an ID.  And, it's absurd to put this in UnsupervisedFilter...
@@ -870,13 +868,11 @@ class WekaMine{
 		}else if (nameSet.contains("ID")){	
 			def instNames = instances.attributeValues("ID")
 			def noIDinstances = WekaMine.removeInstanceID(instances)
-			println "CHECK2"
 
 			// Apply the filter to instances...
 			//noIDinstances = WekaMine.applyUnsupervisedFilter(noIDinstances,options.filter)
 			filter.setInputFormat(noIDinstances);	
 			noIDinstances = Filter.useFilter(noIDinstances,filter)
-			println "CHECK3"
 
 			// Put the ID back into the instances...
 			// KJD: Note that addID below assumes same number of instances in same order. 
@@ -884,7 +880,6 @@ class WekaMine{
 			// For example:  it doesn't work with Spreadsubasmple
 			filteredInstances = WekaMine.addID(noIDinstances,instNames)
 						
-			println "CHECK4"
 		}else{
 			err.println "WARNING: this code branch is associated with some coding issues.  Please proceed with caution."
 			filter.setInputFormat(instances);				
