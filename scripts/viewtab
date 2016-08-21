@@ -7,6 +7,8 @@
 	TODO Run functions on rows... for example BimodalityFilter, and get some kind of output. 
 	TODO Move some of this code into a library so that it can get more complex. 
 	TODO Add search facility (e.g. search row names for PTEN)
+	TODO Set app name to be the name of the file so can switch to it easily. 
+	TODO Set main menu name to be viewtab instead of Groovy .
 */
 
 import groovy.swing.SwingBuilder
@@ -25,6 +27,8 @@ import org.jfree.data.xy.*;
 import org.jfree.ui.*
 import org.jfree.data.statistics.*;
 
+import com.apple.eawt.Application;
+
 import durbin.util.*
 import static durbin.charts.Charts.*
 
@@ -35,6 +39,17 @@ if (isOSX()){
 	//err.println "IS OSX"
 	System.setProperty("apple.laf.useScreenMenuBar", "true");
 	System.setProperty("com.apple.mrj.application.apple.menu.about.name", "ViewTable");
+	// set the look and feel
+	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	
+	// Set the dock icon. 
+	def scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
+	def imgFileName = scriptDir+"/img/viewtab.png"
+	def dockImage = new ImageIcon(imgFileName).getImage();
+	Application.getApplication().setDockIconImage(dockImage);
+	
+	// Let's see what other methods Application has...
+	//println Application.metaClass.methods*.name.sort().unique() 
 }
 
 options = ParseOptions(args)

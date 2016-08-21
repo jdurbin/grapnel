@@ -5,7 +5,7 @@
 	<target name="clean">
 		<delete dir="target/classes"/>
 		<delete dir="target/classes"/>
-		<delete file="target/jar/*"/>
+		<delete dir="target/jar/"/>
 		<delete file="target/jar/durbinlib.jar"/>
 		<delete file="groovylibs/*"/>
 		<delete dir="doc/"/>
