@@ -15,13 +15,24 @@ import weka.core.converters.ConverterUtils.DataSource
 * WekaAdditions.enable()
 * </pre>
 * 
-* Some extensions to Instances this will add include: <br>
+* Extensions to Instance: <br>
 * <ul>
-* <li>Instances.attributeValues(attributeName)</li>
-* <li>Instances.setClassName(attributeName)</li>
+* <li>Instance.getAt(attributeName)		Get named attribute value with [] notation.</li>
+* <li>Instance.getAt(attrIdx)			Get indexed attribute value with [] notation.</li>
+* <ul>
+* 
+* <ul>
+* <li>Instances.iterator						each{}, for(x in A), etc. </li>
+* <li>Instances.getAt(InstanceID)				Get Instance by ID with [] notation.</li>
+* <li>Instances.getAt(instanceIdx)				Get Instance by index with [] notation.</li>
+* <li>Instances.attributeValues(attributeName)	Returns all the values for the named attribute</li>		
+* <li>Instances.setClassNAme(attributeName)		Sets the class attribute based on attribute name</li>
+* <li>Instances.className()						Returns the attribute name of the class attribute</li>
+* <li>Instances.nameListToIndexList(nameList)	Takes a list of instance names and returns their indices. </li>
+* <li>Instances.metaClass.nameSetToIndexList(nameSet)	</li>
 * <li>Instances.instanceValues(instanceName)</li>
 * <li>Instances.attributeNames()</li>
-* <li>Instances.each{}, and other Iterable sugar</li>
+* <li>
 * </ul>
 * Each of these methods does the same as the corresponding method in Instances except using
 * name instead of index keys. 
@@ -68,18 +79,6 @@ public class WekaAdditions{
 				return(delegate.stringValue(i))
 			}
 		}
-		
-		
-			Instance.metaClass.getAt = {int attributeIdx->
-				def dataset = dataset()
-				Attribute attribute = dataset.attribute(attributeIdx)
-				def i = attribute.index()
-				if (attribute.isNumeric()){
-					return(value(i))
-				}else{ 
-					return(delegate.stringValue(i))
-				}
-			}
 		
 		/***
 		* Make instances iterable... 

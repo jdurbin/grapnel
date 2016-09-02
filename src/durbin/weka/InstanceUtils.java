@@ -392,7 +392,7 @@ public class InstanceUtils {
 				data.add(newInstance);
 		}
 		
-		System.err.println("done. Final attributes: "+data.numAttributes());
+		System.err.println(" done. Final attributes: "+data.numAttributes());
 		return(data);
 	}	
 	

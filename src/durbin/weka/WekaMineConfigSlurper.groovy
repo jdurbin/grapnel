@@ -1,7 +1,6 @@
 #!/usr/bin/env groovy 
 
 package durbin.weka;
-
 import com.google.common.collect.*
 
 class ConfigRange{

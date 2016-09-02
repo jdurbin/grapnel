@@ -96,6 +96,24 @@ class OnlineTable{
 		}
 	}	
 	
+	def find(Closure c){
+		boolean done = false;
+		def row;
+		def rowStr;
+		while (((rowStr = r.readLine()) != null ) && (!done)) {
+		//r.eachLine{rowStr->
+			def rfields = rowStr.split(sep,-1)
+			row = [:]
+			rfields.eachWithIndex{f,i->
+				row[headings[i]]=f
+			}
+			done = c(row)
+			if (done) break;
+		}
+		return(row)
+	}
+	
+	
 	/**
 	* Collect items from a stream...
 	* Stream will be closed after this closure. 

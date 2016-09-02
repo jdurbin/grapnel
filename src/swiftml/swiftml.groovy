@@ -35,6 +35,11 @@ class swiftml{
 		return(WekaMine.readFromTable(params.file))
 	}
 	
+	static def saveTab(params=[:]){
+		WekaMine.saveTableFromInstances(params.file,params.data)
+	}
+	
+	
 	static def makeInstances(data,clin,className){
 		return(WekaMine.createInstancesFromDataAndClinical(data,clin,className))
 	}	

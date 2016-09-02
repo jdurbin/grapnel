@@ -771,7 +771,10 @@ public class DoubleTable extends GroovyObjectSupport{
 			closure.call(column);
 		}
 		return this;
-	}	
+	}		
+	public DoubleTable eachCol(Closure closure){
+		return(eachColumn(closure));
+	}
 }
 
 

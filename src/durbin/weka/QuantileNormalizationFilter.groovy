@@ -8,6 +8,9 @@ import weka.filters.*;
 import durbin.stat.QuantileNormalization;
 import hep.aida.bin.QuantileBin1D;
 
+import org.apache.commons.math3.stat.ranking.NaturalRanking
+import org.apache.commons.math3.stat.ranking.*
+
 /****
 * Wraps QuantileNormalization in boilerplate to be used as a Weka filter. 
 * 
@@ -16,39 +19,80 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 	static{WekaAdditions.enable();}
 	static err = System.err
 	
-	//QuantileNormalization qn = new QuantileNormalization()
-	def qn = new QuantileBin1D(0.002)
+	NaturalRanking ranking = new NaturalRanking(NaNStrategy.MINIMAL,TiesStrategy.MINIMUM);
+	def quantiles = null;
 	
-	def setTrainingDistribution(trainingData){
-		def allvalues = getAllValues(trainingData)	
-		def count = 0;	
-		allvalues.each{
-			try{
-				qn.add(it)
-			}catch(Exception e){
-				println "Exception at it = $it \t count=$count"
-			}
-			count++
-		}
-		//qn.compressDistribution(allvalues)
+	//QuantileNormalization qn = new QuantileNormalization()
+	//def qn = new QuantileBin1D(0.002)
+	
+	def initializeTrainingDistribution(trainingData){
+		computeQuantiles(trainingData)
 	}
 	
-	def setNumQuantiles(numQuantiles){
-		//qn.setNumQuantiles(numQuantiles)
+	def setQuantiles(thequantiles){
+		quantiles = thequantiles
 	}
 	
 	protected Instances process(Instances instances) throws Exception {	
+		
 		Instances result = new Instances(determineOutputFormat(instances), 0);
-
+			
+		// If quantiles aren't defined, generate from these instances...
+		if (quantiles == null){			
+			def names = instances.attributeNames() as Set	
+			if (names.contains("ID")){
+				def instNames = instances.attributeValues("ID")
+				noIDinstances = WekaMine.removeInstanceID(instances)
+				computeQuantiles(instances)	
+				instances = WekaMine.addID(noIDinstances,instNames)			
+			}else{
+				computeQuantiles(instances)			
+			}
+		}
+		
 		instances.eachWithIndex{instance,i->
 			//def newValues = qn.transform(instance.toDoubleArray());
 			def newValues = transform(instance)
-			err.println "Adding ${newValues.length} values for instance $i"
-			result.add(new Instance(1, newValues));			
-		}
-		return result;
+			err.println "Adding ${newValues.size()} values for instance $i"			
+			result.add(new Instance(1, newValues));					
+		}		
+		return result;		
 	}
 	
+	def computeQuantiles(instances){
+		
+		// *KJDKJDKJDKJDKJKDKJDKJDKJKDJKJDKJKDJKJDKJD
+		// commented out
+		// kjd -1 is to remove ID attribute... should test for ID attribute
+		// and remove it in advance and replace, or something more overt than
+		// this
+		//quantiles = new double[instances.numAttributes()-1]
+		quantiles = new double[instances.numAttributes()]
+		instances.eachWithIndex{instance,i->
+			def vals = instance.toDoubleArray()
+			//vals = vals[1..-1] as double[]
+			Arrays.sort(vals) 
+			vals.eachWithIndex{v,j->
+				quantiles[j]+=v
+			}
+		}
+		quantiles = quantiles.collect{it/(double)instances.numInstances()}
+		return(quantiles)
+	}
+	
+	
+	def transform(instance){	
+		def vals = instance.toDoubleArray()			
+		int[] ranks = ranking.rank(vals) as int[]
+		def newvals = new double[vals.size()]
+		// ranking returns 1-based ranks, so -1
+		ranks.eachWithIndex{sortedIdx,i->
+			newvals[i] = quantiles[sortedIdx-1]
+		}				
+		return(newvals)
+	}
+	
+	/*
 	def transform(instance){
 		def vals = instance.toDoubleArray()
 		def testQuantileBin = new QuantileBin1D(0.002) 
@@ -63,6 +107,7 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 		}
 		return(newvals)
 	}
+	*/
 
 	/**
 	* Retrieves all of the attribute values across all instances. 

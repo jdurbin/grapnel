@@ -842,14 +842,14 @@ throws Exception {
 * successfully or the class is not defined
 */
 public void crossValidateModel(Classifier classifier,
-	Instances data, int numFolds, Random random,
+	Instances inputData, int numFolds, Random random,
 		Object... forPredictionsPrinting) 
 throws Exception {
 	
 	System.err.println("DEBUG CHECK3");
 
 	// Make a copy of the data we can reorder
-	data = new Instances(data);
+	Instances data = new Instances(inputData);
 	data.randomize(random);
 	if (data.classAttribute().isNominal()) {
 		data.stratify(numFolds);
@@ -913,7 +913,7 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//	System.err.println(train);
 	//}	
 	
-	// copiedClassifier is a FilteredClassifier...
+	// copiedClassifier is a FilteredClassifier (from WekaMine.. RemoveType filter wrapped...)...
 	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;	
 	
 	System.err.print("\t\t\t\tGet attribute selected classifier...");

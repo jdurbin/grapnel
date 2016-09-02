@@ -152,7 +152,7 @@ class WekaMine{
 	/***
 	* takes a set of instances and creates a tab file from them...
 	*/ 
-	static saveDataFromInstances(fileName,instances){
+	static saveTableFromInstances(fileName,instances){
 		
 		err.print "Saving data to $fileName..."
 				
@@ -168,7 +168,7 @@ class WekaMine{
 	*
 	* deprecated for faster version in SaveTab.java
 	*/ 
-	static saveDataFromInstances2(fileName,instances){
+	static saveTableFromInstances2(fileName,instances){
 		
 		err.print "Saving data to $fileName..."
 					
@@ -733,6 +733,7 @@ class WekaMine{
 	*/ 
 	def crossValidateModel(classifier,data,cvFolds,rng,evalTraining){
 		
+		// This will remove the ID
 		def filteredClassifier = getFilteredClassifier(classifier);	
 
 		// Perform cross-validation of the model..
@@ -745,8 +746,6 @@ class WekaMine{
 		err.println "CHECK1"
 		//eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions)
 		
-		// Apparently I haven't written this yet.... looks like I intended the functionality to match 
-		// cross-validate with folds... 
 		eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions,new Range("first,last"),false,trainPredictions)
 		//testResults = CVUtils.parsePredictions(predictions)
 				
@@ -843,7 +842,9 @@ class WekaMine{
 	/****
 	* 
 	*/ 
-	static Instances applyUnsupervisedFilter(instances,Filter filter){		
+	static Instances applyUnsupervisedFilter(instances,Filter filter){	
+		
+		err.println "WARNING: in some instances this method has caused problems. Not yet debugged. "	
 
 		if (filter == null){ 
 			err.println "FILTER: Apply unsupervised filter: None"
@@ -899,7 +900,7 @@ class WekaMine{
 		err.println("Before instances: ${instances.numInstances()} attributes: ${instances.numAttributes()}")
 				
 		err.print("Apply unsupervised filter $filterName...")
-		def filter = filterFromSpec(filterName)
+		def filter = ExperimentSpec.filterFromSpec(filterName)
 		filter.setInputFormat(instances);	
 		def filteredInstances = Filter.useFilter(instances,filter)
 		err.println("done.")
@@ -1162,88 +1163,6 @@ class WekaMine{
     //err.println "DEBUG ${data.numInstances()} x ${data.numAttributes()} done."
     return(data)
   }
-
-	/**
-  *  Creae a classifier from the command-line classifier specification
-  *  string.  For example:<br><br>
-  * 
-  *  weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -M
-  */
-  static def classifierFromSpec(classifierSpec){
-		if (classifierSpec.toLowerCase() == 'none') return('none');
-	
-    // Create a classifier from the name...
-    def options = Utils.splitOptions(classifierSpec)
-    def classifierName = options[0]
-    options[0] = ""
-
-    //System.err.println "classifierName: $classifierName"
-    //System.err.println "options: $options"
-
-    def classifier = Classifier.forName(classifierName,options) 
-    return(classifier)
-  }
-
-	static def filterFromSpec(filterSpec){
-		 // Create a filter from the name...
-	    def options = Utils.splitOptions(filterSpec)
-	    def filterName = options[0]
-	    options[0] = ""
-		
-		  def filter = (Filter) Class.forName(filterName).newInstance();
-		  if (filter instanceof OptionHandler){
-		    ((OptionHandler) filter).setOptions(options);
-		  }
-			return(filter)		
-	}
-
-
-	static def filteredClassifierFromClassifier(classifier){
-	 // Create a classifier from the name...
-    // By using filtered classifer to remove ID, the cross-validation
-    // wrapper will keep the original dataset and keep track of the mapping 
-    // between the original and the folds (minus ID). 
-    def filteredClassifier = new FilteredClassifier()
-    def removeTypeFilter = new RemoveType();  
-
-    filteredClassifier.setClassifier(classifier)
-    filteredClassifier.setFilter(removeTypeFilter)
-		return(filteredClassifier)
-	}
-
-
-  /**
-  *  Create a attribute evaluation from the command-line evaluation specification
-  *  string.  For example:<br><br>
-  * 
-  *  weka.attributeSelection.InfoGainAttributeEval
-  */
-  static def evalFromSpec(attributeEvalSpec){    
-    // Create a classifier from the name...
-    def options = Utils.splitOptions(attributeEvalSpec)
-    def evalName = options[0]
-    options[0] = ""
-    def classifier = ASEvaluation.forName(evalName,options) 
-    return(classifier)
-  }
- 
-	/**
-   *  Creae a attribute evaluation from the command-line evaluation specification
-   *  string.  For example:<br><br>
-   * 
-   *  weka.attributeSelection.InfoGainAttributeEval
-   */
-   static def searchFromSpec(attributeSearchSpec){   
-     //System.err.println("attributeSearchSpec: $attributeSearchSpec") 
-     // Create a classifier from the name...
-     def options = Utils.splitOptions(attributeSearchSpec)
-     def searchName = options[0]
-     options[0] = ""
-     //System.err.println("searchName: $searchName")
-     //System.err.println("options: $options")
-     def search = ASSearch.forName(searchName,options) 
-     return(search)
-   }
 
 }
 
