@@ -281,7 +281,7 @@ public class InstanceUtils {
 	* @throws IllegalArgumentException if the datasets are not the same size
 	*/
 	public static Instances mergeNamedInstances(Instances first, Instances second) {
-                        
+
     // Create the vector of merged attributes
   	FastVector newAttributes = new FastVector();
   	for (int i = 0; i < first.numAttributes(); i++) {
@@ -290,7 +290,7 @@ public class InstanceUtils {
   	for (int i = 0; i < second.numAttributes(); i++) {
   		  newAttributes.addElement(second.attribute(i));
   	}
-  	  	  	
+  				
   	// Create the set of Instances  
     Map<String,Integer> firstName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(first);   		
   	Map<String,Integer> secondName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(second); 	                                  		                                  
@@ -307,7 +307,6 @@ public class InstanceUtils {
 
     commonInstanceNames.retainAll(secondNames);
 		//System.err.println("commonInstanceNames: "+commonInstanceNames.size());
-
     
   	int maxInstances = first.numInstances()+second.numInstances();  		                                    
     Instances merged = new Instances(first.relationName() + '_'
@@ -320,7 +319,7 @@ public class InstanceUtils {
       
       merged.add(first.instance(firstIdx).mergeInstance(second.instance(secondIdx)));
     }
-    
+	    
     // OK, now we have two copies of ID's.  Some code expects ID to be at 0, so 
     // remove the duplicate not at index 0. 
     int removeIDIdx = -1;
@@ -330,7 +329,7 @@ public class InstanceUtils {
         removeIDIdx = i;
         break;
       }
-    }            
+    }     
     merged.deleteAttributeAt(removeIDIdx);
     return(merged);    
 	}

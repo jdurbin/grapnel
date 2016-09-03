@@ -19,7 +19,6 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 	static{WekaAdditions.enable();}
 	static err = System.err
 	
-	NaturalRanking ranking = new NaturalRanking(NaNStrategy.MINIMAL,TiesStrategy.MINIMUM);
 	def quantiles = null;
 	
 	//QuantileNormalization qn = new QuantileNormalization()
@@ -82,6 +81,8 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 	
 	
 	def transform(instance){	
+		NaturalRanking ranking = new NaturalRanking(NaNStrategy.MINIMAL,TiesStrategy.MINIMUM);
+		
 		def vals = instance.toDoubleArray()			
 		int[] ranks = ranking.rank(vals) as int[]
 		def newvals = new double[vals.size()]

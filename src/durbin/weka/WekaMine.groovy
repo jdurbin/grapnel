@@ -208,28 +208,24 @@ class WekaMine{
 	* instances. 
 	*/ 
 	static def createInstancesFromDataAndClinical(data,clinical,classAttribute){		
-			
-		err.print "Creating instances from data and clinical..."
-				
- 		// Remove all clinical attributes except for the current class...
-  	def selectedAttributes = []
-  	selectedAttributes.add(classAttribute)
+							
+		// Remove all clinical attributes except for the current class...
+		def selectedAttributes = []
+		selectedAttributes.add(classAttribute)
 
 		selectedAttributes.add("ID") // Want to preserve the ID along with classAttribute  KJD
-  	def singleClinicalInstances = subsetAttributes(clinical,selectedAttributes)  
+		def singleClinicalInstances = subsetAttributes(clinical,selectedAttributes)  
 		singleClinicalInstances.setClassName(classAttribute)
 		
 		//err.println "DEBUG singleClinicalInstances.size() = "+singleClinicalInstances.numInstances()
 		//err.println "DEBUG  data.size() = "+data.numInstances()		
 		
-  	// Merge data and clinical files (i.e. instances contained in both, omitting rest)		
-  	def merged = IU.mergeNamedInstances(data,singleClinicalInstances)		
+		// Merge data and clinical files (i.e. instances contained in both, omitting rest)				
+		def merged = IU.mergeNamedInstances(data,singleClinicalInstances)		
 
-    //err.println "DEBUG merged: "+merged.numInstances()
+		//err.println "DEBUG merged: "+merged.numInstances()
 
 		def classIdx = merged.setClassName(classAttribute)
-
-		err.println "done."
 
 		return(merged)
 	}
