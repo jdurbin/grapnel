@@ -152,8 +152,7 @@ class WekaMine{
 	/***
 	* takes a set of instances and creates a tab file from them...
 	*/ 
-	static saveTableFromInstances(fileName,instances){
-		
+	static saveTableFromInstances(fileName,instances){		
 		err.print "Saving data to $fileName..."
 				
 		// See if this speeds things up at all..
