@@ -4,6 +4,8 @@ import weka.core.*;
 import weka.core.Capabilities.*;
 import weka.core.Capabilities.Capability;
 import weka.filters.*;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 //import org.apache.commons.math.stat.ranking.*;
 //import org.apache.commons.math.distribution.*;
@@ -47,7 +49,10 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 	* b<-apply(data,2,rankNA)
 	* c<-apply(b, c(1,2),qexp)
 	*/ 
-	protected Instances process(Instances instances) throws Exception {
+	protected Instances process(Instances withClassInstances) throws Exception {		
+		// If a class attribute is set, remove it before filtering....
+		AttributeUtils au = new AttributeUtils();
+		Instances instances = au.removeClassAttribute(withClassInstances); 
 	
 		Instances result = new Instances(determineOutputFormat(instances), 0);
 		ExponentialDistribution exp = new ExponentialDistribution(1.0);
@@ -61,7 +66,7 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 			Instance inst = instances.instance(i);
 			
 			// rank the attribute values...
-			double[] attrvals = inst.toDoubleArray(); 											
+			double[] attrvals = inst.toDoubleArray(); 																				
 			double [] attrranks = ranking.rank(attrvals);
 			double attsum = attrranks.length - countNAN(attrvals);
 			double invattsum = (double)(1.0/attsum);
@@ -75,6 +80,8 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 			}
 			result.add(new Instance(1, newValues));
 		}
+		// If we saved a class attribute, restore it. 
+		result = au.restoreClassAttribute(result);
 		return result;
 	}
 	

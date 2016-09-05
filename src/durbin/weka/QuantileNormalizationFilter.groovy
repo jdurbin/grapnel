@@ -32,7 +32,12 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 		quantiles = thequantiles
 	}
 	
-	protected Instances process(Instances instances) throws Exception {	
+	// withClassInstances may or may not contain class attribute
+	protected Instances process(Instances withClassInstances) throws Exception {	
+		
+		// If a class attribute is set, remove it before filtering....
+		AttributeUtils au = new AttributeUtils();
+		Instances instances = au.removeClassAttribute(withClassInstances);
 		
 		Instances result = new Instances(determineOutputFormat(instances), 0);
 			
@@ -54,7 +59,9 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 			def newValues = transform(instance)
 			err.println "Adding ${newValues.size()} values for instance $i"			
 			result.add(new Instance(1, newValues));					
-		}		
+		}			
+		// If we saved a class attribute, restore it. 
+		result = au.restoreClassAttribute(result);			
 		return result;		
 	}
 	

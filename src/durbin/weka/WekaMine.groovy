@@ -863,7 +863,7 @@ class WekaMine{
 			filteredInstances = Filter.useFilter(instances,filter)
 		}else if (nameSet.contains("ID")){	
 			def instNames = instances.attributeValues("ID")
-			def noIDinstances = WekaMine.removeInstanceID(instances)
+			def noIDinstances = WekaMine.removeInstanceID(instances)						
 
 			// Apply the filter to instances...
 			//noIDinstances = WekaMine.applyUnsupervisedFilter(noIDinstances,options.filter)

@@ -70,10 +70,8 @@ class WekaMineModel implements Serializable{
 	def setNullModel(BootstrapNullModel nullmodel){
 		bnm = nullmodel;
 	}
-	
-	
-	def WekaMineModel(instances,classifier,discretization,filter){
 		
+	def WekaMineModel(instances,classifier,discretization,filter){				
 		// Train the classifier with the instances...
 		classifier.buildClassifier(instances);	
 		
@@ -82,7 +80,7 @@ class WekaMineModel implements Serializable{
 		this.discretization = discretization
 		attributes = instances.attributeNames()	
 		attributes = attributes - "ID" // don't save ID if there is one. 
-		
+				
 		// Want to keep class attribute separate from attributes.
 		className = instances.className()
 		attributes = attributes - className	
@@ -92,7 +90,7 @@ class WekaMineModel implements Serializable{
 		def classAttr = instances.attribute(className)
 		for(i in (0..<classAttr.numValues())){
 			classValues.add(classAttr.value(i))
-		}				
+		}
 	}
 	
 	def classAttribute(){
