@@ -123,8 +123,9 @@ class WekaMineModel implements Serializable{
 	/***
 	* Permutes the class lables and evaluates performance in a cross-validated setting. 
 	* Accumulated values are saved in BootstrapNullModel for future significance computations. 
+	* Not really a bootstrap model in this case... background model. 
 	**/ 
-	def computeBootstrapNullModel(instances){						
+	def addNullSamples(instances){						
 		def rng = new Random();		
 		bnm = new BootstrapNullModel(classValues)
 		ArrayList<Classification> results = classify(instances)

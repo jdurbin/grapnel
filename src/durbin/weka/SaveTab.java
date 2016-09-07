@@ -47,10 +47,15 @@ public class SaveTab{
 	static void saveDataFromInstances(String fileName,Instances instances) throws Exception{
 				
 		PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(fileName)));
-		
-		
+						
 		// Write header...
 		Attribute IDAttribute = instances.attribute("ID");
+		
+		if (IDAttribute == null){
+			System.err.println("ERROR: saveDataFromInstances requires an ID");
+			return;
+		}
+				
 		FastVector instNames = attributeValues(instances,IDAttribute);		
 		pw.write("Features\t");
 		for(int i = 0;i < instNames.size()-1;i++){
