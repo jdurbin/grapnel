@@ -127,8 +127,12 @@ class WekaMineModel implements Serializable{
 	**/ 
 	def addNullSamples(instances){						
 		def rng = new Random();		
-		bnm = new BootstrapNullModel(classValues)
+		bnm = new BootstrapNullModel(classValues)		
 		ArrayList<Classification> results = classify(instances)
+//		results.each{
+//			println "classification: "+it.prForValues
+//		}
+				
 		bnm.addPoints(results)
 	}
 	
