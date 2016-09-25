@@ -49,6 +49,13 @@ class WekaMineModel implements Serializable{
 	def className
 	def classValues	
 	
+	// Performance information.
+	def roc
+	def tp1
+	def fp1
+	def tn1
+	def fn1
+	
 	BootstrapNullModel bnm; 
 		
 	String toString(){
@@ -180,7 +187,7 @@ class WekaMineModel implements Serializable{
 	def printResults(out,ArrayList<Classification> results,sampleIDs){		
 		def outStrings = getResultStrings(results,sampleIDs)
 		
-		out<<"ID\tconfidence0\tconfidence1\tcall\tnullConfidence0\tnullConfidence1\n"
+		out<<"ID\tconfidence0\tconfidence1\tnullConfidence0\tnullConfidence1\tcall\n"
 
 		outStrings.each{
 			out << "$it\n"

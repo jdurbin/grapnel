@@ -630,14 +630,16 @@ public class Table extends GroovyObjectSupport{
 	}
 	
 	/**
-		* Get row by the name of the row. 
-		*/
+	* Get row by the name of the row. 
+	* If rownames aren't unique, returns just one matching row!
+	*/
 	public TableMatrix1D getRow(String rowStr){
 		
 		int row = getRowIdx(rowStr);
 		return(new TableMatrix1D(matrix.viewRow(row),colName2Idx,rowNames[row]));
 		
 	}
+	
 
 	/**
 		* Provide support for iterating over table by rows...
