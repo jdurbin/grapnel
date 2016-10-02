@@ -216,13 +216,9 @@ class WekaMine{
 		def singleClinicalInstances = subsetAttributes(clinical,selectedAttributes)  
 		singleClinicalInstances.setClassName(classAttribute)
 		
-		//err.println "DEBUG singleClinicalInstances.size() = "+singleClinicalInstances.numInstances()
-		//err.println "DEBUG  data.size() = "+data.numInstances()		
 		
 		// Merge data and clinical files (i.e. instances contained in both, omitting rest)				
 		def merged = IU.mergeNamedInstances(data,singleClinicalInstances)		
-
-		//err.println "DEBUG merged: "+merged.numInstances()
 
 		def classIdx = merged.setClassName(classAttribute)
 
@@ -239,7 +235,7 @@ class WekaMine{
 		attributeValues.each{values.addElement(it)}
 		newData.insertAttributeAt(new Attribute(attributeName, values), newData.numAttributes());
 		for (int i = 0; i < newData.numInstances(); i++) {
-			newData.instance(i).setValue(newData.numAttributes() - 1,Instance.missingValue());
+			newData.instance(i).setValue(newData.numAttributes() - 1,Utils.missingValue());
 		}	
 		return(newData);
 	}
@@ -283,12 +279,12 @@ class WekaMine{
 						def rawIdx = rawName2Idx[modelAttrName]
 						vals[aIdx] = rawVals[rawIdx]
 					}else{
-						vals[aIdx] = Instance.missingValue();
+						vals[aIdx] = Utils.missingValue();
 					}
 				}
 
 				//println "\nOLD INSTANCE ELAC1: ${instance['ELAC1']} NUP205: ${instance['NUP205']}"					
-				def newInstance = new Instance(1.0,vals)
+				def newInstance = new DenseInstance(1.0,vals)
 				data.add(newInstance);
 		}		
 
@@ -628,25 +624,6 @@ class WekaMine{
 		
 			return(filteredClassifier)
 	}
-	
-	/**
-	* Remove string attributes.  Specifically the string attribute that contains 
-	* the instance ID.  This is done because most attribute evaluators and classifiers
-	* can not handle string attributes. 
-	*/ 
-	static Instances removeInstanceID(instances){
-		def filter = new RemoveType()
-		filter.setInputFormat(instances);
-		def instances_notype = Filter.useFilter(instances,filter)
-		return(instances_notype)
-	}
-
-	def removeID(instances){
-		def filter = new RemoveType();
-		filter.setInputFormat(instances);
-		def newinstances = Filter.useFilter(instances,filter)
-		return(newinstances);
-	}
 
 	
 	/***
@@ -708,8 +685,7 @@ class WekaMine{
 		
 		def trainPredictions = null;
 		if (evalTraining) trainPredictions = new StringBuffer()
-	
-		err.println "CHECK1"
+
 		//eval.crossValidateModel(filteredClassifier,data,cvFolds,rng,predictions)
 		
 		// gene names passed in because, by this point, names have been stripped out of data...
@@ -839,7 +815,7 @@ class WekaMine{
 	*/ 
 	static Instances applyUnsupervisedFilter(instances,Filter filter){	
 		
-		err.println "WARNING: in some instances this method has caused problems. Not yet debugged. "	
+		//err.println "WARNING: in some instances this method has caused problems. Not yet debugged. "	
 
 		if (filter == null){ 
 			err.println "FILTER: Apply unsupervised filter: None"
@@ -863,7 +839,7 @@ class WekaMine{
 			filteredInstances = Filter.useFilter(instances,filter)
 		}else if (nameSet.contains("ID")){	
 			def instNames = instances.attributeValues("ID")
-			def noIDinstances = WekaMine.removeInstanceID(instances)						
+			def noIDinstances = AttributeUtils.removeInstanceID(instances)						
 
 			// Apply the filter to instances...
 			//noIDinstances = WekaMine.applyUnsupervisedFilter(noIDinstances,options.filter)
@@ -1128,7 +1104,6 @@ class WekaMine{
 			  return(it)
       }
     }
-    //err.println "DEBUG ${data.numInstances()} x ${data.numAttributes()} done."
     return(data)
   }
 
@@ -1137,27 +1112,26 @@ class WekaMine{
   * Read instances from a table, filling in missing value tokens as we go. 
   */ 
   static Instances readFromTable(dataFileName,instancesInRows){
-    // Read data in from table.  Handle missing values as we go.
-    err.print "Loading data from $dataFileName..."
-    TableFileLoader loader = new TableFileLoader()
-    loader.setAddInstanceNamesAsFeatures(true)
+	  // Read data in from table.  Handle missing values as we go.
+	  err.print "Loading data from $dataFileName..."
+	  TableFileLoader loader = new TableFileLoader()
+	  loader.setAddInstanceNamesAsFeatures(true)
 
-		def relationName = dataFileName;
-    Instances data = loader.read(dataFileName,relationName,"\t",instancesInRows){  
+	  def relationName = dataFileName;
+	  Instances data = loader.read(dataFileName,relationName,"\t",instancesInRows){  
 
-      // Lots of different missing value notations...
-      if ((it == "") || (it == null) || (it == "NA") || 
-         (it == "null") || (it == 'NULL') || 
-         (it == "?")){
-        return ("?")
-      }else{
-        //return(it as Double)  //KJD 5/16
-			  return(it)
-      }
-    }
-    //err.println "DEBUG ${data.numInstances()} x ${data.numAttributes()} done."
-    return(data)
-  }
+		  // Lots of different missing value notations...
+		  if ((it == "") || (it == null) || (it == "NA") || 
+		  (it == "null") || (it == 'NULL') || 
+		  (it == "?")){
+			  return ("?")
+			  }else{
+				  //return(it as Double)  //KJD 5/16
+				  return(it)
+			  }
+		  }
+		  return(data)
+	  }
 
 }
 

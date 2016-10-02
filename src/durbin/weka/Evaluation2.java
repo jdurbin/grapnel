@@ -423,7 +423,7 @@ throws Exception {
 /**
 * Returns the area under ROC for those predictions that have been collected
 * in the evaluateClassifier(Classifier, Instances) method. Returns 
-* Instance.missingValue() if the area is not available.
+* Utils.missingValue() if the area is not available.
 *
 * @param classIndex the index of the class to consider as "positive"
 * @return the area under the ROC curve or not a number
@@ -432,7 +432,7 @@ public double areaUnderROC(int classIndex) {
 
   // Check if any predictions have been collected
   if (m_Predictions == null) {
-    return Instance.missingValue();
+    return Utils.missingValue();
   } else {
     ThresholdCurve tc = new ThresholdCurve();
     Instances result = tc.getCurve(m_Predictions, classIndex);
@@ -459,7 +459,7 @@ public double weightedAreaUnderROC() {
   double aucTotal = 0;
   for(int i = 0; i < m_NumClasses; i++) {
     double temp = areaUnderROC(i);
-    if (!Instance.isMissingValue(temp)) {
+    if (!Utils.isMissingValue(temp)) {
       aucTotal += (temp * classCounts[i]);
     }
   }
@@ -547,24 +547,24 @@ throws Exception {
   	for (int i = 0; i < numFolds; i++) {
 			//printHeapSpace();
 			System.err.println("\t\tFold:"+(i+1)); // Add 1 to output 1-based. 
-			System.err.println("*****Delay??? CVUtils.trainCV");
+			//System.err.println("*****Delay??? CVUtils.trainCV");
 			Instances train = CVUtils.trainCV(data,foldSet,i);
-			System.err.println("*****Delay???");
+			//System.err.println("*****Delay???");
 			
-			System.err.println("\t\t\tEval: train.size="+train.numInstances());
+			//System.err.println("\t\t\tEval: train.size="+train.numInstances());
 			
-			System.err.println("*****Delay??? CVUtils.testCV");
+			//System.err.println("*****Delay??? CVUtils.testCV");
 			Instances test = CVUtils.testCV(data,foldSet,i);		
-			System.err.println("*****Delay???");
-			System.err.println("\t\t\tDEBUG Test/Train instances created:"+test.numInstances());
+			//System.err.println("*****Delay???");
+			//System.err.println("\t\t\tDEBUG Test/Train instances created:"+test.numInstances());
 			//printHeapSpace();
-			System.err.println("\t\t\tEval: evalsingle fold...");
+			//System.err.println("\t\t\tEval: evalsingle fold...");
 						
     		evaluateSingleFold(data,train,test,classifier,forPredictionsPrinting);			
 			
-			System.err.println("Eval: evalsingle fold DONE.");
+			//System.err.println("Eval: evalsingle fold DONE.");
 			
-			System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
+			//System.err.println("\t\tDEBUG ModelBuiltAndEvaluated");
 			//printHeapSpace();
   	}
 	}
@@ -787,7 +787,6 @@ throws Exception {
 	// to output) and the third a Boolean (whether or not to output a distribution instead
 	// of just a classification)
 	if (forPredictionsPrinting.length > 0) {
-		System.err.println("forPredictionsPringing.length="+forPredictionsPrinting.length);
 		
 		// print the header first    
 		StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
@@ -846,8 +845,6 @@ public void crossValidateModel(Classifier classifier,
 		Object... forPredictionsPrinting) 
 throws Exception {
 	
-	System.err.println("DEBUG CHECK3");
-
 	// Make a copy of the data we can reorder
 	Instances data = new Instances(inputData);
 	data.randomize(random);
@@ -855,22 +852,16 @@ throws Exception {
 		data.stratify(numFolds);
 	}
 	
-	System.err.println("CHECK4");
-
 	// We assume that the first element is a StringBuffer, the second a Range (attributes
 	// to output) and the third a Boolean (whether or not to output a distribution instead
 	// of just a classification)
-	if (forPredictionsPrinting.length > 0) {
-		System.err.println("forPredictionsPringing.length="+forPredictionsPrinting.length);
-		
+	if (forPredictionsPrinting.length > 0) {		
 		// print the header first    
 		StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
 		Range attsToOutput = (Range)forPredictionsPrinting[1];
 		boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
 		printClassificationsHeader(data, attsToOutput, printDist, buff);
 	}
-
-	System.err.println("CHECK5");
 
 	// Do the folds	
 	for (int i = 0; i < numFolds; i++) {		
@@ -893,21 +884,21 @@ throws Exception {
 */ 
 public void evaluateSingleFold(Instances data, Instances train,Instances test,Classifier classifier,Object... forPredictionsPrinting) throws Exception{
 	
-	System.err.println("\t\t\t\tevalSingleFold (setPriors,copyClassifier)");	
+	//System.err.println("\t\t\t\tevalSingleFold (setPriors,copyClassifier)");	
 	// Create a list to store classifiers (Evaluation2)
 	setPriors(train);
 	
 	Classifier copiedClassifier=null;
 	//try{
-	copiedClassifier = Classifier.makeCopy(classifier);
+	copiedClassifier = AbstractClassifier.makeCopy(classifier);
 	
-	System.err.println("\t\t\t\tClassifier.toString = "+copiedClassifier.toString());
+	//System.err.println("\t\t\t\tClassifier.toString = "+copiedClassifier.toString());
 	
 	// All the slowness is concentrated here.... however.... Building each of the
 	// random trees of the forest goes very very quickly... so.. what is it?
-	System.err.println("\t\t\t\t TRAIN CLASSIFIER on "+train.numInstances()+" samples...");	
+	System.err.print("\t\tTRAIN CLASSIFIER on "+train.numInstances()+" samples...");	
 	copiedClassifier.buildClassifier(train);
-	System.err.println("\t\t\t\t DONE TRAIN CLASSIFIER");
+	System.err.println("done.");
 	//}catch(Exception e){
 	//	System.err.println("DEBUG2 Exception occurred:\n"+e);
 	//	System.err.println(train);
@@ -916,12 +907,12 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	// copiedClassifier is a FilteredClassifier (from WekaMine.. RemoveType filter wrapped...)...
 	FilteredClassifier fc = (FilteredClassifier) copiedClassifier;	
 	
-	System.err.print("\t\t\t\tGet attribute selected classifier...");
+	//System.err.print("\t\t\t\tGet attribute selected classifier...");
 	AttributeSelectedClassifier2 asClassifier = (AttributeSelectedClassifier2) fc.getClassifier();
 	AttributeSelection attributeSelection = asClassifier.getAttributeSelection(); // method unique to AttributeSelectedClassifier2	
 	ASEvaluation eval = asClassifier.getEvaluator();
 	ASSearch search = asClassifier.getSearch();
-	System.err.println("done.");
+	//System.err.println("done.");
 	
 	//weka.attributeSelection.PrincipalComponents pceval = (weka.attributeSelection.PrincipalComponents) eval;
 	//System.err.println("transformedHeader:"+pceval.transformedHeader());
@@ -949,14 +940,14 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 	//System.err.println("\t rankedAttrs.size(): "+rankedAttrs.length);
 	 m_cvAttributeSelections.add(lwAttributes);
 	
-	  System.err.print("\t\t\t\t evaluateModel....");
-		evaluateModel(copiedClassifier, test, forPredictionsPrinting);
-	  System.err.println("done.");
+	System.err.print("\t\tEvaluate model on "+test.numInstances()+" test samples...");
+	evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+	System.err.println("done.");
 	
 	// If there is a non-null fourth element, it is assumed to be a second buffer to store the evaluations on the 
 	// training samples.  This is a bit of a hack, but allows me to touch as little of the code as possible...
 	if (forPredictionsPrinting[3] != null){
-		System.err.println("!!!Evaluating model on training data...");
+		System.err.print("\t\tEvaluating model on training data...");
 		trainingEval = new Evaluation2(data);
 		
 		StringBuffer saveTestBuf = (StringBuffer)forPredictionsPrinting[0]; // Save the test buffer...
@@ -964,7 +955,7 @@ public void evaluateSingleFold(Instances data, Instances train,Instances test,Cl
 		trainingEval.evaluateModel(copiedClassifier,train,forPredictionsPrinting); // evaluate model on training data. 
 		forPredictionsPrinting[3] = forPredictionsPrinting[0]; // redundant, but makes me feel better. 
 		forPredictionsPrinting[0] = saveTestBuf;  // Restore test buffer
-		System.err.println("!!!done");
+		System.err.println("done");
 	}
 	
 	copiedClassifier = null; // Encourage garbage collection.
@@ -990,7 +981,7 @@ Instances data, int numFolds,
 String[] options, Random random) 
 throws Exception {
 
-  crossValidateModel(Classifier.forName(classifierString, options),
+  crossValidateModel(AbstractClassifier.forName(classifierString, options),
     data, numFolds, random);
 }
 
@@ -1281,7 +1272,7 @@ String [] options) throws Exception {
         if (!success) {
           // load options from serialized data  ('-l' is automatically erased!)
           XMLClassifier xmlserial = new XMLClassifier();
-          Classifier cl = (Classifier) xmlserial.read(Utils.getOption('l', options));
+          OptionHandler cl = (OptionHandler) xmlserial.read(Utils.getOption('l', options));
 
           // merge options
           optionsTmp = new String[options.length + cl.getOptions().length];
@@ -1534,7 +1525,7 @@ String [] options) throws Exception {
       }
 
       // backup of fully setup classifier for cross-validation
-      classifierBackup = Classifier.makeCopy(classifier);
+      classifierBackup = AbstractClassifier.makeCopy(classifier);
 
       // Build the classifier if no object file provided
       if ((classifier instanceof UpdateableClassifier) &&
@@ -1568,7 +1559,7 @@ String [] options) throws Exception {
 
       // backup of fully trained classifier for printing the classifications
       if (printClassifications)
-        classifierClassifications = Classifier.makeCopy(classifier);
+        classifierClassifications = AbstractClassifier.makeCopy(classifier);
 
       // Save the classifier if an object output file is provided
       if (objectOutputFileName.length() != 0) {
@@ -1742,7 +1733,7 @@ String [] options) throws Exception {
         // Testing is via cross-validation on training data
         Random random = new Random(seed);
         // use untrained (!) classifier for cross-validation
-        classifier = Classifier.makeCopy(classifierBackup);
+        classifier = AbstractClassifier.makeCopy(classifierBackup);
         if (!printClassifications) {
           testingEvaluation.crossValidateModel(classifier, 
             trainSource.getDataSet(actualClassIndex), 
@@ -1933,7 +1924,7 @@ Instance instance) throws Exception {
     double [] dist = classifier.distributionForInstance(classMissing);
     pred = Utils.maxIndex(dist);
     if (dist[(int)pred] <= 0) {
-      pred = Instance.missingValue();
+      pred = Utils.missingValue();
     }
     updateStatsForClassifier(dist, instance);
 		//KJD The ID is almost certainly the 0th attribute, I take pains to make it so, 
@@ -1977,7 +1968,7 @@ Instance instance) throws Exception {
     double [] dist = classifier.distributionForInstance(classMissing);
     pred = Utils.maxIndex(dist);
     if (dist[(int)pred] <= 0) {
-      pred = Instance.missingValue();
+      pred = Utils.missingValue();
     }
     updateStatsForClassifier(dist, instance);
   } else {
@@ -2002,7 +1993,7 @@ Instance instance) throws Exception {
   if (m_ClassIsNominal) {
     pred = Utils.maxIndex(dist);
     if (dist[(int)pred] <= 0) {
-      pred = Instance.missingValue();
+      pred = Utils.missingValue();
     }
     updateStatsForClassifier(dist, instance);
   } else {
@@ -2032,7 +2023,7 @@ Instance instance) throws Exception {
     }
     pred = Utils.maxIndex(dist);
     if (dist[(int)pred] <= 0) {
-      pred = Instance.missingValue();
+      pred = Utils.missingValue();
     }
     updateStatsForClassifier(dist, instance);
     m_Predictions.addElement(new NominalPredictionPlus(instance.classValue(), dist, instance.weight(),instance.toString(0)));
@@ -2940,7 +2931,7 @@ public String toClassDetailsString(String title) throws Exception {
       .append("    ");
 
     double rocVal = areaUnderROC(i);
-    if (Instance.isMissingValue(rocVal)) {
+    if (Utils.isMissingValue(rocVal)) {
       text.append("  ?    ")
         .append("    ");
     } else {
@@ -3687,12 +3678,12 @@ throws Exception {
     else
       result.append(" " + Utils.doubleToString(inst.classValue(), width, prec));
     // predicted
-    if (Instance.isMissingValue(predValue))
+    if (Utils.isMissingValue(predValue))
       result.append(" " + Utils.padLeft("?", width));
     else
       result.append(" " + Utils.doubleToString(predValue, width, prec));
     // error
-    if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+    if (Utils.isMissingValue(predValue) || inst.classIsMissing())
       result.append(" " + Utils.padLeft("?", width));
     else
       result.append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
@@ -3700,7 +3691,7 @@ throws Exception {
     // actual
     result.append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
     // predicted
-    if (Instance.isMissingValue(predValue))
+    if (Utils.isMissingValue(predValue))
       result.append(" " + Utils.padLeft("?", width));
     else
       result.append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
@@ -3711,7 +3702,7 @@ throws Exception {
       result.append(" " + "     ");
     // prediction/distribution
     if (printDistribution) {
-      if (Instance.isMissingValue(predValue)) {
+      if (Utils.isMissingValue(predValue)) {
         result.append(" " + "?");
       }
       else {
@@ -3727,7 +3718,7 @@ throws Exception {
       }
     }
     else {
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
         result.append(" " + "?");
       else
         result.append(" " + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
@@ -3945,7 +3936,7 @@ protected String num2ShortID(int num, char[] IDChars, int IDWidth) {
 protected double [] makeDistribution(double predictedClass) {
 
   double [] result = new double [m_NumClasses];
-  if (Instance.isMissingValue(predictedClass)) {
+  if (Utils.isMissingValue(predictedClass)) {
     return result;
   }
   if (m_ClassIsNominal) {
@@ -4062,7 +4053,7 @@ throws Exception {
 
     // Update stats
     m_WithClass += instance.weight();
-    if (Instance.isMissingValue(predictedValue)) {
+    if (Utils.isMissingValue(predictedValue)) {
       m_Unclassified += instance.weight();
       return;
     }

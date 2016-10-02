@@ -53,4 +53,16 @@ class AttributeUtils{
 		}
 		return(noClassInstances)		
 	}
+	
+	/**
+	* Remove string attributes.  Specifically the string attribute that contains 
+	* the instance ID.  This is done because most attribute evaluators and classifiers
+	* can not handle string attributes. 
+	*/ 
+	static Instances removeInstanceID(instances){
+		def filter = new RemoveType()
+		filter.setInputFormat(instances);
+		def instances_notype = Filter.useFilter(instances,filter)
+		return(instances_notype)
+	}
 }

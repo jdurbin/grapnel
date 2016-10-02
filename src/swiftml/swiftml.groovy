@@ -12,6 +12,7 @@ import weka.attributeSelection.InfoGainAttributeEval
 import weka.classifiers.Evaluation
 import weka.filters.*
 import weka.filters.supervised.attribute.AttributeSelection
+import weka.core.SerializationHelper
 
 /***
 * Class to encapsulate nicer versions of WekaMine functions. 
@@ -45,8 +46,17 @@ class swiftml{
 	}	
 	
 	static def removeID(data){
-		return(WekaMine.removeInstanceID(data))
+		return(AttributeUtils.removeInstanceID(data))
 	}		
+	
+	static def saveClassifier(outFile,classifier){
+		SerializationHelper.write(outFile,classifier)
+	}
+	
+	static def readClassifier(clFile){
+		def model = SerializationHelper.read(clFile);
+		return(model)
+	}
 	
 	/**********
 	* CLASSIFIERS 
@@ -58,9 +68,10 @@ class swiftml{
 	}
 	
 	static def BalancedRandomForest(params=[:]){
-		def brf = new BalancedRandomForest()
-		brf.setOptions(params2Options(params))
-		return(brf)
+		System.err.println "BalancedRandomForest is disabled pending migration to weka 3.8"
+		//def brf = new BalancedRandomForest()
+		//brf.setOptions(params2Options(params))
+		//return(brf)
 	}	
 	
 	static def svm_rbf(params=[:]){
@@ -146,6 +157,16 @@ class swiftml{
 			classifications<<classification
 		}
 		return(classifications)
+	}
+	
+	static def numericPredictions(reg,withIDInstances){
+		def predictions = []
+		def noIDInstances = removeID(withIDInstances)
+		noIDInstances.eachWithIndex{instance,i->
+			def prediction = reg.classifyInstance(noIDInstances[i])			
+			predictions<<prediction
+		}
+		return(predictions)
 	}
 	
 	

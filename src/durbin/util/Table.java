@@ -741,14 +741,9 @@ public class Table extends GroovyObjectSupport{
 		newt.rowNames = rowNames.clone();
 		newt.colNames = new String[cols()];
 		
-		System.err.println("DEBUG cols: "+cols());
-		
 		for(int c =0;c < cols();c++){
 			//int oldc = ((int)newOrder.get(c)) -1; -1 is just for 1 based coord offset, right?
-			int oldc = ((int)newOrder.get(c));
-			
-			System.err.println("\tDEBUG oldc: "+oldc);
-			System.err.println("\tDEBUG c: "+c);
+			int oldc = ((int)newOrder.get(c));			
 			
 			newt.colNames[c] = colNames[oldc];
 			for(int r = 0;r < rows();r++){

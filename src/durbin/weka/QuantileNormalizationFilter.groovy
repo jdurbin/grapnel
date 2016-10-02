@@ -46,7 +46,7 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 			def names = instances.attributeNames() as Set	
 			if (names.contains("ID")){
 				def instNames = instances.attributeValues("ID")
-				noIDinstances = WekaMine.removeInstanceID(instances)
+				noIDinstances = AttributeUtils.removeInstanceID(instances)
 				computeQuantiles(instances)	
 				instances = WekaMine.addID(noIDinstances,instNames)			
 			}else{
@@ -58,7 +58,7 @@ public class QuantileNormalizationFilter extends SimpleBatchFilter {
 			//def newValues = qn.transform(instance.toDoubleArray());
 			def newValues = transform(instance)
 			err.println "Adding ${newValues.size()} values for instance $i"			
-			result.add(new Instance(1, newValues));					
+			result.add(new DenseInstance(1, newValues));					
 		}			
 		// If we saved a class attribute, restore it. 
 		result = au.restoreClassAttribute(result);			

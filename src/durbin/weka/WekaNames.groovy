@@ -38,7 +38,7 @@ public class WekaNames{
 	/**
 	*
 	*/ 
-	static def isNonlinearSMO(classifier){
+	static def isNonlinearSMO(String classifier){
 		if (classifier.contains("RBFKernel")) return(true);
 		if (classifier.contains("PolyKernel")){
 			if (classifier.contains("-E 1")) return(false);

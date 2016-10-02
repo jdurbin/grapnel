@@ -172,7 +172,7 @@ class ExperimentSpec{
 	   //System.err.println "classifierName: $classifierName"
 	   //System.err.println "options: $options"
 
-	   def classifier = Classifier.forName(classifierName,options) 
+	   def classifier = AbstractClassifier.forName(classifierName,options) 
 	   return(classifier)
    }
 

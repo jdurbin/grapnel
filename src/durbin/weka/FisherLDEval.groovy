@@ -127,7 +127,6 @@ class FisherLDEval
     return(fisherScores[attributeIdx])
   }
   
-  
   /******************************************
  	*  Creates a DynamicBin1D object for each of two classes for each attribute 
  	*  in the instances. From these DynamicBin1D objects, we can compute a 
@@ -145,7 +144,7 @@ class FisherLDEval
  			double[] values = data.instance(i).toDoubleArray()
  			for (int attrIdx = 0; attrIdx < data.numAttributes();attrIdx++){
  			  double value = values[attrIdx];
- 			  if (value != Instance.missingValue()){
+ 			  if (value != Utils.missingValue()){
  			    if (data.instance(i).classValue() == 0){			    
  			      bins0[attrIdx].add(values[attrIdx]); 
  		      }else{

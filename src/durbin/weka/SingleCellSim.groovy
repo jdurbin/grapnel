@@ -38,10 +38,10 @@ class SingleCellSim{
 				// otherwise, leave the value unchanged. 
 				values[attrIdx] = data.instance(i).value(attrIdx)
 				if (prGene != null){
-					if ((rng.nextInt(1000)/1000.0) > prGene) values[attrIdx] = Instance.missingValue()
+					if ((rng.nextInt(1000)/1000.0) > prGene) values[attrIdx] = Utils.missingValue()
 				}
 			}
-			simdata.add(new Instance(1, values));
+			simdata.add(new DenseInstance(1, values));
 		}
 		return(simdata)	
 	}

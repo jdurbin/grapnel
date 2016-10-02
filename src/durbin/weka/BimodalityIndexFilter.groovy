@@ -142,7 +142,7 @@ public class BimodalityIndexFilter extends SimpleBatchFilter {
 				double scaledy = (2*(y-m1))/(m2-m1-1);					
 				values[n] = scaledy
 			}
-			scaled.add(new Instance(1, values));
+			scaled.add(new DenseInstance(1, values));
 		}
 		
 		//System.err.println "CHECK2"	

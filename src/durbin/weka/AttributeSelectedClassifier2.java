@@ -45,8 +45,7 @@ public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
    * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-	  
-	  System.err.println("\t\t\t\t\t\tAttribute selected classifier.");
+	 //System.err.println("\t\t\t\t\t\tAttribute selected classifier.");
 	  
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
@@ -63,12 +62,12 @@ public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
-	System.err.print("\t\t\t\t\tRemove with missing class...");
+//	System.err.print("\t\t\t\t\tRemove with missing class...");
     // remove instances with missing class
     Instances newData = new Instances(data);
-	System.err.print("\t\t\t\t\tcopy done");
+//	System.err.print("\t\t\t\t\tcopy done");
     newData.deleteWithMissingClass();
-	System.err.println("\t\t\t\t\t delete done.");
+//	System.err.println("\t\t\t\t\t delete done.");
     
     if (newData.numInstances() == 0) {
       m_Classifier.buildClassifier(newData);
@@ -80,7 +79,6 @@ public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
       m_numClasses = 1;
     }
 
-	System.err.print("\t\t\t\t\tResample?? instances....");
     Instances resampledData = null;
     // check to see if training data has all equal weights
     double weight = newData.instance(0).weight();
@@ -105,7 +103,6 @@ public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
       // all equal weights in the training data so just use as is
       resampledData = newData;
     }
-	System.err.println("done.");
 	
 	// SINGLE CELL SIMULATION 
 	// Handle special case for simulation. 
@@ -118,14 +115,14 @@ public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
 	m_AttributeSelection = new AttributeSelection();
     m_AttributeSelection.setEvaluator(m_Evaluator);
     m_AttributeSelection.setSearch(m_Search);
-	System.err.println("\t\t\t\t\tSelect attributes with "+m_Evaluator.toString());
+//	System.err.println("\t\t\t\t\tSelect attributes with "+m_Evaluator.toString());
     long start = System.currentTimeMillis();
     m_AttributeSelection.
       SelectAttributes((m_Evaluator instanceof WeightedInstancesHandler) 
                        ? newData
                        : resampledData);
     long end = System.currentTimeMillis();
-	System.err.println("\t\t\t\t\t done Attribute selection.");
+//	System.err.println("\t\t\t\t\t done Attribute selection.");
     if (m_Classifier instanceof WeightedInstancesHandler) {
       newData = m_AttributeSelection.reduceDimensionality(newData);
       m_Classifier.buildClassifier(newData);
@@ -142,6 +139,6 @@ public class AttributeSelectedClassifier2 extends AttributeSelectedClassifier{
                     : resampledData, 0);
     m_selectionTime = (double)(end - start);
     m_totalTime = (double)(end2 - start);
-	System.err.println("\t\t\t\t\t completely done Attribute selection.");
+//	System.err.println("\t\t\t\t\t completely done Attribute selection.");
   }
 }

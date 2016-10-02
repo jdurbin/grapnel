@@ -264,74 +264,83 @@ public class InstanceUtils {
 	}
 		
 	/***
-	* Like Instances.mergeInstances, but uses named ID's to merge two sets of 
-	* Instances that may not have the same number of elements or the elements in 
-	* the same order. 
-	* 
-	* Merges two sets of named Instances together (i.e. instances have ID field) 
-	* The resulting set will have all the attributes of the first set plus all 
-	* the attributes of the second set. With the exception of the required "ID"
-	* attribute, attributes of the two sets of instances are assumed to be non-overlapping. 
-	* Only instances that occur in both sets will be returned, all other instances 
-	* will be omitted. 
-	*
-	* @param first the first set of Instances
-	* @param second the second set of Instances
-	* @return the merged set of Instances
-	* @throws IllegalArgumentException if the datasets are not the same size
-	*/
+		* Like Instances.mergeInstances, but uses named ID's to merge two sets of 
+		* Instances that may not have the same number of elements or the elements in 
+		* the same order. 
+		* 
+		* Merges two sets of named Instances together (i.e. instances have ID field) 
+		* The resulting set will have all the attributes of the first set plus all 
+		* the attributes of the second set. With the exception of the required "ID"
+		* attribute, attributes of the two sets of instances are assumed to be non-overlapping. 
+		* Only instances that occur in both sets will be returned, all other instances 
+		* will be omitted. 
+		*
+		* @param first the first set of Instances
+		* @param second the second set of Instances
+		* @return the merged set of Instances
+		* @throws IllegalArgumentException if the datasets are not the same size
+		*/
 	public static Instances mergeNamedInstances(Instances first, Instances second) {
 
-    // Create the vector of merged attributes
-  	FastVector newAttributes = new FastVector();
-  	for (int i = 0; i < first.numAttributes(); i++) {
-  	  newAttributes.addElement(first.attribute(i));
-  	}
-  	for (int i = 0; i < second.numAttributes(); i++) {
-  		  newAttributes.addElement(second.attribute(i));
-  	}
-  				
-  	// Create the set of Instances  
-    Map<String,Integer> firstName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(first);   		
-  	Map<String,Integer> secondName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(second); 	                                  		                                  
+		//System.err.println("DEBUG mergeNamedInstances");									  
+
+		// Create the vector of merged attributes
+		FastVector newAttributes = new FastVector();				
+		for (int i = 0; i < first.numAttributes(); i++) {
+			newAttributes.addElement(first.attribute(i));
+		}
+		for (int i = 0; i < second.numAttributes(); i++) {			
+			// Don't include ID attribute twice...
+			if (second.attribute(i).name() != "ID"){
+				newAttributes.addElement(second.attribute(i));
+			}
+		}  				
+			
+		// Create the set of Instances  
+		Map<String,Integer> firstName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(first);   		
+		Map<String,Integer> secondName2InstanceIdxMap = InstanceUtils.createInstanceNameMap(second); 	                                  		                                  
   	
-    // Find the set of instances they have in common...
-    Set<String> commonInstanceNames = firstName2InstanceIdxMap.keySet();        
+		// Find the set of instances they have in common...
+		Set<String> commonInstanceNames = firstName2InstanceIdxMap.keySet();        
 		//System.err.println("DEBUG: firstInstances:"+commonInstanceNames.size());
 		//System.err.println(commonInstanceNames);
 		
 
-    Set<String> secondNames = secondName2InstanceIdxMap.keySet();
+		Set<String> secondNames = secondName2InstanceIdxMap.keySet();
 		//System.err.println("DEBUG: secondInstances: "+secondNames.size());
 		//System.err.println(secondNames);
-
-    commonInstanceNames.retainAll(secondNames);
-		//System.err.println("commonInstanceNames: "+commonInstanceNames.size());
+		commonInstanceNames.retainAll(secondNames);
+		//System.err.println("commonInstanceNames: "+commonInstanceNames.size());				
+		
     
-  	int maxInstances = first.numInstances()+second.numInstances();  		                                    
-    Instances merged = new Instances(first.relationName() + '_'
-  		                              + second.relationName(),
-  		                                newAttributes,maxInstances);
-  		                                    
-    for(String name: commonInstanceNames){
-      int firstIdx = firstName2InstanceIdxMap.get(name);
-      int secondIdx = secondName2InstanceIdxMap.get(name);
+		int maxInstances = first.numInstances()+second.numInstances();  		                                    
+		Instances merged = new Instances(first.relationName() + '_'
+			+ second.relationName(),
+				newAttributes,maxInstances);
+  		                              
+		Instances secondNoID = AttributeUtils.removeInstanceID(second);
+		for(String name: commonInstanceNames){
+			int firstIdx = firstName2InstanceIdxMap.get(name);
+			int secondIdx = secondName2InstanceIdxMap.get(name);
       
-      merged.add(first.instance(firstIdx).mergeInstance(second.instance(secondIdx)));
-    }
+			merged.add(first.instance(firstIdx).mergeInstance(secondNoID.instance(secondIdx)));
+		}
 	    
-    // OK, now we have two copies of ID's.  Some code expects ID to be at 0, so 
-    // remove the duplicate not at index 0. 
-    int removeIDIdx = -1;
-    for(int i = 0;i < merged.numAttributes();i++){
-      String attrName = merged.attribute(i).name();
-      if (attrName.matches("ID") && (i != 0)){      
-        removeIDIdx = i;
-        break;
-      }
-    }     
-    merged.deleteAttributeAt(removeIDIdx);
-    return(merged);    
+		// OK, now we have two copies of ID's.  Some code expects ID to be at 0, so 
+		// remove the duplicate not at index 0. 
+		/*
+		int removeIDIdx = -1;
+		for(int i = 0;i < merged.numAttributes();i++){
+			String attrName = merged.attribute(i).name();
+			if (attrName.matches("ID") && (i != 0)){      
+				removeIDIdx = i;
+				break;
+			}
+		}     
+		merged.deleteAttributeAt(removeIDIdx);
+		*/
+			
+		return(merged);    
 	}
 	
 	
@@ -381,13 +390,13 @@ public class InstanceUtils {
 						int rawIdx = rawName2Idx.get(modelAttrName);
 						vals[aIdx] = rawVals[rawIdx];
 					}else{
-						vals[aIdx] = Instance.missingValue();
+						vals[aIdx] = Utils.missingValue();
 					}
 					aIdx++;
 				}
 
 				//println "\nOLD INSTANCE ELAC1: ${instance['ELAC1']} NUP205: ${instance['NUP205']}"					
-				Instance newInstance = new Instance(1.0,vals);
+				Instance newInstance = new DenseInstance(1.0,vals);
 				data.add(newInstance);
 		}
 		
@@ -396,7 +405,6 @@ public class InstanceUtils {
 	}	
 	
 	
-
 	
 	
 	/*

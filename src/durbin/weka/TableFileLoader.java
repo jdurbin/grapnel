@@ -10,6 +10,7 @@ import weka.core.*;
 import weka.filters.*;
 import weka.filters.unsupervised.attribute.*;
 
+
 import com.google.common.primitives.*;
 
 import groovy.lang.Closure;
@@ -164,13 +165,13 @@ public class TableFileLoader {
 					double value;
 					
 					if (valToken.equals("null")){
-						value = Instance.missingValue();
+						value = Utils.missingValue();
 					} else if (valToken.equals("?")){
-						value = Instance.missingValue();
+						value = Utils.missingValue();
 					}else if (valToken.equals("NA")){
-						 value = Instance.missingValue();
+						 value = Utils.missingValue();
 					}else if (valToken.equals("")){
-						value = Instance.missingValue();
+						value = Utils.missingValue();
 						//}else value = DoubleParser.lightningParse(valToken); // faster double parser with MANY assumptions
 					}else value = Double.parseDouble(valToken);										
 					dataArray[rowIdx][colIdx] = value;
@@ -218,7 +219,7 @@ public class TableFileLoader {
 				vals[r] = val;
 			}
 			// Add the a newly minted instance with those attribute values...
-			data.add(new Instance(1.0,vals));
+			data.add(new DenseInstance(1.0,vals));
 		}
     
 		//System.err.println("DEBUG: data.numInstances: "+data.numInstances());
@@ -283,7 +284,7 @@ public class TableFileLoader {
 			// for each attribute			
 			for (int c = 0;c < t.numCols;c++) {			    
 				String val = (String) t.matrix.getQuick(r,c);
-				if (val == "?") vals[c] = Instance.missingValue();
+				if (val == "?") vals[c] = Utils.missingValue();
 				else if (isNominal.get(c)){
 					vals[c] = allAttVals.get(c).indexOf(val);
 				}else{ 
@@ -291,7 +292,7 @@ public class TableFileLoader {
 				}
 			}
 			// Add the a newly minted instance with those attribute values...
-			data.add(new Instance(1.0,vals));
+			data.add(new DenseInstance(1.0,vals));
 		}
 		
 		System.err.print("add feature names..."); 
@@ -363,7 +364,7 @@ public class TableFileLoader {
 			// for each attribute			
 			for (int c = 0;c < t.numCols;c++) {			    
 				String val = (String) t.matrix.getQuick(r,c);
-				if (val == "?") vals[c] = Instance.missingValue();
+				if (val == "?") vals[c] = Utils.missingValue();
 				else if (isNominal.get(c)){
 					vals[c] = allAttVals.get(c).indexOf(val);
 				}else{ 
@@ -371,7 +372,7 @@ public class TableFileLoader {
 				}
 			}
 			// Add the a newly minted instance with those attribute values...
-			data.add(new Instance(1.0,vals));
+			data.add(new DenseInstance(1.0,vals));
 		}
 		
 		System.err.print("add feature names..."); 
@@ -487,21 +488,17 @@ public class TableFileLoader {
 	}
 	
 
-  /****************************************************
-  *  Convert a table to a set of instances, with <b>columns</b> representing individual </b>instances</b>
-  *  and <b>rows</b> representing <b>attributes</b> (e.g. as is common with microarray data)
-  */
-  public Instances tableColsToInstances(Table t,String relationName) {
+	/****************************************************
+		*  Convert a table to a set of instances, with <b>columns</b> representing individual </b>instances</b>
+		*  and <b>rows</b> representing <b>attributes</b> (e.g. as is common with microarray data)
+		*/
+	public Instances tableColsToInstances(Table t,String relationName) {
        
-		System.err.print("Converting table cols to instances...");
-
-  	// Set up attributes, which for colInstances will be the rowNames...
-  	FastVector atts = new FastVector();
+		// Set up attributes, which for colInstances will be the rowNames...
+		FastVector atts = new FastVector();
 		ArrayList<Boolean> isNominal = new ArrayList<Boolean>();
 		ArrayList<FastVector> allAttVals = new ArrayList<FastVector>(); // Save values for later...
 
-		System.err.print("creating attributes...");
-		
 		for (int r = 0;r < t.numRows;r++) {						
 			if (rowIsNumeric(t,r)){
 				isNominal.add(false);
@@ -517,8 +514,6 @@ public class TableFileLoader {
 			}
 		}
 		
-		System.err.print("creating instances...");
-
 		// Create Instances object..
 		Instances data = new Instances(relationName,atts,0);
 		data.setRelationName(relationName);
@@ -532,7 +527,7 @@ public class TableFileLoader {
 			// For each attribute fill in the numeric or attributeValue index...
 			for (int r = 0;r < t.numRows;r++) {			    
 				String val = (String) t.matrix.getQuick(r,c);
-				if (val == "?") vals[r] = Instance.missingValue();
+				if (val == "?") vals[r] = Utils.missingValue();
 				else if (isNominal.get(r)){
 					vals[r] = allAttVals.get(r).indexOf(val);
 				}else{ 
@@ -540,32 +535,31 @@ public class TableFileLoader {
 				}
 			}						
 			// Add the a newly minted instance with those attribute values...
-			data.add(new Instance(1.0,vals));
+			data.add(new DenseInstance(1.0,vals));
 		}		
 
-		System.err.print("add feature names..."); 
    
 		/*******  ADD FEATURE NAMES **************/		
 		// takes basically zero time... all time is in previous 2 chunks. 
 		if (addInstanceNamesAsFeatures){		  		  
-	  	Instances newData = new Instances(data);
-    	newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
-    	int attrIdx = newData.attribute("ID").index(); // Paranoid... should be 0
+			Instances newData = new Instances(data);
+			newData.insertAttributeAt(new Attribute("ID",(FastVector)null),0);	      
+			int attrIdx = newData.attribute("ID").index(); // Paranoid... should be 0
     
-    	// We save the instanceNames in a list because it's handy later on...
-    	instanceNames = new ArrayList<String>();
+			// We save the instanceNames in a list because it's handy later on...
+			instanceNames = new ArrayList<String>();
     	
-    	for(int c = 0;c < t.colNames.length;c++){
-      	instanceNames.add(t.colNames[c]);
-      	newData.instance(c).setValue(attrIdx,t.colNames[c]);
-    	}            
-    	data = newData;
-  	}			
+			for(int c = 0;c < t.colNames.length;c++){
+				instanceNames.add(t.colNames[c]);
+				newData.instance(c).setValue(attrIdx,t.colNames[c]);
+			}            
+			data = newData;
+		}			
   
 		System.err.println("done.");
 		
-  	return(data);
-  } 
+		return(data);
+	} 
 
 
 	/***
@@ -577,8 +571,8 @@ public class TableFileLoader {
 			String val = (String)t.matrix.getQuick(r,colIdx);
 			
 			if (val == null){
-				 System.err.println("\nDEBUG r="+r+"\tc="+colIdx+"\tval="+val);			
-				 System.err.println("\nDEBUG r="+t.rowNames[r]+"\tc="+t.colNames[colIdx]);			
+				 //System.err.println("\nDEBUG r="+r+"\tc="+colIdx+"\tval="+val);			
+				 //System.err.println("\nDEBUG r="+t.rowNames[r]+"\tc="+t.colNames[colIdx]);			
 			 }
 			
 			// Don't want to include "missing value" as one of the nominal values...
@@ -663,11 +657,11 @@ public class TableFileLoader {
 			// For each attribute...
 			for (int r = 0;r < t.numRows;r++) {			    
 				Object val = t.matrix.getQuick(r,c);
-				if (val == null) 	vals[r] = Instance.missingValue();
+				if (val == null) 	vals[r] = Utils.missingValue();
 				else vals[r] = (Double) val;								
 			}						
 			// Add the a newly minted instance with those attribute values...
-			data.add(new Instance(1.0,vals));
+			data.add(new DenseInstance(1.0,vals));
 		}		
 
    // System.err.println("******* Before Add Instance Names **********");

@@ -219,7 +219,7 @@ extends SimpleBatchFilter {
           }   			
 		    }
 	    }
-	    if (!bSkipInstance)	result.add(new Instance(1,values));
+	    if (!bSkipInstance)	result.add(new DenseInstance(1,values));
 	    else bSkipInstance = false;
     }
     return(result);
@@ -260,7 +260,7 @@ extends SimpleBatchFilter {
     			else values[aIdx] = 1.0; // inde to nominal value.     			
 		    }
 	    }
-	    result.add(new Instance(1,values));
+	    result.add(new DenseInstance(1,values));
     }
     return(result);
   }
@@ -308,7 +308,7 @@ extends SimpleBatchFilter {
 		    }
 	    }	    
 	    
-	    if (!bSkipInstance) result.add(new Instance(1,values));
+	    if (!bSkipInstance) result.add(new DenseInstance(1,values));
 	    else bSkipInstance = false;
     }
     return(result);
@@ -346,7 +346,7 @@ extends SimpleBatchFilter {
 			for (int sIdx = 0; sIdx < selectedAttributes.length;sIdx++) {
 			  int attrIdx = selectedAttributes[sIdx];
 			  double value = values[attrIdx];
-			  if (value != Instance.missingValue()){
+			  if (value != Utils.missingValue()){
 			    bins[attrIdx].add(values[attrIdx]); 
 			  }else{
 			    System.err.println("Value for instance: "+i+" attribute "+attrIdx+" is missing.");

@@ -23,10 +23,10 @@ class WekaClassifierInfo{
 		}
 		
 		switch(baseClassifier){
-			case {it instanceof durbin.weka.BalancedRandomForest}:
-				def trees = baseClassifier.m_bagger.m_Classifiers
-				def numTrees = trees.size()
-				return("Balanced Random Forest.  NumTrees: $numTrees")
+			//case {it instanceof durbin.weka.BalancedRandomForest}:
+			//	def trees = baseClassifier.m_bagger.m_Classifiers
+			//	def numTrees = trees.size()
+			//	return("Balanced Random Forest.  NumTrees: $numTrees")
 			case {it instanceof weka.classifiers.trees.RandomForest}:
 				def trees = baseClassifier.m_bagger.m_Classifiers
 				def numTrees = trees.size()
@@ -72,7 +72,7 @@ class WekaClassifierInfo{
 		}
 		
 		switch(baseClassifier){
-			case {it instanceof durbin.weka.BalancedRandomForest}:
+			//case {it instanceof durbin.weka.BalancedRandomForest}:
 			case {it instanceof weka.classifiers.trees.RandomForest}:
 			def features2weights = getRFFeatures(baseClassifier)
 			return(features2weights)
@@ -88,7 +88,7 @@ class WekaClassifierInfo{
 				def features2weights = getSMOFeatures(baseClassifier);
 				return(features2weights);
 			}else{
-				System.err.println "ERROR: Unsupported non-linear kernel for WekaClassifierInfo"
+				//System.err.println "\tWARNING: Unsupported non-linear kernel for WekaClassifierInfo.getFeatures"
 			}
 				return(null);
 			break;
@@ -162,7 +162,7 @@ class WekaClassifierInfo{
 		// if there are only two classes... 
 		def c = classifier.m_classifiers[0][1]
 
-		if (classifier.m_filterType == classifier.FILTER_NORMALIZE) println "Normalized values."
+		//if (classifier.m_filterType == classifier.FILTER_NORMALIZE) println "Normalized values."
 
 		def name2weight = [:]
 

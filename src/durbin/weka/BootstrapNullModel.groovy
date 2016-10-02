@@ -97,7 +97,7 @@ class BootstrapNullModel implements Serializable{
 			for(attrIdx in 0..< data.numAttributes()){
 				newvals[attrIdx] = allattributes[attrIdx].get(instanceIdx) 
 			}
-			permutedInstances.add(new Instance(1.0,newvals))
+			permutedInstances.add(new DenseInstance(1.0,newvals))
 		}			
 		
 		return(permutedInstances)

@@ -78,7 +78,7 @@ public class ExponentialNormalizationFilter extends SimpleBatchFilter {
 				double newVal = Math.abs(exp.inverseCumulativeProbability(Math.abs(scaled)));
 				newValues[a] = newVal;
 			}
-			result.add(new Instance(1, newValues));
+			result.add(new DenseInstance(1, newValues));
 		}
 		// If we saved a class attribute, restore it. 
 		result = au.restoreClassAttribute(result);
