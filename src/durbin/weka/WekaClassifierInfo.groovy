@@ -28,9 +28,11 @@ class WekaClassifierInfo{
 			//	def numTrees = trees.size()
 			//	return("Balanced Random Forest.  NumTrees: $numTrees")
 			case {it instanceof weka.classifiers.trees.RandomForest}:
-				def trees = baseClassifier.m_bagger.m_Classifiers
-				def numTrees = trees.size()
-				return("Random Forest.  NumTrees: $numTrees")		
+			// need to fix weka 3.8 refactor. 
+				//def trees = baseClassifier.m_Classifiers
+				//def numTrees = trees.size()
+				//return("Random Forest.  NumTrees: $numTrees")		
+				return("Random Forest.");
 			break;
 			
 			case {it instanceof weka.classifiers.functions.SimpleLogistic}:
@@ -74,8 +76,10 @@ class WekaClassifierInfo{
 		switch(baseClassifier){
 			//case {it instanceof durbin.weka.BalancedRandomForest}:
 			case {it instanceof weka.classifiers.trees.RandomForest}:
-			def features2weights = getRFFeatures(baseClassifier)
-			return(features2weights)
+			// Need to refactor for weka3.8 changes. 
+			return(null);
+			//def features2weights = getRFFeatures(baseClassifier)
+			//return(features2weights)
 			break;
 			
 			case {it instanceof weka.classifiers.functions.SimpleLogistic}:
@@ -109,7 +113,7 @@ class WekaClassifierInfo{
 	static def getRFFeatures(classifier){
 		def featureSet = [] as Set
 
-		def trees = classifier.m_bagger.m_Classifiers
+		def trees = classifier.m_Classifiers
 		trees.each{tree->
 			dfsCollectFeatures(tree,featureSet)
 		}
