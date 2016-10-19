@@ -74,7 +74,7 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
 	public TableMatrix1D(ObjectMatrix1D dom,HashMap<String,Integer> n2I,String theName){
 		names2Idx = n2I;
 		name = theName;
-    data = dom;
+    	data = dom;
   }
 
 	public Object asType(Class clazz) {

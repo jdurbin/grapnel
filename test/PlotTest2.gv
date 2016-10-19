@@ -31,4 +31,4 @@ hist3 = dualhist(title:"Price vs Alcohol3",
 showCharts(title:"Lung/Expression Atlas",
 		   charts:[hist1,hist2,hist3],
 		   orientation:"HORIZONTAL",
-		   chartSize:new Dimension(150,75))
+		   chartSize:new Dimension(300,150))

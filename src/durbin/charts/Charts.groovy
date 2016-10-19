@@ -13,6 +13,9 @@ import java.awt.*
 import javax.swing.WindowConstants as WC
 import javax.swing.*
 
+import java.awt.Shape
+import java.awt.geom.Ellipse2D
+
 import durbin.util.*
 
 /**
@@ -226,10 +229,19 @@ class Charts{
     XYPlot plot = (XYPlot) chart.getPlot();
     plot.setDomainPannable(true);
     plot.setRangePannable(true);
+	plot.setForegroundAlpha(0.30f);		
+	
     XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
     renderer.setBaseShapesVisible(true);
     renderer.setBaseShapesFilled(true);
-    renderer.setBaseLinesVisible(false);
+    renderer.setBaseLinesVisible(false);	
+	def color1 = Color.blue
+	renderer.setSeriesPaint(0, color1);
+	Shape shape  = new Ellipse2D.Double(0,0,8,8);
+	renderer.setBaseShape(shape);
+	renderer.setSeriesShape(0, shape);
+	
+	plot.setBackgroundPaint(new Color(0,0,0,10)); 
 
     // change the auto tick unit selection to integer units only...
     NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
@@ -295,10 +307,16 @@ class Charts{
     XYPlot plot = (XYPlot) chart.getPlot();
     plot.setDomainPannable(true);
     plot.setRangePannable(true);
+	//plot.setBackgroundPaint(Color.lightGray); 
+	plot.setBackgroundPaint(new Color(0,0,0,25));  
+	plot.setForegroundAlpha(0.80f);
+	
+	def renderer = (XYBarRenderer) plot.getRenderer();
+	def color1 = Color.blue
+	renderer.setSeriesPaint(0, color1);
 
-		if (xydata.getSeriesCount() > 1) plot.setForegroundAlpha(0.85f);
+	if (xydata.getSeriesCount() > 1) plot.setForegroundAlpha(0.85f);
 
-    def renderer = (XYBarRenderer) plot.getRenderer();
     renderer.setDrawBarOutline(false);
     renderer.setBarPainter(new StandardXYBarPainter());
     renderer.setShadowVisible(false);
@@ -316,6 +334,7 @@ class Charts{
 	*/ 						
 	static dualhist(params=[:]){
 		
+		// PARAMS:
 		def cName = params.title ?: "Dual Histogram"
 		def series1name = params.series1name ?: "Series1"
 		def series2name = params.series2name ?: "Series2"
@@ -324,7 +343,9 @@ class Charts{
 		
 		def color1 = params.color1 ?: Color.blue
 		def color2 = params.color2 ?: Color.green
-						
+
+
+		// 
 		double binmax1 = values1.max()
 		double binmax2 = values2.max()
 		double binmin1 = values1.min()

@@ -44,6 +44,11 @@ public class Table extends GroovyObjectSupport{
 	public HashMap<String,Integer> colName2Idx = new HashMap<String,Integer>();
 	public HashMap<String,Integer> rowName2Idx = new HashMap<String,Integer>();
   
+  	// Cache to save inferred column types.  DoubleTable assumes all values are
+	// doubles.  Table assumes a mix of number columns and string columns.  
+	// It does a dirty test to infer the column type for getTyped and then caches the result. 
+  	//public HashMap<Integer,Class> columnTypeCache = new HashMap<Integer,Class>();
+  
 	/**
 		* Create empty Table
 		*/
@@ -155,6 +160,39 @@ public class Table extends GroovyObjectSupport{
 		matrix.assign(o);
 		
 	}
+	
+	/*
+	public Object getTyped(int row,int c){	
+		Integer col = new Integer(c);
+		if (columnTypeCache.containsKey(col)){
+			if(columnTypeCache.get(col) == Double.class){
+				return(Double.parseDouble((String)matrix.get(row,col)));
+			}else{
+				return(matrix.get(row,col));	
+			}
+		}else{
+			columnTypeCache.get(col) = determineColumnType(col);
+			if(columnTypeCache.get(col) == Double.class) {
+				return(Double.parseDouble((String)matrix.get(row,col)));
+			}else{
+				return(matrix.get(row,col));
+			}
+		}
+	}
+	
+	public Class determineColumnType(int col){
+		return(Double.class);		
+	}
+	
+	public Class getColumnClass(int col){		
+		if (columnTypeCache.containsKey(col)){
+			return(columnTypeCache.get(col));
+		}else{
+			columnTypeCache.get(col) = determineColumnType(col);
+			return(columnTypeCache.get(col));
+		}
+	}
+	*/
 	
 	
 	/**
@@ -588,10 +626,8 @@ public class Table extends GroovyObjectSupport{
 	/**
 		* Get row at row index with [] notation in Groovy 
 		*/
-	public TableMatrix1D getAt(int ridx){
-		
-		return(getRow(ridx));
-		
+	public TableMatrix1D getAt(int ridx){		
+		return(getRow(ridx));		
 	}
 	
 	/**
