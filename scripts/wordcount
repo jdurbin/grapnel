@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-import durbin.util.*
+import grapnel.util.*
 
 /***
 * Count the number of terms from stdin...

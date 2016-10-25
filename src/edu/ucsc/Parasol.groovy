@@ -1,6 +1,6 @@
 package edu.ucsc
 
-import durbin.util.*
+import grapnel.util.*
 
 /****
 * Minimal support for running parasol jobs on cluster. 

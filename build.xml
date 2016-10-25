@@ -6,7 +6,7 @@
 		<delete dir="target/classes"/>
 		<delete dir="target/classes"/>
 		<delete dir="target/jar/"/>
-		<delete file="target/jar/durbinlib.jar"/>
+		<delete file="target/jar/grapnel.jar"/>
 		<delete file="groovylibs/*"/>
 		<delete dir="doc/"/>
 	</target>
@@ -26,14 +26,14 @@
 			<include name="**/*.jar"/>
 		</fileset>
 	
-		<fileset id="durbinlib.jars" dir="./lib/">
+		<fileset id="grapnel.jars" dir="./lib/">
 			<include name="**/*.jar"/>
 		</fileset>
 
 		<path id="lib.path">
 			<fileset refid="groovylib.jars"/>
 			<fileset refid="mygroovylib.jars"/>
-			<fileset refid="durbinlib.jars"/>
+			<fileset refid="grapnel.jars"/>
 		</path>
 
 		<taskdef 
@@ -51,20 +51,20 @@
 	
 			<target name="jar" depends="groovy">	
 				<mkdir dir="target/jar"/>
-				<jar destfile="target/jar/durbinlib.jar" basedir="target/classes">
+				<jar destfile="target/jar/grapnel.jar" basedir="target/classes">
 				</jar>
 			</target>
 
 
-			<!-- Installs durbinlib and dependencies into ~/.groovy/lib/ -->
+			<!-- Installs grapnel and dependencies into ~/.groovy/lib/ -->
 			<target name="localinstall" depends="clean,jar">
-				<copy file="target/jar/durbinlib.jar" tofile="${user.home}/.groovy/lib/durbinlib.jar"/>
+				<copy file="target/jar/grapnel.jar" tofile="${user.home}/.groovy/lib/grapnel.jar"/>
 				<copy todir="${user.home}/.groovy/lib/">
 					<fileset dir="lib/"/>
 				</copy>
 			</target>
 
-			<!-- Installs durbinlib to target/jar/	-->
+			<!-- Installs grapnel to target/jar/	-->
 			<target name="install" depends="clean,jar">
 				<copy todir="target/jar/">
 					<fileset dir="lib/"/>

@@ -1,13 +1,13 @@
-##durbinlib.jar##
+##grapnel.jar##
 
-**durbinlib** is a library of functionality to help with performing data analysis in [Groovy](http://groovy.codehaus.org/), especially machine learning and bioinformatics data analysis.  durbinlib is the kitchen sink of java/groovy functionality that I use every day.  I might eventually separate this into individual libraries with more narrow focus, and when someone else contributes I'll change the vanity name ;-), but for the moment it's just a big grab-bag of useful things.  The general-interest packages in durbinlib include:
+**grapnel** is a library of functionality to help with performing data analysis in [Groovy](http://groovy.codehaus.org/), especially machine learning and bioinformatics data analysis.  grapnel is the kitchen sink of java/groovy functionality that I use every day.  I might eventually separate this into individual libraries with more narrow focus, and when someone else contributes I'll change the vanity name ;-), but for the moment it's just a big grab-bag of useful things.  The general-interest packages in grapnel include:
 
 * **durbin.charts:**  Support for common kinds of charts: line chart, xyplot, hist.  Based on [JFreeChart](http://www.jfree.org/jfreechart/) but includes lots of sugar to make it easier to make commonly used charts and support for saving them in various formats. Also has support for creating a chart and displaying it in a GUI with a single command. 
 
 * **durbin.stat:**  Statistical classes.  
     * **MixtureModel** Class to compute parameters of a mixture model given data (based on [SSJ](http://www.iro.umontreal.ca/~simardr/ssj/indexe.html)), and to classify data into most-likely mixtures. 
     * **KolmogorovSmirnov** class to compute KolmogorovSmirnov statistics from data.<br><br>
-* **durbin.util:** Core functionality of durbinlib.  
+* **durbin.util:** Core functionality of grapnel.  
     * **DoubleTable**  Implements a high-performance 2D table of doubles accessible by index or name. Backed by [colt] (http://acs.lbl.gov/software/colt/) DenseDoubleMatrix.  Includes syntatic sugar to allow [] notation, eachRow closures, etc. from Groovy and functionality to read/write tables to files in a fairly high performance way. 
     * **Table** Implements a fairly high-performance 2D object table.  Same functionality as DoubleTable generalized to a table of objects.  Not as efficient as DoubleTable for numeric data, but still fairly efficient.
     * **DynamicTable**  Implements a dynamically allocatable 2D table (a 2D Map, essentially).  Row and column keys can be any comparable object.  Backed by Google HashBasedTable in [guava](http://code.google.com/p/guava-libraries/)  Good performance with lots of Groovy syntax sugar. Read/write to file functionality.  
@@ -27,7 +27,7 @@
     * **BimodalityIndexFilter** Model attributes as a mixture model, replace each value with a bimodality index based on that model.
 <br><br>
 * **scripts** Collection of command-line scripts (groovy). 
-    * **[csvsql](https://github.com/jdurbin/durbinlib/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
+    * **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
  
         ```sql
         csvsql "select score from people.csv where age < 40"
@@ -37,7 +37,7 @@
         ```   
 
     * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on your 30,000 rows x 2,000 columns tables?  Then viewtab is for you!  View, sort data, plot histograms, scatter plot pairs of rows or columns.  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html)
-    ![viewtab](https://raw.github.com/jdurbin/durbinlib/master/img/viewtab.jpg)         
+    ![viewtab](https://raw.github.com/jdurbin/grapnel/master/img/viewtab.jpg)         
     * **cutbyname** Like cut, but cuts columns by column name. 
     * **rename** Rename batch of files based on regular expression find and replace. 
     * **tablesize**  How big is that csv/tab file in rows/columns? 

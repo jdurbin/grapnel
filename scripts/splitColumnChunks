@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy 
 
-import durbin.util.* 
+import grapnel.util.* 
 
 if (args.size() < 3){
 	System.err.println """

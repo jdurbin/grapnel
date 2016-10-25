@@ -2,7 +2,7 @@
 
 import groovy.sql.Sql
 import org.h2.Driver
-import durbin.util.*
+import grapnel.util.*
 
 err = System.err
 

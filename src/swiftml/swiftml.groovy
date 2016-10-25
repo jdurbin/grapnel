@@ -1,6 +1,8 @@
 package swiftml
 
-import durbin.weka.*
+import grapnel.weka.*
+
+
 import weka.clusterers.SimpleKMeans
 //import weka.clusterers.HierarchicalClusterer
 import weka.classifiers.trees.RandomForest

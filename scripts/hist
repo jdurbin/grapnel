@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy 
 
-import durbin.util.*
-import static durbin.charts.Charts.*
+import grapnel.util.*
+import static grapnel.charts.Charts.*
 
 vals = []
 System.in.eachLine(){line->
