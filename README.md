@@ -2,7 +2,7 @@
 
 <img src="https://raw.github.com/jdurbin/grapnel/master/img/graplinghook.png" width="256"> 
 
-A grappling hook, also called a **grapnel**, is a device that allows one to hook onto an object for the purpose of grabbing hold or gripping an object at a distnace.  Groovy **grapnel** is a collection of libraries and tools that will help you to get a grip on your data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   One way to think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.  
+A grappling hook, also called a **grapnel**, is a device that allows one to hook onto an object for the purpose of grabbing hold or gripping an object at a distnace.  Groovy **grapnel** is a collection of libraries and tools that will help you to get a grip on your data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
 
 The general-interest packages in grapnel include:
 
@@ -11,11 +11,14 @@ The general-interest packages in grapnel include:
 * **grapnel.stat:**  Statistical classes.  
     * **MixtureModel** Class to compute parameters of a mixture model given data (based on [SSJ](http://www.iro.umontreal.ca/~simardr/ssj/indexe.html)), and to classify data into most-likely mixtures. 
     * **KolmogorovSmirnov** class to compute KolmogorovSmirnov statistics from data.<br><br>
+    * **QuantileNormalization** classes to perform [quantile normalization] (https://en.wikipedia.org/wiki/Quantile_normalization)<br><br>
+     * **Sampling** Wrappers to simplifying sampling from lists. <br><br> 
 * **grapnel.util:** Core functionality of grapnel.  
     * **DoubleTable**  Implements a high-performance 2D table of doubles accessible by index or name. Backed by [colt] (http://acs.lbl.gov/software/colt/) DenseDoubleMatrix.  Includes syntatic sugar to allow [] notation, eachRow closures, etc. from Groovy and functionality to read/write tables to files in a fairly high performance way. 
     * **Table** Implements a fairly high-performance 2D object table.  Same functionality as DoubleTable generalized to a table of objects.  Not as efficient as DoubleTable for numeric data, but still fairly efficient.
     * **DynamicTable**  Implements a dynamically allocatable 2D table (a 2D Map, essentially).  Row and column keys can be any comparable object.  Backed by Google HashBasedTable in [guava](http://code.google.com/p/guava-libraries/)  Good performance with lots of Groovy syntax sugar. Read/write to file functionality.  
     * **MultidimensionalMap**  When a 2D Map isn't enough, MultidimensionalMap allows you to create HashMaps of arbitrary dimensions.  
+    * **CounterMap**  Map that counts unique occurrences of keys.   
     * **FileUtils** Number of file utilities, fastCountLines, determineSeparator, etc. 
     * **ImageUtils** Utilities for saving AWT/Swing components as JPG/PNG/GIF images.  
     * **OnlineTable** Class to allow access to a tabular data file one-row-at-a-time by column name. 
@@ -30,6 +33,8 @@ The general-interest packages in grapnel include:
     * **FishersLDEval** Attribute ranking based on Fisher's linear discriminant. 
     * **BimodalityIndexFilter** Model attributes as a mixture model, replace each value with a bimodality index based on that model.
 <br><br>
+* **swiftml** Collection of machine learning algorithms packaged nicely. Where wekaMine provides tools to easily automate large scale model selection/evaluation experiments, swiftml aims to provide a clean and easy to use interface to machine learning algorithms in the spirit of, for example, scikit-learn.  If you are looking for scikit-learn for Groovy/JVM swiftml might be what you need.  
+
 * **scripts** Collection of command-line scripts (groovy). 
     * **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
  
