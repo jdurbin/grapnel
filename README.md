@@ -1,6 +1,9 @@
-##Groovy Grapnel##
+##Groovy Grapnel    
 
-**grapnel** is a library of functionality to help with performing data analysis in [Groovy](http://groovy.codehaus.org/), especially machine learning and bioinformatics data analysis.  grapnel is the kitchen sink of java/groovy functionality that I use every day.  The general-interest packages in grapnel include:
+<img src="https://raw.github.com/jdurbin/grapnel/master/img/graplinghook.png" width="128">
+A grappling hook, also called a **grapnel**, is a device that allows one to hook onto an object for the purpose of grabbing hold or gripping an object at a distnace.  Groovy **grapnel** is a collection of libraries and tools that will help you to get a grip on your data analysis tasks.  While **grapnel** is geared towards[Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   One way to think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.  
+
+The general-interest packages in grapnel include:
 
 * **grapnel.charts:**  Support for common kinds of charts: line chart, xyplot, hist.  Based on [JFreeChart](http://www.jfree.org/jfreechart/) but includes lots of sugar to make it easier to make commonly used charts and support for saving them in various formats. Also has support for creating a chart and displaying it in a GUI with a single command. 
 
