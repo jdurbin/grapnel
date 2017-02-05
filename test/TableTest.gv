@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy 
 
-import durbin.util.*
+import grapnel.util.*
 err = System.err
 
 err.println "Test DoubleTable"
@@ -22,7 +22,7 @@ assert alcohol[68]==0
 assert alcohol.mean() == 4.420289855072465
 
 brooklyn = beer["BrooklynBrand"]
-assert brooklyn instanceof durbin.util.DoubleVector
+assert brooklyn instanceof grapnel.util.DoubleVector
 trueBrooklyn = new DoubleVector([6.24,159,5.2,1,1] as double[])
 trueBrooklyn.eachWithIndex{b,i-> assert b == brooklyn[i]}
 
