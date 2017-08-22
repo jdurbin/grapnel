@@ -1,7 +1,5 @@
 package grapnel.charts;
 
-import grapnel.util.*
-
 import org.jfree.chart.*
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.*
@@ -9,6 +7,9 @@ import org.jfree.chart.renderer.xy.*;
 import org.jfree.data.xy.*;
 import org.jfree.ui.*
 import org.jfree.data.statistics.*;
+import org.jfree.data.category.*;
+import org.jfree.chart.renderer.category.*
+
 
 import groovy.swing.SwingBuilder
 import java.awt.*
@@ -17,6 +18,8 @@ import javax.swing.*
 
 import java.awt.Shape
 import java.awt.geom.Ellipse2D
+
+import grapnel.util.*
 
 /**
 * Configuring JFreeChart charts is not hard, but it does clutter up your code. 
@@ -32,10 +35,8 @@ class Charts{
 	* Saves a chart as PNG with fileName
 	*/ 
 	static saveChart(chart,fileName){
-		err.println "Saving chart to $fileName..."
 		def chartpanel = new ChartPanel(chart);
 		ImageUtils.savePanelAsPNG(chartpanel,fileName)
-		err.print "saving done."
 	}
 	
 	/***
@@ -328,6 +329,83 @@ class Charts{
     return chart;
   }
 
+	static def createDatasetFromCollection(values){
+		def binmax = Collections.max(values) //values.max()
+		def binmin = Collections.min(values) //values.min()
+
+		//err.println "createHistogramFromValues"
+		def series = new HistogramDataset()
+		def valarray = new double[values.size()]
+		values.eachWithIndex{v,i->valarray[i] = v as double}
+
+		series.addSeries("Series1",valarray,50,binmin as double,binmax as double)
+		return(series)
+	}	
+  
+	static def addMarker(hist,location,label){
+		ValueMarker marker = new ValueMarker(location);  // position is the value on the axis
+		marker.setPaint(Color.green)
+		marker.setStroke(new BasicStroke((float)2.0))
+		marker.setLabelAnchor(RectangleAnchor.TOP);
+		marker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
+		marker.setLabel(label); // see JavaDoc for labels, colors, strokes
+		XYPlot plot = (XYPlot) hist.getPlot();
+		plot.addDomainMarker(marker);				
+	}
+  
+  
+	static hist(params=[:]){
+		
+		//String title,String xlabel,String ylabel, HistogramDataset xydata){
+		def title = params.title ?: "Dual Histogram"		
+		def xlabel = params.xlabel ?: "X-axis"
+		def ylabel = params.ylabel ?: "Y-axis"
+		def dataset = params.dataset
+		
+		if (!(dataset instanceof HistogramDataset)) dataset = createDatasetFromCollection(dataset)				
+		
+		// Only show legend if there is more than one series. 
+		def bShowLegend = false;
+		if (dataset.getSeriesCount() > 1) bShowLegend = true;
+		else bShowLegend = false;
+  
+		// create the chart...
+		JFreeChart chart = ChartFactory.createHistogram(
+				  title,      // chart title
+				  xlabel,                      // x axis label... KJD: if null doesn't it take it from series???
+				  ylabel,                      // y axis label
+				  dataset,                  // data
+				  PlotOrientation.VERTICAL,
+				  bShowLegend,                     // include legend
+				  false,                     // tooltips
+				  false                     // urls
+		);
+
+		// get a reference to the plot for further customisation...
+		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setDomainPannable(true);
+		plot.setRangePannable(true);
+		//plot.setBackgroundPaint(Color.lightGray); 
+		plot.setBackgroundPaint(new Color(0,0,0,25));  
+		plot.setForegroundAlpha(0.80f);
+		   
+		def renderer = (XYBarRenderer) plot.getRenderer();
+		def color1 = Color.blue
+		renderer.setSeriesPaint(0, color1);
+		   
+		if (dataset.getSeriesCount() > 1) plot.setForegroundAlpha(0.85f);
+		   
+		renderer.setDrawBarOutline(false);
+		renderer.setBarPainter(new StandardXYBarPainter());
+		renderer.setShadowVisible(false);
+		   
+		// change the auto tick unit selection to integer units only...
+		NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());		   
+		return chart;
+	}
+  
+
 	/***
 	* Create a histogram from two sets of values in arbitrary collection...
 	* KJD TODO: change hist and other chart functions to take named parameters. 
@@ -378,4 +456,33 @@ class Charts{
 
 		return(chart)
 	} 
+	
+	static categoryHistogram(title,xlabel,ylabel,label2countMap){
+		def categoryData = createCategoryFromMap(label2countMap)
+		JFreeChart chart = ChartFactory.createBarChart(
+		            title,         // chart title
+		            xlabel,               // domain axis label
+		            ylabel,                  // range axis label
+		            categoryData,                  // data
+		            PlotOrientation.HORIZONTAL, // orientation
+		            false,                     // include legend
+		            true,                     // tooltips?
+		            false                     // URLs?
+		        );
+						
+		final CategoryPlot plot = chart.getCategoryPlot();
+		def renderer = (BarRenderer) plot.getRenderer()
+		renderer.setBarPainter(new StandardBarPainter());	
+		renderer.setShadowVisible(false);	
+		return(chart);
+	}
+
+	static CategoryDataset createCategoryFromMap(label2countMap) {
+		def dataset = new DefaultCategoryDataset( );
+		label2countMap.each{label,count->
+			dataset.addValue(count,"S1",label)
+		 }		  
+	     return dataset; 
+	}
+	
 }

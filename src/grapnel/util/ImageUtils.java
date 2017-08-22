@@ -38,7 +38,7 @@ public class ImageUtils{
   * I think it's more expensive to layout 1000 charts than it is to layout 1000 
   * already rendered (fixed) images. 
   */ 
-  public static Image getPanelImage(JPanel p){
+  public static BufferedImage getPanelImage(JPanel p){
     JFrame frame;
     frame = new JFrame();
     frame.setContentPane(p);

@@ -23,6 +23,29 @@ class Classification{
 		return(-1);
 	}
 	
+	def call(){
+		def maxIdx = getMaxIdx(prForValues)
+		def call = classValues[maxIdx] 
+		return(call)
+	}
+	
+	def callAndIdx(){
+		def maxIdx = getMaxIdx(prForValues)
+		def call = classValues[maxIdx] 
+		return([call,maxIdx])
+	}
+	
+	def getMaxIdx(list){
+		def maxVal = -9999999;
+		def maxIdx = 0;
+		list.eachWithIndex{val,i->
+			if (val > maxVal) {
+				maxVal = val
+				maxIdx = i
+			}
+		}
+		return(maxIdx)
+	}	
 }
 
 /***
@@ -208,14 +231,16 @@ class WekaMineModel implements Serializable{
 		results.eachWithIndex{result,i->			
 			
 			def prForValues = result.prForValues as ArrayList						
-			def maxIdx = getMaxIdx(prForValues)
-			def call = classValues[maxIdx] // look up the name of this.
-			def prstr = prForValues.join("\t")	
+			//def maxIdx = getMaxIdx(prForValues)
+			//def call = classValues[maxIdx] // look up the name of this.
+			def call = result.call()
+			def roundValues = prForValues.collect{it.round(4)}
+			def prstr = roundValues.join("\t")	
 			
 			if (bnm != null){
 				def nullConf0 = bnm.getSignificance(prForValues[0],0)						
 				def nullConf1 = bnm.getSignificance(prForValues[1],1)
-				outStrings <<"${sampleIDs[i]}\t$prstr\t$nullConf0\t$nullConf1\t$call"
+				outStrings <<"${sampleIDs[i]}\t$prstr\t${nullConf0.round(4)}\t${nullConf1.round(4)}\t$call"
 			}else{
 				outStrings <<"${sampleIDs[i]}\t$prstr\t\t\t$call"
 			}
@@ -290,7 +315,7 @@ class WekaMineModel implements Serializable{
 		out << heading
 		out << "\n"
 		newStrings.each{
-			out << "$it\t$matchFraction\t$majorityFrac"
+			out << "$it\t${matchFraction.round(4)}\t${majorityFrac.round(4)}"
 			out << "\n"
 		}	
 		
@@ -300,21 +325,8 @@ class WekaMineModel implements Serializable{
 		Instances result = tc.getCurve(predictions,0);
 		result.each{println it}
 		def roc = ThresholdCurve.getROCArea(result);
-		System.err.println "ROC: $roc"									
+		System.err.println "ROC: ${roc.round(4)}"									
 	}
-	
-	def getMaxIdx(list){
-		def maxVal = -9999999;
-		def maxIdx = 0;
-		list.eachWithIndex{val,i->
-			if (val > maxVal) {
-				maxVal = val
-				maxIdx = i
-			}
-		}
-		return(maxIdx)
-	}
-	
 	
 	/*************************************************************************************/ 
 		
@@ -375,8 +387,9 @@ class WekaMineModel implements Serializable{
 			results.eachWithIndex{result,i->
 				def prForValues = result.prForValues as ArrayList
 				//def r = result as ArrayList	// distribution for instance...			
-				def maxIdx = getMaxIdx(prForValues)
-				def call = classValues[maxIdx] // look up the name of this.
+				//def maxIdx = getMaxIdx(prForValues)
+				//def call = classValues[maxIdx] // look up the name of this.
+				def call = result.call()
 				def rstr = prForValues.join(",")	
 
 				def id = dataSampleIDs[i]

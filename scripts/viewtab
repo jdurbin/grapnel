@@ -20,6 +20,10 @@ import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.BorderLayout as BL
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
 
 import org.jfree.chart.*
 import org.jfree.chart.axis.NumberAxis;
@@ -51,6 +55,7 @@ if (isOSX()){
 	// Set the dock icon. 
 	def scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
 	def imgFileName = scriptDir+"/img/viewtab.png"
+	System.err.println "imgFileName: "+imgFileName
 	def dockImage = new ImageIcon(imgFileName).getImage();
 	Application.getApplication().setDockIconImage(dockImage);
 	
@@ -82,28 +87,53 @@ swing = new SwingBuilder()
 // define some menus...
 def menuItems = {
 		menu(text: "Actions", mnemonic: 'F') {
+			//menuItem(text: "Search...", mnemonic: 's', actionPerformed: {performSearch()})
 			menuItem(text: "Exit", mnemonic: 'X', actionPerformed: { System.exit(0) })
 		}
 }
 
 // Build the frame...
-def thetab
+def thetab,jtf
 frame = swing.frame(title:options.fileName,defaultCloseOperation:JFrame.EXIT_ON_CLOSE){
 //	frame = swing.frame(title:options.fileName){
 	menuBar(menuItems)
 		
-	// Add a scroll pane with table inside...
-  scrollpane = scrollPane{						
-		thetab = table(autoResizeMode:JTable.AUTO_RESIZE_OFF, 
-										autoCreateRowSorter:true,
-										cellSelectionEnabled:false,
-										columnSelectionAllowed:true,
-										preferredScrollableViewportSize:[900,400]){
-			tableModel(dtm)										
-		}							
-  }
+	borderLayout()
+		// Add a scroll pane with table inside...
+		scrollpane = scrollPane{						
+			thetab = table(autoResizeMode:JTable.AUTO_RESIZE_OFF, 
+											autoCreateRowSorter:true,
+											cellSelectionEnabled:false,
+											columnSelectionAllowed:true,
+											preferredScrollableViewportSize:[900,400]){
+												tableModel(dtm)										
+											}							
+  		}
+		def rowSorter = new TableRowSorter(dtm);
+		thetab.setRowSorter(rowSorter)	
+		
+		jtf = textField(id:"jtFilter",constraints:BL.SOUTH,actionPerformed:{
+			String text = jtf.getText();
+
+			if (text.trim().length() == 0) {
+         		rowSorter.setRowFilter(null);
+			} else {
+				def filterStr="(?i)" + text
+         		rowSorter.setRowFilter(RowFilter.regexFilter(filterStr));
+     		}
+		 }) // actionPerformed:{println("TextEntered")},
+	
 }
 err.println "done."
+
+// Add a row filter and listener to filter text 
+//def rowSorter = new TableRowSorter(thetab.getModel());
+
+// This character by character update is a bit too slow for very large tables
+// so just do this as enter action...
+// 
+//createFilterListener(jtf,rowSorter)
+
 
 // Set the default selection mode for the table...
 thetab.columnSelectionAllowed = false
@@ -189,11 +219,18 @@ def histogramSelectedCols(thetab,selectedCols){
 		colName = tc.getHeaderValue()	
 				
 		rows = thetab.getRowCount();
-		values = getRowValues(thetab,colIdx)
+		values = getRowValues(thetab,colIdx)		
 		
-		if (values.size() == 0) return;		
-		hist = hist(colName,values)
-		showTableChart(hist,"Distribution of $colName")	
+		if (values.size() == 0) {
+			// Must have been some non-numeric stuff in the column
+			// So make a categorical plot instead. 
+			def cm = getCategoryCounts(thetab,colIdx) 
+			def hist = categoryHistogram("Category Frequency","Category","Frequency",cm)
+			showTableChart(hist,"Distribution of $colName")	
+		}else{	
+			def hist = hist(colName,values)
+			showTableChart(hist,"Distribution of $colName")	
+		}
 	}
 }
 
@@ -353,6 +390,23 @@ def getMatchedRowValues(thetab,colIdx1,colIdx2){
 	return([values1,values2])
 }
 
+def getCategoryCounts(thetab,colIdx){
+	def counts = new CounterMap()
+	def rows = thetab.getRowCount();
+	for(int row = 0;row < rows;row++){
+		o = thetab.getValueAt(row,colIdx)		
+		try{
+			v = o as String
+			counts.inc(v)
+		}catch(Exception e){				
+			// Don't do anything...
+			err.println "WARNING: column ${getColName(thetab,colIdx)} can't convert to string."
+		}			
+	}
+	counts = counts.sort{-it.value}
+	return(counts)
+}
+
 
 def getRowValues(thetab,colIdx){
 	def values = []		
@@ -364,7 +418,7 @@ def getRowValues(thetab,colIdx){
 			if (!Double.isNaN(v)) values.add(v)
 		}catch(Exception e){				
 			// Don't do anything...
-			err.println "WARNING: column ${getColName(thetab,colIdx)} contains non-numeric values."
+			//err.println "WARNING: column ${getColName(thetab,colIdx)} contains non-numeric values."
 		}			
 	}
 	return(values)
@@ -394,6 +448,10 @@ def printSelectedCols(thetab,selectedCols){
 		println o
 	}
 	println "\n\n"
+}
+
+def performSearch(){
+	println "Search performed!"
 }
 
 
@@ -432,7 +490,7 @@ def ParseOptions(args){
 				it
 			}
 		}
-	
+			
 		options = parser.parse(args); 
 		options.fileName = parser.remainder[0]
 	}catch(Exception e){
@@ -440,6 +498,38 @@ def ParseOptions(args){
 		System.exit(1)
 	}		
 	return(options)
+}
+
+//private TableRowSorter<TableModel> rowSorter = new TableRowSorter(jTable.getModel());
+def createFilterListener(jtfFilter,rowSorter){
+	jtfFilter.getDocument().addDocumentListener(new DocumentListener(){
+		@Override
+    	public void insertUpdate(DocumentEvent e) {        	
+			String text = jtfFilter.getText();
+
+        	if (text.trim().length() == 0) {
+            	rowSorter.setRowFilter(null);
+        	} else {
+				def filterStr="(?i)" + text
+            	rowSorter.setRowFilter(RowFilter.regexFilter(filterStr));
+        	}
+    	}
+
+    	@Override
+    	public void removeUpdate(DocumentEvent e) {
+        	String text = jtfFilter.getText();
+        	if (text.trim().length() == 0) {
+            	rowSorter.setRowFilter(null);
+        	} else {
+            	rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+        	}
+    	}
+		
+    	@Override
+    	public void changedUpdate(DocumentEvent e) {
+        	throw new UnsupportedOperationException("DocumentEvent type not supported yet."); 
+    	}
+	});
 }
 
 //*************************************
@@ -527,8 +617,7 @@ class TableModel extends AbstractTableModel{
 			//System.err.println "col: ${getColumnName(c)} is String"
 			return(String.class)		
 		}
-	} 
-		
+	} 		
 }
 
 

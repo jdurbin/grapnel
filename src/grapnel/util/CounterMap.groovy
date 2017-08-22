@@ -33,7 +33,6 @@ package grapnel.util;
 * cm.inc('bob')
 */
 
-
 class CounterMap extends HashMap{
 	
 	/***
