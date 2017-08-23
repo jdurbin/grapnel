@@ -1,10 +1,46 @@
-##Groovy Grapnel    
+### Groovy Grapnel    
+
+## About
 
 <img src="https://raw.github.com/jdurbin/grapnel/master/img/graplinghook.png" width="256"> 
 
 A grappling hook, also called a **grapnel**, is a device that allows one to hook onto an object for the purpose of grabbing hold or gripping it when it is at a distnace or when there are no attachment points or handles.  In this spirit, Groovy **grapnel** is a collection of libraries and tools that will help you to get a grip on your data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
 
-The general-interest packages in grapnel include:
+## Installation
+
+Installation is in three parts:  install required software, clone and build grapnel from github, set environment variables. 
+
+The only dependencies for Grapnel are a newish version of Java (1.7 or later), a newish version of [Apache Ant](http://ant.apache.org/) (1.7 or later) and a newish version of [Apache Groovy](http://groovy-lang.org) (2.0 or later).   You can install these on your own machine wherever you like, just make sure all three are in your path.  
+
+# Clone grapnel from github and build
+Clone and build grapnel.jar:
+
+```
+git clone git://github.com/jdurbin/grapnel.git
+cd grapnel
+ant install
+```
+The install should build grapnel.jar and copy it and all required 3rd party jars, including weka, to grapnel/target.
+
+# Setting up Environment Variables
+
+Set the CLASSPATH environment variable to include all the jars under grapnel/target/jar, and add the scripts
+directory under grapnel to your path.  For example: 
+
+```
+export CLASSPATH="/Users/james/src/grapnel/target/jar/*"
+export PATH=$PATH:/Users/james/src/grapnel/scripts/
+```
+
+It's useful, but not strictly necessary, to set the environment variable JAVA_OPTS to give more RAM to the JVM and to optimize for long-running jobs: 
+
+```
+export JAVA_OPTS="-Xmx6000m -server -Xss40m"
+```
+
+Type `csvsql` to test out the installation.  You should see the help message for csvsql. 
+
+## The general-interest packages in grapnel include:
 
 * **grapnel.charts:**  Support for common kinds of charts: line chart, xyplot, hist.  Based on [JFreeChart](http://www.jfree.org/jfreechart/) but includes lots of sugar to make it easier to make commonly used charts and support for saving them in various formats. Also has support for creating a chart and displaying it in a GUI with a single command. 
 
