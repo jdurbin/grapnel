@@ -10,6 +10,8 @@ A grappling hook, also called a **grapnel**, is a device that allows one to hook
 
 Installation is in three parts:  install required software, clone and build grapnel from github, set environment variables. 
 
+# Dependencies
+
 The only dependencies for Grapnel are a newish version of Java (1.7 or later), a newish version of [Apache Ant](http://ant.apache.org/) (1.7 or later) and a newish version of [Apache Groovy](http://groovy-lang.org) (2.0 or later).   You can install these on your own machine wherever you like, just make sure all three are in your path.  
 
 # Clone grapnel from github and build
@@ -22,7 +24,7 @@ ant install
 ```
 The install should build grapnel.jar and copy it and all required 3rd party jars, including weka, to grapnel/target.
 
-# Setting up Environment Variables
+# Set up Environment Variables
 
 Set the CLASSPATH environment variable to include all the jars under grapnel/target/jar, and add the scripts
 directory under grapnel to your path.  For example: 
@@ -40,7 +42,7 @@ export JAVA_OPTS="-Xmx6000m -server -Xss40m"
 
 Type `csvsql` to test out the installation.  You should see the help message for csvsql. 
 
-## The general-interest packages in grapnel include:
+## grapnel.jar library includes:
 
 * **grapnel.charts:**  Support for common kinds of charts: line chart, xyplot, hist.  Based on [JFreeChart](http://www.jfree.org/jfreechart/) but includes lots of sugar to make it easier to make commonly used charts and support for saving them in various formats. Also has support for creating a chart and displaying it in a GUI with a single command. 
 
@@ -70,6 +72,8 @@ Type `csvsql` to test out the installation.  You should see the help message for
     * **BimodalityIndexFilter** Model attributes as a mixture model, replace each value with a bimodality index based on that model.
 <br><br>
 * **swiftml** Collection of machine learning algorithms packaged nicely. Where wekaMine provides tools to easily automate large scale model selection/evaluation experiments, swiftml aims to provide a clean and easy to use interface to machine learning algorithms in the spirit of, for example, scikit-learn.  If you are looking for scikit-learn for Groovy/JVM swiftml might be what you need.  
+
+## Grapnel Scripts
 
 * **scripts** Collection of command-line scripts (groovy). 
     * **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
