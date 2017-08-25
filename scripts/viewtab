@@ -35,7 +35,8 @@ import org.jfree.data.statistics.*;
 
 import com.google.common.primitives.Doubles;
 
-import com.apple.eawt.Application;
+// Import breaks script on non-OS X machines. 
+//import com.apple.eawt.Application;
 
 import grapnel.util.*
 import static grapnel.charts.Charts.*
@@ -46,7 +47,11 @@ err = System.err
 
 // Enable system specific GUI features...
 if (isOSX()){
-	//err.println "IS OSX"
+	
+	// Workaround so that don't have to the platform-specific import
+	// which would throw an error on non OS X machines. 
+	Application = this.class.classLoader.loadClass("com.apple.eawt.Application")
+	
 	System.setProperty("apple.laf.useScreenMenuBar", "true");
 	System.setProperty("com.apple.mrj.application.apple.menu.about.name", "ViewTable");
 	// set the look and feel
