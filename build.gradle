@@ -1,11 +1,34 @@
-apply plugin: 'eclipse'
+plugins{
+	id "edu.sc.seis.macAppBundle" version "2.1.7"
+}
 apply plugin: 'groovy'
 
 repositories {
-    mavenCentral()
+    mavenCentral() 
 }
 
+// Get groovy itself for the compile. 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
-    testCompile 'junit:junit:4.12'
+   compile 'org.codehaus.groovy:groovy-all:2.4.7'
+   
+   // Add all the jar dependencies from the lib folder. 
+   // (Most will be retrieved from Maven soon...)
+   compile fileTree(dir: 'lib', include: ['*.jar'])
+  
+}
+
+jar{
+	baseName = 'grapnel_gradle'
+	version = '0.8'
+}
+
+sourceSets{
+	main{
+		java	{srcDirs=[]}  // nothing should be handled by java compiler
+		
+		// everything under src handled by groovy.  Groovy will pass to 
+		// Java compiler as needed for java files, creating necessary stubs for 
+		// groovy classes that java files may use first.  
+		groovy {srcDirs =["src/"]}	
+	}
 }

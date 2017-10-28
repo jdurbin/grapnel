@@ -1,6 +1,10 @@
 #!/usr/bin/env groovy 
 
 /*
+
+	BUG	 Empty cells not showing up as empty but as control char
+	BUG	 non-type matching headings showing up as some kind of garbage. 
+
 	TODO Add overall descriptive statistics (at least to the plots)
 	TODO "Pin" plots so that you can select different rows and plot will update. 
 	TODO Run functions on rows... for example BimodalityFilter, and get some kind of output. 
@@ -18,7 +22,6 @@ import javax.swing.JTable
 import javax.swing.*
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
-import javax.swing.*;
 import java.awt.event.*;
 import java.awt.BorderLayout as BL
 import javax.swing.event.DocumentEvent;
@@ -39,6 +42,8 @@ import com.google.common.primitives.Doubles;
 //import com.apple.eawt.Application;
 
 import grapnel.util.*
+import grapnel.os.*
+import grapnel.gui.*
 import static grapnel.charts.Charts.*
 
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation
@@ -46,26 +51,8 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation
 err = System.err
 
 // Enable system specific GUI features...
-if (isOSX()){
-	
-	// Workaround so that don't have to the platform-specific import
-	// which would throw an error on non OS X machines. 
-	Application = this.class.classLoader.loadClass("com.apple.eawt.Application")
-	
-	System.setProperty("apple.laf.useScreenMenuBar", "true");
-	System.setProperty("com.apple.mrj.application.apple.menu.about.name", "ViewTable");
-	// set the look and feel
-	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	
-	// Set the dock icon. 
-	def scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
-	def imgFileName = scriptDir+"/img/viewtab.png"
-	System.err.println "imgFileName: "+imgFileName
-	def dockImage = new ImageIcon(imgFileName).getImage();
-	Application.getApplication().setDockIconImage(dockImage);
-	
-	// Let's see what other methods Application has...
-	//println Application.metaClass.methods*.name.sort().unique() 
+if (OSSupport.isOSX()){
+	OSSupport.setOSXLookAndFeel(this)	
 }
 
 options = ParseOptions(args)
@@ -74,13 +61,21 @@ options = ParseOptions(args)
 if (options.separator) sep = options.separator
 else sep = FileUtils.determineSeparator(options.fileName)
 
+// Regex that properly handles quoted strings with commas inside. 
+// slower, but more robust. 
 if (options.qregex){
 	sep = /,(?=([^\"]|\"[^\"]*\")*$)/
 }
 
-
 // Read the data in as a Table...
-dt = new Table(options.fileName,sep,bFirstColInTable=true)
+def dt
+if (options.nonsquare){
+	dt = new Table(bFirstColInTable=false)
+	dt.readFileNonSquare(options.fileName,sep)
+}else{
+	dt = new Table(bFirstColInTable=true)
+	dt.readFile(options.fileName,sep)
+}
 
 // Use that Table to back a JTable instance..
 err.print "Creating gui table..."
@@ -112,7 +107,7 @@ frame = swing.frame(title:options.fileName,defaultCloseOperation:JFrame.EXIT_ON_
 											columnSelectionAllowed:true,
 											preferredScrollableViewportSize:[900,400]){
 												tableModel(dtm)										
-											}							
+											}																		
   		}
 		def rowSorter = new TableRowSorter(dtm);
 		thetab.setRowSorter(rowSorter)	
@@ -187,9 +182,28 @@ thetab.setComponentPopupMenu(swing.popupMenu(popupMenuItems))
 frame.pack()
 frame.show()
 
-def isOSX() {
-	String osName = System.getProperty("os.name");
-	return osName.contains("OS X");
+
+def histogramSelectedRows0(thetab,selectedRows){	
+	selectedRows.each{rowIdx->	
+		// Get the name of the row...
+		def rowName = thetab.getValueAt(rowIdx,0)
+		
+		def cols = thetab.getColumnCount();
+		def values = []
+		for(int col = 0;col < cols;col++){
+			try{
+				o = thetab.getValueAt(rowIdx,col)
+				v = o as double
+				if (Double.isNaN(o)) return;
+				values.add(v)
+			}catch(Exception e){
+				// Don't do anything...
+				err.println "WARNING: row $rowName contains non-numeric values."
+			}					
+		}
+		def hist = hist(rowName,values)
+		showTableChart(hist,"Distribution of $rowName")	
+	}
 }
 
 def histogramSelectedRows(thetab,selectedRows){	
@@ -214,6 +228,8 @@ def histogramSelectedRows(thetab,selectedRows){
 		showTableChart(hist,"Distribution of $rowName")	
 	}
 }
+
+
 
 def histogramSelectedCols(thetab,selectedCols){			
 	selectedCols.each{colIdx->
@@ -489,6 +505,7 @@ def ParseOptions(args){
 		parser.with{
 			optional 's','separator',[description: 'Force separator to be this character.']
 			flag 'q','qregex',[default:false,description: 'Use a regex to capture quoted comma lists as single field (slower).']
+			flag 'n','nonsquare',[default:false,description: 'Read in a non-square file, filling in missing columns to make it square. (slower)']
 	  		flag 'h','help',[default:false,description: 'Print script help.']
 			remainder{			
 				if(!it) throw new Exception("Must specify a file.");
@@ -505,7 +522,6 @@ def ParseOptions(args){
 	return(options)
 }
 
-//private TableRowSorter<TableModel> rowSorter = new TableRowSorter(jTable.getModel());
 def createFilterListener(jtfFilter,rowSorter){
 	jtfFilter.getDocument().addDocumentListener(new DocumentListener(){
 		@Override
@@ -535,94 +551,6 @@ def createFilterListener(jtfFilter,rowSorter){
         	throw new UnsupportedOperationException("DocumentEvent type not supported yet."); 
     	}
 	});
-}
-
-//*************************************
-// Supporting classes
-//*************************************
-class TableModel extends AbstractTableModel{		
-	Table dt;
-	
-	// As the user selects columns, determine if the 
-	// column is numeric or not and cache this fact 
-	// for sorting and such.  
-	def column2TypeCache = [:]
-	
-	TableModel(Table table){dt = table;}
-
-	public String getColumnName(int col) {return(dt.colNames[col]);}	
-	public String getRowName(int row){
-		def rowName = dt.rowNames[row]
-		println "getRowName: $row \t $rowName"
-		return(rowName);
-	}	
-	public int getRowCount() { return(dt.rows())}
-	public int getColumnCount() { return(dt.cols())}
-	
-	// Maybe implement this in Table as a special 
-	// getTypedAt() sort of method... 	
-	// Do type conversion here instead of loading because 
-	// don't want to pay to convert everything, just what see/use. 
-	public Object getValueAt(int row, int col) {		
-		if (col==0) return(dt.get(row,col))							
-		if (column2TypeCache.containsKey(col)){
-			if(column2TypeCache[col] == Double.class){
-				try{
-				return(Double.parseDouble(dt.get(row,col)))
-				}catch(Exception e){
-					return(Double.NaN)
-				}
-			}else{
-				return(dt.get(row,col))	
-			}
-		}else{
-			column2TypeCache[col] = determineColumnType(col)
-			if(column2TypeCache[col] == Double.class){
-				try{
-					return(Double.parseDouble(dt.get(row,col)))
-				}catch(Exception e){
-					return(Double.NaN)
-				}
-			}else{
-				return(dt.get(row,col))
-			}
-		}
-	}
-	
-	public Class getColumnClass(int c) {
-		if (c == 0) return(String.class)
-		
-		if (column2TypeCache.containsKey(c)){
-			return(column2TypeCache[c])
-		}else{
-			column2TypeCache[c] = determineColumnType(c)
-			return(column2TypeCache[c])
-		}
-	}  	
-	public boolean isCellEditable(int row, int col){return false;}	
-	public void setValueAt(Object value, int row, int col) {}
-	
-	
-	// To make it more efficient only look at the first 100 rows
-	// If they are all numbers, assume the whole column is numbers. 
-	def determineColumnType(c){
-		def rows = dt.numRows 
-		int scanEnd = (500 < rows) ? 500 : (rows -1)
-				
-		int numcount = 0;
-		for(int i = 0;i < scanEnd;i++){
-			 if (Doubles.tryParse(dt.get(i,c)) != null) numcount++
-		}
-		def acceptCount = scanEnd* 0.5
-		if (numcount >= acceptCount) {
-			//System.err.println "col: ${getColumnName(c)} is Double"
-			return(Double.class)
-		}
-		else {
-			//System.err.println "col: ${getColumnName(c)} is String"
-			return(String.class)		
-		}
-	} 		
 }
 
 

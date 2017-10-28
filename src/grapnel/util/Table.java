@@ -89,6 +89,11 @@ public class Table extends GroovyObjectSupport{
 		readFile(fileName,delimiter);
 		
 	}
+	
+	public Table(boolean bFirstRowInTable){
+		setFirstColInTable(bFirstRowInTable);
+	}
+		
 
 	/**
 		* The first row will always populate the rowNames, but sometimes we want to put the 
@@ -446,12 +451,75 @@ public class Table extends GroovyObjectSupport{
 									      
 			for(int colIdx = 0;colIdx < (tokens.length-colOffset);colIdx++){
 				//System.err.println("rowIdx:"+rowIdx+" colIdx:"+colIdx+" colOffset:"+colOffset+" tokens.length:"+tokens.length);
+				//System.err.println("row: "+rowIdx+"\tcol:"+colIdx+"\tcolIdx+colOffset:"+(colIdx+colOffset)+"\ttoken: "+tokens[colIdx+colOffset]);
 				matrix.setQuick(rowIdx,colIdx,tokens[colIdx+colOffset]);                
 			}     
 			rowIdx++;
 		}
 		createNameMap(rowNames,rowName2Idx);
 		System.err.println("done");
+	}
+	
+	
+	/**
+		*  Read a delimited table from a file.
+		*
+		*  Some attention has been paid to performance, since this is meant to be
+		*  a core class.  Additional performance gains are no doubt possible.
+		*/
+	public void readFileNonSquare(String fileName,String regex) throws Exception {
+
+		ArrayList<Integer> rowsCols = FileUtils.fastCountLinesRowsCols(fileName,regex.charAt(0)); // -1 exclude heading.
+		numRows = rowsCols.get(0);
+		rowNames = new String[numRows];
+		
+		numCols = rowsCols.get(1);
+		colNames = createColNames(numCols);
+
+		createNameMap(colNames,colName2Idx);
+
+		System.err.print("Reading "+numRows+" x "+numCols+" table...");
+
+		// Create an empty object matrix...
+		matrix = new DenseObjectMatrix2D(numRows,numCols);
+
+		// Populate the matrix with values...
+		int rowIdx = 0;
+		BufferedReader reader = new BufferedReader(new FileReader(fileName));
+		String line;
+		while ((line = reader.readLine()) != null) {
+			String[] tokens = line.split(regex,-1);
+			if (bFirstColInTable){
+				rowNames[rowIdx] = "Row "+rowIdx;
+			}else{
+				rowNames[rowIdx] = tokens[0].trim();
+			}					
+			int colLimit = (tokens.length-colOffset);
+			for(int colIdx = 0;colIdx < colLimit;colIdx++){
+				//System.err.println("row: "+rowIdx+"\tcol:"+colIdx+"\tcolIdx+colOffset:"+(colIdx+colOffset)+"\ttoken: "+tokens[colIdx+colOffset]);
+				matrix.setQuick(rowIdx,colIdx,tokens[colIdx+colOffset]);  
+			}
+			//System.err.println("CHECK2");
+			for(int colIdx = colLimit;colIdx<numCols;colIdx++){
+				//System.err.println("Padding: row: "+rowIdx+"\tcol:"+colIdx);
+				matrix.setQuick(rowIdx,colIdx,"NA");				
+			}
+			rowIdx++;
+		}
+		//System.err.println("WHOLE TABLE: ");
+		//System.err.println(matrix);
+		
+		createNameMap(rowNames,rowName2Idx);
+		System.err.println("done");
+	}
+	
+	
+	public 	String[] createColNames(int numCols){
+		String[] rnames = new String[numCols];
+		for(int i = 0;i < numCols;i++){
+			rnames[i] = "Column "+i;
+		}
+		return(rnames);
 	}
 	
 	/**

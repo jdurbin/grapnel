@@ -75,4 +75,51 @@ public class FileUtils {
 		
 		return count;
 	}
+	
+	/***
+	* Determines the number of lines in a file AND the number of columns. 
+	*/
+	public static ArrayList<Integer> fastCountLinesRowsCols(String fileName,char delimiter) throws Exception {
+		InputStream bis = new BufferedInputStream(new FileInputStream(fileName));
+		ArrayList rvals = fastCountLinesRowsCols(bis,delimiter);
+		bis.close();
+		return(rvals);
+	}
+
+	/***
+	* An optimized function to quickly count the number of lines remaining
+	* in the given input stream AND the number of columns.  Returns an ArrayList
+	* where first element is rows, second element is maxCols. 
+	*/
+	public static ArrayList<Integer> fastCountLinesRowsCols(InputStream is,char delimiter) throws IOException {
+		byte[] c = new byte[1024];
+		int count = 0;		
+		int columnCount = 0;
+		int maxColumns = -999;
+		int readChars = 0;
+		boolean lastCR=true;
+		while ((readChars = is.read(c)) != -1) {
+			for (int i = 0; i < readChars; ++i) {
+				if (c[i] == '\n'){
+					 ++count;
+					 if (columnCount > maxColumns) maxColumns = columnCount;
+					 columnCount = 0;
+				}				
+				if (c[i] == delimiter) columnCount++;
+			}
+			// If the last thing we read was a CR, note the fact...
+			if (c[(readChars-1)] == '\n') lastCR = true;
+			else lastCR = false; 
+		}
+		
+		// If the very last thing we read wasn't a CR, then the last line doesn't
+		// end in a CR and we've undercounted the lines by one...
+		if (!lastCR) count++;
+		
+		ArrayList<Integer> rvals = new ArrayList<Integer>();
+		rvals.add(count);
+		rvals.add(maxColumns);
+		
+		return(rvals);
+	}		
 }

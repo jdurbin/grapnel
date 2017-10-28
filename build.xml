@@ -1,4 +1,4 @@
-<project name="DurbinLib" default="jar" basedir=".">
+<project name="Grapnel" default="jar" basedir=".">
 	
 	<property environment="env"/>
 	
@@ -10,7 +10,6 @@
 		<delete file="groovylibs/*"/>
 		<delete dir="doc/"/>
 	</target>
-
 
 	<!--	
 		<mkdir dir="${env.HOME}/.groovy/lib"/>
@@ -48,8 +47,16 @@
 					<javac />
 				</groovyc>
 			</target>
+
+			<target name="jar" depends="groovy">
+				<mkdir dir="target/jar"/>
+				<jar destfile="target/jar/grapnel.jar">	
+				<fileset dir="target/classes/"/> 
+				<fileset dir="resources/"/>
+				</jar>
+			</target>
 	
-			<target name="jar" depends="groovy">	
+			<target name="jar0" depends="groovy">	
 				<mkdir dir="target/jar"/>
 				<jar destfile="target/jar/grapnel.jar" basedir="target/classes">
 				</jar>

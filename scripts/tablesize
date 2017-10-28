@@ -9,6 +9,7 @@ fileName = args[0]
 numRows = FileUtils.fastCountLines(fileName) -1; // -1 exclude heading.
 
 def numCols
+
 // Crudely determine if it's a tab or csv file and cound columns
 new File(fileName).withReader{r->
 	line = r.readLine()
@@ -23,7 +24,6 @@ new File(fileName).withReader{r->
 	}
 	
 	fields = line.split(sep)
-	numCols = fields.size() -1	
+	numCols = fields.size() -1		
 }
-
 println "$fileName: $numRows x $numCols"
