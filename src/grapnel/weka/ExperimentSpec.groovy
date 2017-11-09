@@ -98,8 +98,8 @@ class ExperimentSpec{
 		* The idea is for all knowledge of the heading order to be confined to WekaMineResult
 		* so that we don't have to worry about things getting out of sync. 
 		*/ 
-   def ExperimentSpec(String line,headings2Cols){
-    def fields = line.split("\t")
+   def ExperimentSpec(String line,headings2Cols,delimeter){
+    def fields = line.split(delimeter)
 
 	//System.err.println "DEBUG fields: "+fields
 	//System.err.println "DEBUG headings2cols: "+headings2Cols
