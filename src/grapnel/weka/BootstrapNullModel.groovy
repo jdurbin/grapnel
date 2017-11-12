@@ -71,24 +71,35 @@ class BootstrapNullModel implements Serializable{
 	* each gene and the class while retaining the same distribution of attribute values 
 	* within an attribute. 
 	*/		
-	def permuteAttributeValues(data){	
+	def permuteAttributeValues(dataWithClass){					
+		
+		// Save the class attribute, if it exists, since don't want to 
+		// permute that...
+		AttributeUtils au = new AttributeUtils();
+		def data = au.removeClassAttribute(dataWithClass);
+						
 		def attributeNames = data.attributeNames()	
+
 		// Set up attributes, which for colInstances will be the rowNames...
 		FastVector atts = new FastVector();
 		for(int a = 0; a < data.numAttributes();a++){
 			atts.addElement(new Attribute(attributeNames[a]));
 		}	
 		Instances permutedInstances = new Instances("permutation",atts,0);
-		permutedInstances.setRelationName("permutation");
-	
+		permutedInstances.setRelationName("permutation");	
+
 		def allattributes = []	
 		for(attrIdx in 0..< data.numAttributes()){		
+			
+			// Need to protect class attribute if there is one... 
+			// attrIdx is negative if there is 	
+			//if (attrIdx = data.classIndex()){			
 			// get values for that attribute...
 			def attrVals = data.attributeToDoubleArray(attrIdx)				
 			def attrList = new DoubleArrayList(attrVals);
 			attrList.shuffle()
 
-			allattributes.add(attrList)
+			allattributes.add(attrList)						
 		}
 			
 		for(instanceIdx in 0..< data.numInstances()){	
@@ -97,9 +108,12 @@ class BootstrapNullModel implements Serializable{
 				newvals[attrIdx] = allattributes[attrIdx].get(instanceIdx) 
 			}
 			permutedInstances.add(new DenseInstance(1.0,newvals))
-		}			
+		}	
 		
-		return(permutedInstances)
+		// Restore saved class attribute, if any. 
+		def permutedInstancesWithClass = au.restoreClassAttribute(permutedInstances)
+		
+		return(permutedInstancesWithClass)
 	}
 	
 	

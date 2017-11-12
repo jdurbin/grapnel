@@ -349,6 +349,8 @@ public class InstanceUtils {
 	* match those specified in the attribute list (e.g. the attributes retrieved
 	* from a trained model).  In some cases rawdata has an ID, in some cases 
 	* not, have to handle that as a special case...
+	*
+	* NOTE: will not handle class attributes properly. 
 	*/
 	static Instances createInstancesToMatchAttributeList(Instances rawdata,
 		ArrayList<String> modelAttributes){

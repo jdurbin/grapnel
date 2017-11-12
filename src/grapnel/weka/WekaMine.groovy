@@ -210,12 +210,13 @@ class WekaMine{
 							
 		// Remove all clinical attributes except for the current class...
 		def selectedAttributes = []
-		selectedAttributes.add(classAttribute)
 
-		selectedAttributes.add("ID") // Want to preserve the ID along with classAttribute  KJD
+		// Want to preserve the ID along with classAttribute  KJD
+		selectedAttributes.add(classAttribute)		
+		selectedAttributes.add("ID") 
+		
 		def singleClinicalInstances = subsetAttributes(clinical,selectedAttributes)  
 		singleClinicalInstances.setClassName(classAttribute)
-		
 		
 		// Merge data and clinical files (i.e. instances contained in both, omitting rest)				
 		def merged = IU.mergeNamedInstances(data,singleClinicalInstances)		

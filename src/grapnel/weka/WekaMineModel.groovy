@@ -137,24 +137,20 @@ class WekaMineModel implements Serializable{
 		def numInstances = instances.numInstances()		
 		
 		for(int i = 0;i < numInstances;i++){
-			def instance = instances.instance(i)											
+			def instance = instances.instance(i)	
 			def prForValues = classifier.distributionForInstance(instance)						
 			// Package dist up in a Classification while we have the instance
 			// handy, just be sure we don't mix them up. 
 			def classification = new Classification(prForValues,classValues)
-									
-			def nompred = new NominalPrediction(instance.classValue(),prForValues,instance.weight());
-			classification.nompred = nompred
-			
+			def nompred = new NominalPrediction(instance.classValue(),prForValues,instance.weight());			
+			classification.nompred = nompred			
 			rval.add(classification)
 		}
 		return(rval)		
 	}
 	
 	/***
-	* Permutes the class lables and evaluates performance in a cross-validated setting. 
-	* Accumulated values are saved in BootstrapNullModel for future significance computations. 
-	* Not really a bootstrap model in this case... background model. 
+	* Add background samples to be used as a null model 
 	**/ 
 	def addNullSamples(instances){						
 		def rng = new Random();		
@@ -186,15 +182,16 @@ class WekaMineModel implements Serializable{
 		for(i in 0..<nullModelIterations){
 			err.print "Null model iteration $i "
 			err.print "permute.."
+			
 			def pinstances = bnm.permuteAttributeValues(instances)						
-			pinstances.setClassName(instances.className())
+			pinstances.setClassName(instances.className())						
 			
 			// Apply classifier to these instances...
 			// one result per instance, each result is a distribution for instance...
 			// Note: it is assumed that instances have already been cleaned up. 
 			err.print "apply classifier..."
 			//err.println "pinstances: "+pinstances.numInstances()+" pinstances.attrs: "+pinstances.numAttributes()
-			//err.println "pinstances.attrNames:"+pinstances.attributeNames()
+			//err.println "pinstances.attrNames:"+pinstances.attributeNames()					
 						
 			ArrayList<Classification> results = classify(pinstances)
 			
