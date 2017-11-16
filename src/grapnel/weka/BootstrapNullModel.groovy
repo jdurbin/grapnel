@@ -27,8 +27,7 @@ class BootstrapNullModel implements Serializable{
 
 	// DynamicBin1D saves entire distribution.  QuantileBin1D stores a compression
 	// that can be used to compute approximate quantiles.  
-	//ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()			
-	ArrayList<QuantileBin1D> nullDistribution = new ArrayList<QuantileBin1D>()		
+	ArrayList<DynamicBin1D> nullDistribution = new ArrayList<DynamicBin1D>()		
 	ArrayList<String> classValues = new ArrayList<String>()
 
 	def BootstrapNullModel(classValues){
@@ -36,8 +35,11 @@ class BootstrapNullModel implements Serializable{
 		def numClassValues = classValues.size()
 		for(i in 0..<numClassValues){
 			// epsilon = maximum allowed approximation error quantiles.  
-			nullDistribution << new QuantileBin1D(0.001) 
-			//nullDistribution << new DynamicBin1D() 
+			//nullDistribution << new QuantileBin1D(0.001) 
+			// Use DynamicBin because want full distribution for plotting. 
+			// via .elements().  Space savings for our use cases is not
+			// terribly dramatic. 
+			nullDistribution << new DynamicBin1D() 
 		}
 	}
 	
