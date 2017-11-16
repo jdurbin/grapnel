@@ -39,6 +39,8 @@ class BootstrapNullModel implements Serializable{
 			// Use DynamicBin because want full distribution for plotting. 
 			// via .elements().  Space savings for our use cases is not
 			// terribly dramatic. 
+			// Note:  this should be moved to a SignatureSet, where there is 
+			// one background model per signature set, but not per signature. 
 			nullDistribution << new DynamicBin1D() 
 		}
 	}
