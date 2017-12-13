@@ -305,9 +305,9 @@ class WekaMineModel implements Serializable{
 		def values = counterMap.collect{it.value}
 		def maxcallvalues = values.max()
 		def totalcallvalues = values.sum()
-		def majorityFrac = (double)maxcallvalues / (double)totalcallvalues
+		double majorityFrac = (double)maxcallvalues / (double)totalcallvalues
 
-		def matchFraction = matchCount/totalCount 
+		double matchFraction = matchCount/totalCount 
 		
 		out << heading
 		out << "\n"
