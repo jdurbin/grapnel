@@ -4,29 +4,25 @@ package grapnel.weka;
 public class ClassificationPlus implements Serializable{
 	def sampleID
 	def prForValues = []
-	def nullConf0
-	def nullConf1
 	def nullForValues = []
 	def classValues = []
+	def class2Idx =[:]
 	def nompred
 	def modelName
+	def preferredIdx
 	
-	def prForName(name){
-		classValues.eachWithIndex{cname,i->
-			if (name == cname) return(prForValues[i])
-		}
-		System.err.println "WARNING: prForName: $name not found."
-		return(-1);
-	}
 			
-	def ClassificationPlus(id,modelName,classification,nullConf0,nullConf1){
+	def ClassificationPlus(id,modelName,classification,nullconfs,prefIdx){
 		this.sampleID = id
 		this.prForValues = classification.prForValues
 		this.classValues = classification.classValues
 		this.nompred = classification.nompred
-		this.nullConf0 = nullConf0
-		this.nullConf1 = nullConf1
+		this.nullForValues = nullconfs
 		this.modelName = modelName
+		preferredIdx = prefIdx		
+		classValues.eachWithIndex{k,i->
+			class2Idx[k] = i
+		}
 	}
 	
 	def call(){
@@ -35,7 +31,11 @@ public class ClassificationPlus implements Serializable{
 		return(call)
 	}
 	
-	def callAndIdx(){
+	
+	/**
+	* Determine the best call and the associated class index. 
+	*/ 
+	def bestCallAndIdx(){
 		def maxIdx = getMaxIdx(prForValues)
 		def call = classValues[maxIdx]
 		return([call,maxIdx])

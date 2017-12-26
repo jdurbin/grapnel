@@ -20,7 +20,7 @@ public class SignatureSet{
 	// All the models in a SignatureSet use the same background
 	// samples for it's background null model.  
 	String backgroundDescription;	
-	String preferredClass;				
+	String preferredClass;	
 	
 	def modelList = []
 	def modelName2Model = [:]
@@ -75,7 +75,12 @@ public class SignatureSet{
 		return(allModelResults);
 	}
 	
-	public static def applyModel(Instances instances,WekaMineModel model){
+	
+	/***
+	*  apply the given model to a set of instances. 
+	*  Assumes models
+	*/ 
+	def applyModel(Instances instances,WekaMineModel model){
 				
 		/*
 		 * Going to assume all models exponentially normalized up front and perform Exponential normalization
@@ -102,16 +107,16 @@ public class SignatureSet{
 		results.eachWithIndex{result,i->
 			//System.err.println "adding classification plus for instance ${instanceIDs[i]}"
 			
-			def nullConf0,nullConf1
+			def nullconfs = []
 			if (model.bnm != null){
 				def prForValues = result.prForValues as ArrayList // ??
-				nullConf0 = model.bnm.getSignificance(prForValues[0],0)
-				nullConf1 = model.bnm.getSignificance(prForValues[1],1)
+				nullconfs[0] = model.bnm.getSignificance(prForValues[0],0)
+				nullconfs[1] = model.bnm.getSignificance(prForValues[1],1)
 			}
 			
-			resultsPlus << new ClassificationPlus(instanceIDs[i],model.className,result,nullConf0,nullConf1)
-		}
-				
+			def preferredClassIdx = result.class2Idx[preferredClass]
+			resultsPlus << new ClassificationPlus(instanceIDs[i],model.className,result,nullconfs,preferredClassIdx)
+		}				
 		return(resultsPlus)
 	}
 	
@@ -132,7 +137,7 @@ public class SignatureSet{
 		return(instances)
 	}			
 	
-	static def getResultsBySample(results){
+	static def getResultsBySample(ArrayList<ClassificationPlus> results){
 		def sample2ResultList = [:]
 		results.each{r->
 				if (!sample2ResultList.containsKey(r.sampleID)){
@@ -143,13 +148,21 @@ public class SignatureSet{
 		return(sample2ResultList)
 	}
 	
-	// KJD TODO:  Make sure that all of the cutoffs are using the same value, nullConf 
-	// or classifier score. 
-	static def getBestResults(results,minScore){
+	static def getResultsCutoffByScore(ArrayList<ClassificationPlus> results,minScore){
 		def bestResults = []
+						
 		results.each{r->
-			//System.err.println "${r.nullConf0}"
-			if (r.nullConf0 >= minScore){
+			if (r.prForValues[r.preferredIdx] >= minScore){
+				bestResults<<r
+			}
+		}
+		return(bestResults)
+	}
+	
+	static def getResultsCutoffByNullConfidence(ArrayList<ClassificationPlus> results,minConfidence){
+		def bestResults = []						
+		results.each{r->
+			if (r.nullForValues[r.preferredIdx] >= minConfidence){
 				bestResults<<r
 			}
 		}

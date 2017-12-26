@@ -91,6 +91,11 @@ class ExperimentSpec{
 		ExperimentSpec(line,WekaMineResult.defaultHeadingMap())
 	}
 	
+	 def ExperimentSpec(String line,headings2Cols){
+		 init(line,headings2Cols,"\t")		 
+	 }
+	
+	
 		/***
 		* Takes a comma separated string and creates an experiment from it. 
 		* headings2Cols gives the index of the column where the given field is derived from
@@ -99,8 +104,13 @@ class ExperimentSpec{
 		* so that we don't have to worry about things getting out of sync. 
 		*/ 
    def ExperimentSpec(String line,headings2Cols,delimeter){
+	   init(line,headings2Cols,delimeter)
+   }
+   
+   def init(String line,headings2Cols,delimeter){
     def fields = line.split(delimeter)
 
+	//System.err.println "line: "+line
 	//System.err.println "DEBUG fields: "+fields
 	//System.err.println "DEBUG headings2cols: "+headings2Cols
     classifierStr = fields[headings2Cols['classifier']]

@@ -4,50 +4,6 @@ import grapnel.util.*
 import weka.core.*
 import weka.classifiers.evaluation.*
 
-// Package up distForInstance with the associated class names
-class Classification{						
-	def Classification(prForValues,classValues){
-		this.prForValues = prForValues
-		this.classValues = classValues
-	}
-	
-	def prForValues = []
-	def classValues = []
-	def nompred
-	
-	def prForName(name){
-		classValues.eachWithIndex{cname,i->
-			if (name == cname) return(prForValues[i])
-		}
-		System.err.println "WARNING: prForName: $name not found."
-		return(-1);
-	}
-	
-	def call(){
-		def maxIdx = getMaxIdx(prForValues)
-		def call = classValues[maxIdx] 
-		return(call)
-	}
-	
-	def callAndIdx(){
-		def maxIdx = getMaxIdx(prForValues)
-		def call = classValues[maxIdx] 
-		return([call,maxIdx])
-	}
-	
-	def getMaxIdx(list){
-		def maxVal = -9999999;
-		def maxIdx = 0;
-		list.eachWithIndex{val,i->
-			if (val > maxVal) {
-				maxVal = val
-				maxIdx = i
-			}
-		}
-		return(maxIdx)
-	}	
-}
-
 /***
 * Saves a trained classifier and any additional information needed to apply that classifier to a 
 * new dataset.  I thought that the weka.classifier itself contained the instance names, but this seems
