@@ -45,7 +45,6 @@ public class SignatureSet{
 		readModels(modelDir)
 	}
 	
-	
 	public def readModels(modelDir){
 		System.err.println("*** LOADING LOTS OF CLASSIFIER MODELS *******")
 				

@@ -20,6 +20,50 @@ class AttributeUtils{
 	boolean bRestoreClass = false;
 	double[] savedAttributeValues = null;
 	
+	/****
+	* Renames attributes according to the mapping in nameMap
+	*/
+	static Instances renameAttributes(Instances data,HashMap nameMap){
+		def newOutputFormat = determineRenameOutputFormat(data,nameMap)
+
+		Instances newData = new Instances(newOutputFormat, 0);
+		for (int i = 0; i < data.numInstances(); i++){
+			newData.add(data.instance(i).copy());
+		}
+		return(newData);
+	}
+	
+	
+	/**
+	* 
+	*/ 
+	static Instances determineRenameOutputFormat(data,old2NewMap){
+		
+		// Keep track of new names to be sure they are unique
+		// append _cpy0 for copy onto any non-unique name
+		def cpyIdx = 0;
+		def uniqueList = [] as Set				
+		def newAtts = new ArrayList<Attribute>();
+		for(int i = 0;i < data.numAttributes();i++){									
+			def oldAttribute = data.attribute(i)
+						
+			def newName = old2NewMap[oldAttribute.name()]
+			if (newName == null){
+				newName = "unknown_${cpyIdx}"
+			}			
+			
+			if (uniqueList.contains(newName)){
+				newName = "${newName}_cpy${cpyIdx}"
+				cpyIdx++
+			}
+			uniqueList << newName;
+			newAtts.add(oldAttribute.copy(newName))
+		}
+		def newOutputFormat = new Instances(data.relationName(),newAtts,0)
+		return(newOutputFormat)
+	}
+	
+	
 	/***
 	*	Removes the class attribute from a set of instances and 
 	*   saves it to be restored later. 
