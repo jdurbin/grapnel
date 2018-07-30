@@ -39,6 +39,20 @@ public class SignatureSets extends ArrayList{
 			this<<ss
 		}
 	}
+	
+	// Apply all signatures in the signature sets to data 
+	def applyModelsRecordSets(expressionData){
+		def results2sets = [:]
+		this.each{signatureSet->
+			def results = signatureSet.applyModels(expressionData)
+			results.each{r->
+				allResults << r
+				results2sets[r] = signatureSet
+			}
+		}
+		return([allResults,results2sets])		
+	}	
+	
 
 	// Apply all signatures in the signature sets to data 
 	def applyModels(expressionData){

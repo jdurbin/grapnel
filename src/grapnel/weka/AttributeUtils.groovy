@@ -24,7 +24,7 @@ class AttributeUtils{
 	* Renames attributes according to the mapping in nameMap
 	*/
 	static Instances renameAttributes(Instances data,HashMap nameMap){
-		def newOutputFormat = determineRenameOutputFormat(data,nameMap)
+		def (newOutputFormat,duplicateList) = determineRenameOutputFormat(data,nameMap)
 
 		Instances newData = new Instances(newOutputFormat, 0);
 		for (int i = 0; i < data.numInstances(); i++){
@@ -34,33 +34,61 @@ class AttributeUtils{
 	}
 	
 	
+	/****
+	* Renames attributes according to the mapping in nameMap
+	*/
+	static Instances renameAttributesAndRemoveDupsUnknowns(Instances data,HashMap nameMap){
+		
+		def (newOutputFormat,keepList) = determineRenameOutputFormat(data,nameMap)
+
+		Instances newData = new Instances(newOutputFormat, 0);
+		for (int i = 0; i < data.numInstances(); i++){
+			newData.add(data.instance(i).copy());
+		}
+		
+		// Retain only the attributes in keepList
+		newData = WekaMine.subsetAttributes(newData,keepList)
+				
+		return(newData);
+	}
+	
+	
 	/**
 	* 
 	*/ 
-	static Instances determineRenameOutputFormat(data,old2NewMap){
+	static def determineRenameOutputFormat(data,old2NewMap){
 		
 		// Keep track of new names to be sure they are unique
 		// append _cpy0 for copy onto any non-unique name
 		def cpyIdx = 0;
-		def uniqueList = [] as Set				
+		def uniqueList = [] as Set
+		def keepList = []
 		def newAtts = new ArrayList<Attribute>();
 		for(int i = 0;i < data.numAttributes();i++){									
 			def oldAttribute = data.attribute(i)
 						
 			def newName = old2NewMap[oldAttribute.name()]
-			if (newName == null){
-				newName = "unknown_${cpyIdx}"
-			}			
+			//System.err.println "MAP old:[${oldAttribute.name()}]\tnew:[$newName]"
 			
-			if (uniqueList.contains(newName)){
-				newName = "${newName}_cpy${cpyIdx}"
+			
+			if ((newName == null) || (newName == "")){
+				newName = "unknown_${cpyIdx}"
+				//System.err.println "\tUNKNOWN new: [$newName]"
 				cpyIdx++
+			}else if (uniqueList.contains(newName)){
+				newName = "${newName}_cpy${cpyIdx}"
+				//System.err.println "\tDuplicate found new: [$newName]"
+				cpyIdx++
+			}else{
+				String nnStr = (String) newName
+				keepList<<nnStr
 			}
 			uniqueList << newName;
 			newAtts.add(oldAttribute.copy(newName))
 		}
-		def newOutputFormat = new Instances(data.relationName(),newAtts,0)
-		return(newOutputFormat)
+		def newOutputFormat = new Instances(data.relationName(),newAtts,0)		
+		
+		return([newOutputFormat,keepList])
 	}
 	
 	

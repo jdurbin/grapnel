@@ -134,6 +134,14 @@ class TableMatrix1D extends DefaultGroovyMethodsSupport implements Iterable{
 		}
 		return(rval.toString());
 	}
+	
+	public TableMatrix1D eachRow(Closure closure) {
+		for (int c = 0;c < data.size();c++) {
+			Object value = data.get(c);
+			closure.call(new Object[] {value});
+		}
+		return this;
+	}
   
   /****************************************************
   * Returns a view corresponding to the given range. 

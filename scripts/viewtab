@@ -339,8 +339,9 @@ def getMatchedColValues(thetab,rowIdx1,rowIdx2){
 			if (!Double.isNaN(v)) {				
 				// Record that this col has a valid value. 
 				colIdxs.add(col)
+				values.add(v) // just to pad out the list
 			}
-			values.add(v) // just to pad out the list
+			//???values.add(v) // just to pad out the list
 		}catch(Exception e){				
 		}			
 	}		
@@ -382,8 +383,9 @@ def getMatchedRowValues(thetab,colIdx1,colIdx2){
 			if (!Double.isNaN(v)) {				
 				// Record that this row has a valid value. 
 				rowIdxs.add(row)
+				values.add(v) // just to pad out the list
 			}
-			values.add(v) // just to pad out the list
+			// ???values.add(v) // just to pad out the list
 		}catch(Exception e){				
 		}			
 	}		
