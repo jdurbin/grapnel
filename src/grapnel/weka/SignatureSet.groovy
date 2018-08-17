@@ -66,9 +66,9 @@ public class SignatureSet{
 		def allModelResults = []
 		
 		modelList.each{model->
-			System.err.println "Applying ${model.className} to ${expressionData.numInstances()} samples."
+			System.err.println "Applying ${model.className} to ${expressionData.numInstances()} samples..."
 			def results = applyModel(expressionData,model)
-			System.err.println "\tDone ${results.size()} classifications returned. "
+			//System.err.println "\tDone ${results.size()} classifications returned. "
 			allModelResults.addAll(results)
 		}
 		return(allModelResults);
@@ -94,7 +94,7 @@ public class SignatureSet{
 		
 		// The model has no ID, so we save the ID for later reporting...
 		def instanceIDs = instances.attributeValues("ID") as ArrayList
-		
+				
 		instances = InstanceUtils.createInstancesToMatchAttributeList(instances,model.attributes)
 		instances = WekaMine.createEmptyClassAttribute(instances,model.className,model.classValues)
 		instances.setClassName(model.className)

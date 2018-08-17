@@ -28,7 +28,7 @@ class WekaClassifierInfo{
 			//	def numTrees = trees.size()
 			//	return("Balanced Random Forest.  NumTrees: $numTrees")
 			case {it instanceof weka.classifiers.trees.RandomForest}:
-			// need to fix weka 3.8 refactor. 
+			// KJD TODO need to fix weka 3.8 refactor. 
 				//def trees = baseClassifier.m_Classifiers
 				//def numTrees = trees.size()
 				//return("Random Forest.  NumTrees: $numTrees")		
@@ -60,6 +60,8 @@ class WekaClassifierInfo{
 	*/ 
 	static HashMap getFeatures(classifier){
 		
+		System.err.println "GET FEATURES"
+		
 		// Base classifier might be wrapped in a filtered or attribute selected classifier
 		def baseClassifier
 		if (classifier instanceof weka.classifiers.meta.FilteredClassifier){
@@ -76,10 +78,9 @@ class WekaClassifierInfo{
 		switch(baseClassifier){
 			//case {it instanceof grapnel.weka.BalancedRandomForest}:
 			case {it instanceof weka.classifiers.trees.RandomForest}:
-			// Need to refactor for weka3.8 changes. 
-			return(null);
-			//def features2weights = getRFFeatures(baseClassifier)
-			//return(features2weights)
+				// Need to refactor for weka3.8 changes. 
+				def features2weights = getRFFeatures(baseClassifier)
+				return(features2weights)
 			break;
 			
 			case {it instanceof weka.classifiers.functions.SimpleLogistic}:
@@ -106,35 +107,59 @@ class WekaClassifierInfo{
 		return(features2weights)
 	}
 			
+	/***
+	* Performs depth first search through tree to collect feature names. 
+	*/ 
+	static def dfsCollectFeatures(tree,info,features){
+		if (tree.m_Attribute == -1) {
+			// Binary assumption
+			int sum = tree.m_ClassDistribution[0]+tree.m_ClassDistribution[1]
+			return(sum)
+		}	
+		int childInstanceCount = 0	
+		tree.m_Successors.eachWithIndex{child,i->
+			def featureName = info.attribute(tree.m_Attribute).name()
+			//System.err.println "Child# $i DFS featureName: "+featureName+"\t"+child.m_Prop
+			//System.err.println "\tClass distribution: "+child.m_ClassDistribution		
+			int instanceCounts = dfsCollectFeatures(child,info,features)
+			childInstanceCount+=instanceCounts
+			if (features.keySet().contains(featureName)){
+				features[featureName] = features[featureName] + instanceCounts
+			}else{
+				features[featureName] = instanceCounts
+			}
+		}
+		return(childInstanceCount)							
+	}
+
 	/**
 	* Goes through each tree of the random forest and collects all of the features
 	* in that tree. 
 	*/ 	
 	static def getRFFeatures(classifier){
-		def featureSet = [] as Set
+	
+		System.err.println "getRFFeatures"
+		def feature2weights = [:]
+		def feature2counts =[:]
 
+		// classifier is instance of Bagging
 		def trees = classifier.m_Classifiers
-		trees.each{tree->
-			dfsCollectFeatures(tree,featureSet)
+		int totalInstances = 0;	
+		trees.each{randomTree->
+			def tree = randomTree.m_Tree
+			int treeInstances = dfsCollectFeatures(tree,randomTree.m_Info,feature2counts)
+			totalInstances+= treeInstances
 		}
-		def features2weights = [:]
-		featureSet.each{f->
-			features2weights[f] = 1.0;  // Default weight for now. 
-		}
-		return(features2weights);
-	}
-	
-	/***
-	* Performs depth first search through tree to collect feature names. 
-	*/ 
-	static def dfsCollectFeatures(tree,features){
-		if (tree.m_Attribute == -1) return; // end of graph
-	
-		tree.m_Successors.eachWithIndex{child,i->
-			def featureName = tree.m_Info.attribute(tree.m_Attribute).name()
-			features<<featureName
-			dfsCollectFeatures(child,features)
-		}	
+
+		feature2counts.each{k,v->
+			double fraction = (double)v/(double)totalInstances
+			feature2weights[k] = fraction
+		}		
+		
+		// Sort them by weight to make life easy on recipient
+		feature2weights = feature2weights.sort{-it.value}
+		
+		return(feature2weights);
 	}
 	
 	

@@ -1,0 +1,9 @@
+#!/usr/bin/env groovy 
+
+import grapnel.util.*
+
+
+t = new Table()
+t.readFileNonSquare(args[0],"\t")
+
+println t

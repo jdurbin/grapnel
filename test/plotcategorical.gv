@@ -1,0 +1,60 @@
+#!/usr/bin/env groovy 
+
+import org.jfree.chart.*
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.*
+import org.jfree.chart.renderer.xy.*;
+import org.jfree.data.xy.*;
+import org.jfree.ui.*
+import org.jfree.data.statistics.*;
+import org.jfree.data.category.*;
+import org.jfree.chart.renderer.category.*
+
+import grapnel.util.*
+import static grapnel.charts.Charts.*
+
+
+cm = new CounterMap();
+new File("categorical.tab").eachLine{line->
+	cm.inc(line)
+}
+cm = cm.sort { -it.value }
+
+
+chart = categoryHistogram("Category Frequency","Category","Frequency",cm)
+showChart(chart:chart)
+
+while(1);// don't exit. 
+
+
+/*
+def categoryHistogram(title,xlabel,ylabel,label2countMap){
+	def categoryData = createCategoryFromMap(label2countMap)
+	JFreeChart chart = ChartFactory.createBarChart(
+	            title,         // chart title
+	            xlabel,               // domain axis label
+	            ylabel,                  // range axis label
+	            categoryData,                  // data
+	            PlotOrientation.HORIZONTAL, // orientation
+	            false,                     // include legend
+	            true,                     // tooltips?
+	            false                     // URLs?
+	        );
+			
+			
+	final CategoryPlot plot = chart.getCategoryPlot();
+	def renderer = (BarRenderer) plot.getRenderer()
+	renderer.setBarPainter(new StandardBarPainter());	
+	renderer.setShadowVisible(false);	
+	return(chart);
+}
+
+
+def CategoryDataset createCategoryFromMap(label2countMap) {
+	def dataset = new DefaultCategoryDataset( );
+	label2countMap.each{label,count->
+		dataset.addValue(count,"S1",label)
+	 }		  
+     return dataset; 
+}
+*/

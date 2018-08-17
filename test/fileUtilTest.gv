@@ -1,0 +1,10 @@
+#!/usr/bin/env groovy 
+
+import grapnel.util.*
+
+String fName = args[0]
+char delimiter = "\t"[0]
+
+def rvals = FileUtils.fastCountLinesRowsCols(fName,delimiter)
+
+println rvals

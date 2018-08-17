@@ -355,7 +355,7 @@ public class InstanceUtils {
 	static Instances createInstancesToMatchAttributeList(Instances rawdata,
 		ArrayList<String> modelAttributes){
 
-		System.err.print("Make data match model attributes...Initial attributes: "+rawdata.numAttributes());
+		System.err.print("Subset data attrs to match model...");
 
 		ArrayList<String> rawAttributeNames = getAttributeNames(rawdata);
 		Set<String> rawAttributeNamesSet = getAttributeNamesSet(rawdata);
@@ -400,9 +400,8 @@ public class InstanceUtils {
 				//println "\nOLD INSTANCE ELAC1: ${instance['ELAC1']} NUP205: ${instance['NUP205']}"					
 				Instance newInstance = new DenseInstance(1.0,vals);
 				data.add(newInstance);
-		}
-		
-		System.err.println(" done. Final attributes: "+data.numAttributes());
+		}		
+		System.err.println("Before:"+rawdata.numAttributes()+" After: "+data.numAttributes());
 		return(data);
 	}	
 	

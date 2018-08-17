@@ -53,6 +53,7 @@ parser = new Parser(description: '''
 ''')
 
 parser.with{  
+  flag 's','safe',[default:false,description: 'Safe mode: scan entire file to determine column types. Default looks at up to 200 rows.']
   flag 'h','help',[default:false,description: 'Print script help.']
 }
 
@@ -85,7 +86,11 @@ tablenameMap.each{tablename,pathname->
 	if (pathname.contains(".csv")) sep = ","
 	else sep = "\t"
 	
-  typeString = inferColumnTypes(pathname,20,sep)
+	// Look at entire file or just a sample?
+  if (options.safe)	sampleRows = -1
+  else sampleRows = 200
+	
+  typeString = inferColumnTypes(pathname,sampleRows,sep)
 	def stmt
 	if (pathname.contains(".csv")){		
 		stmt = "create table $tablename($typeString) as select * from csvread('$pathname')" as String

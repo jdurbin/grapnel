@@ -36,6 +36,8 @@ public class SignatureSets extends ArrayList{
 		f.eachFileMatch(~/.*.cfg/){cfgFile->
 			System.err.println "CONFIG FILE: "+cfgFile
 			def ss = new SignatureSet(cfgFile);
+			// Copy the model map from the individual signature set. 
+			ss.modelName2Model.each{k,v->modelName2Model[k]=v}
 			this<<ss
 		}
 	}
