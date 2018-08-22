@@ -153,8 +153,8 @@ class Charts{
     plot.setDomainPannable(true);
     plot.setRangePannable(true);
     XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-    renderer.setBaseShapesVisible(true);
-    renderer.setBaseShapesFilled(true);
+    renderer.setDefaultShapesVisible(true);
+    renderer.setDefaultShapesFilled(true);
 
     // change the auto tick unit selection to integer units only...
     NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
@@ -233,13 +233,13 @@ class Charts{
 	plot.setForegroundAlpha(0.30f);		
 	
     XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-    renderer.setBaseShapesVisible(true);
-    renderer.setBaseShapesFilled(true);
-    renderer.setBaseLinesVisible(false);	
+    renderer.setDefaultShapesVisible(true);
+    renderer.setDefaultShapesFilled(true);
+    renderer.setDefaultLinesVisible(false);	
 	def color1 = Color.blue
 	renderer.setSeriesPaint(0, color1);
 	Shape shape  = new Ellipse2D.Double(0,0,8,8);
-	renderer.setBaseShape(shape);
+	renderer.setDefaultShape(shape);
 	renderer.setSeriesShape(0, shape);
 	
 	plot.setBackgroundPaint(new Color(0,0,0,10)); 

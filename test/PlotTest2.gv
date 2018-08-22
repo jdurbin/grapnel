@@ -27,7 +27,6 @@ hist3 = dualhist(title:"Price vs Alcohol3",
 				series2:price,
 				series2name:"Price")
 		  
-
 showCharts(title:"Lung/Expression Atlas",
 		   charts:[hist1,hist2,hist3],
 		   orientation:"HORIZONTAL",

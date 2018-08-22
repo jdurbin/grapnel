@@ -12,7 +12,7 @@ import org.jfree.chart.plot.PlotOrientation as Orientation
 
 import groovy.swing.SwingBuilder
 import javax.swing.WindowConstants as WC
-import org.jfree.chart.ChartUtilities
+import org.jfree.chart.ChartUtils
 import org.jfree.chart.renderer.xy.XYErrorRenderer
 import org.jfree.data.xy.YIntervalSeriesCollection
 import org.jfree.chart.renderer.xy.DeviationRenderer
@@ -67,9 +67,9 @@ class WekaPlots{
     // 
     // http://www.jfree.org/jcommon/api/org/jfree/util/ShapeUtilities.html
     //shape = new java.awt.Rectangle(-1,-1,2,2)
-    //r.setBaseShape(shape)
+    //r.setDefaultShape(shape)
     //r.setSeriesShape(0,shape)
-    //println r.getBaseShape()  // java.awt.geom.Rectangle2D$Double[x=-3.0,y=-3.0,w=6.0,h=6.0]
+    //println r.getDefaultShape()  // java.awt.geom.Rectangle2D$Double[x=-3.0,y=-3.0,w=6.0,h=6.0]
     //println r.lookupSeriesShape(0) // java.awt.geom.Rectangle2D$Double[x=-3.0,y=-3.0,w=6.0,h=6.0]
     
     def xAxis = new NumberAxis(xlabel)
@@ -90,7 +90,7 @@ class WekaPlots{
 
     //  OR save to PNG
     err.print "Saving png..."
-    ChartUtilities.saveChartAsPNG(new File(outputName),chart,width,height)
+    ChartUtils.saveChartAsPNG(new File(outputName),chart,width,height)
     err.println "done."
   }
   
@@ -219,7 +219,7 @@ class WekaPlots{
   
     //  OR save to PNG
     err.print "Saving png to $outputName ..."
-    ChartUtilities.saveChartAsPNG(new File(outputName),chart,width,height)
+    ChartUtils.saveChartAsPNG(new File(outputName),chart,width,height)
     err.println "done."  
   }
   
@@ -265,7 +265,7 @@ class WekaPlots{
   
     //  OR save to PNG
     err.print "Saving png..."
-    ChartUtilities.saveChartAsPNG(new File(outputName),chart,width,height)
+    ChartUtils.saveChartAsPNG(new File(outputName),chart,width,height)
     err.println "done."  
   }
   

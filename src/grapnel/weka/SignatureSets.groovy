@@ -13,6 +13,7 @@ public class SignatureSets extends ArrayList{
 	def allResults = []
 	
 	def modelName2Model = [:]
+	def modelName2Set = [:]
 		
 	def SignatureSets(String dirName){
 		readSets(dirName)
@@ -22,7 +23,8 @@ public class SignatureSets extends ArrayList{
 	boolean add(SignatureSet s){
 		s.modelName2Model.each{k,v->
 			modelName2Model[k] = v
-		}
+			modelName2Set[k] = s;		
+		}		
 		return(super.add(s));
 	}
 		
@@ -37,7 +39,10 @@ public class SignatureSets extends ArrayList{
 			System.err.println "CONFIG FILE: "+cfgFile
 			def ss = new SignatureSet(cfgFile);
 			// Copy the model map from the individual signature set. 
-			ss.modelName2Model.each{k,v->modelName2Model[k]=v}
+			ss.modelName2Model.each{k,v->
+				modelName2Model[k]=v
+				modelName2Set[k] = ss
+			}			
 			this<<ss
 		}
 	}
@@ -66,4 +71,16 @@ public class SignatureSets extends ArrayList{
 		}
 		return(allResults)		
 	}	
+	
+	// Apply all signatures in the signature sets to data 
+	def applyModels(expressionData,globalCutoff){
+		this.each{signatureSet->
+			def results = signatureSet.applyModels(expressionData)
+			results.each{r->
+				allResults << r
+			}
+		}
+		return(allResults)		
+	}	
+	
 }

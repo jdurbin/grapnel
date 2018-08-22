@@ -27,6 +27,7 @@ import java.awt.BorderLayout as BL
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
+import java.text.DecimalFormat;
 
 import org.jfree.chart.*
 import org.jfree.chart.axis.NumberAxis;
@@ -35,8 +36,11 @@ import org.jfree.chart.renderer.xy.*;
 import org.jfree.data.xy.*;
 import org.jfree.ui.*
 import org.jfree.data.statistics.*;
+import org.jfree.chart.title.*;
 
 import com.google.common.primitives.Doubles;
+
+
 
 // Import breaks script on non-OS X machines. 
 //import com.apple.eawt.Application;
@@ -47,6 +51,8 @@ import grapnel.gui.*
 import static grapnel.charts.Charts.*
 
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
+import org.apache.commons.math3.stat.inference.*
 
 err = System.err
 
@@ -87,7 +93,7 @@ swing = new SwingBuilder()
 // define some menus...
 def menuItems = {
 		menu(text: "Actions", mnemonic: 'F') {
-			//menuItem(text: "Search...", mnemonic: 's', actionPerformed: {performSearch()})
+			//menuItem(text: "Save view", mnemonic: 's', actionPerformed: {save()})
 			menuItem(text: "Exit", mnemonic: 'X', actionPerformed: { System.exit(0) })
 		}
 }
@@ -173,6 +179,24 @@ def popupMenuItems = {
 			scatterPlotSelectedCols(thetab,selectedCols)
 		}
 	})
+	
+	menuItem(text:"Dual Histogram",actionPerformed:{
+		if (bRowSelection){
+			err.println "Dual histogram rows not yet implemented"
+		}else{
+			selectedCols = thetab.getSelectedColumns()
+			dualHistogramSelectedCols(thetab,selectedCols)
+		}
+	})
+	
+	menuItem(text:"Two Sample Stats",actionPerformed:{
+		if (bRowSelection){
+			err.println "Paired Stats rows not yet implemented"
+		}else{
+			selectedCols = thetab.getSelectedColumns()
+			statsCols(thetab,selectedCols)
+		}
+	})
 }
 
 
@@ -182,54 +206,35 @@ thetab.setComponentPopupMenu(swing.popupMenu(popupMenuItems))
 frame.pack()
 frame.show()
 
+def histogramValues(name,values){
+	def hist = hist(name,values)
 
-def histogramSelectedRows0(thetab,selectedRows){	
-	selectedRows.each{rowIdx->	
-		// Get the name of the row...
-		def rowName = thetab.getValueAt(rowIdx,0)
-		
-		def cols = thetab.getColumnCount();
-		def values = []
-		for(int col = 0;col < cols;col++){
-			try{
-				o = thetab.getValueAt(rowIdx,col)
-				v = o as double
-				if (Double.isNaN(o)) return;
-				values.add(v)
-			}catch(Exception e){
-				// Don't do anything...
-				err.println "WARNING: row $rowName contains non-numeric values."
-			}					
-		}
-		def hist = hist(rowName,values)
-		showTableChart(hist,"Distribution of $rowName")	
-	}
+	def stats = new DescriptiveStatistics();
+	values.each{stats.addValue(it as double)}
+	def mean = stats.getMean()
+	def std = stats.getStandardDeviation();
+	def median = stats.getPercentile(50);
+	
+	hist.getTitle().setFont(new Font("Tahoma", Font.BOLD, 12))	
+	def summary = "Mean: ${mean.round(2)} Std: ${std.round(2)} Median: ${median.round(2)}"	
+	def tt = new TextTitle(summary)
+	tt.setFont(new Font("Tahoma", Font.PLAIN, 12))
+	hist.addSubtitle(tt)			 	
+	showTableChart(hist,"Distribution of $name")	
 }
+
 
 def histogramSelectedRows(thetab,selectedRows){	
 	selectedRows.each{rowIdx->	
 		// Get the name of the row...
 		def rowName = thetab.getValueAt(rowIdx,0)
-		
-		def cols = thetab.getColumnCount();
-		def values = []
-		for(int col = 0;col < cols;col++){
-			try{
-				o = thetab.getValueAt(rowIdx,col)
-				v = o as double
-				if (Double.isNaN(o)) return;
-				values.add(v)
-			}catch(Exception e){
-				// Don't do anything...
-				err.println "WARNING: row $rowName contains non-numeric values."
-			}					
+		def values = getColValues(thetab,rowIdx)
+		if (values == null){
+			System.err.println "Non-numeric.  Category row plot not yet supported."		
 		}
-		def hist = hist(rowName,values)
-		showTableChart(hist,"Distribution of $rowName")	
+		histogramValues(rowName,values)
 	}
 }
-
-
 
 def histogramSelectedCols(thetab,selectedCols){			
 	selectedCols.each{colIdx->
@@ -249,36 +254,37 @@ def histogramSelectedCols(thetab,selectedCols){
 			def hist = categoryHistogram("Category Frequency","Category","Frequency",cm)
 			showTableChart(hist,"Distribution of $colName")	
 		}else{	
-			def hist = hist(colName,values)
-			showTableChart(hist,"Distribution of $colName")	
+			histogramValues(colName,values)
 		}
 	}
+}
+
+def scatterPlotValues(name0,name1,values0,values1){
+	
+	// Compute some statistics. 
+	def corr = new SpearmansCorrelation().correlation(values0 as double[],values1 as double[]);
+	
+	scatter = xyplot("$name0 vs $name1 ",name0,name1,values0,values1)	
+	scatter.getTitle().setFont(new Font("Tahoma", Font.BOLD, 12))		
+	scatter.addSubtitle(new TextTitle("Spearman correlation: ${corr.round(3)}"))			 
+					 
+	showTableChart(scatter,"Scatterplot of $name0 vs $name1")	
 }
 
 def scatterPlotSelectedRows(thetab,selectedRows){			
 	if(selectedRows.size() != 2){
 		err.println "ERROR: Can only scatter plot exactly two rows."
 		return;
-	}
-	
+	}	
 	row0 = selectedRows[0]
-	rowName0 = getRowName(thetab,row0)
-	
+	rowName0 = getRowName(thetab,row0)	
 	row1 = selectedRows[1]
 	rowName1 = getRowName(thetab,row1)
-	
-	err.println "plotting $rowName0 vs $rowName1"
-
-	(values0,values1) = getMatchedColValues(thetab,row0,row1)
-	def corr = new SpearmansCorrelation().correlation(values0 as double[],values1 as double[]);
-
+	(values0,values1) = getMatchedColValues(thetab,row0,row1)	
 	if (values0.size() != values1.size()){
 		err.println "ERROR: rows do not contain same number of values."
 	}
-		
-	scatter = xyplot("$rowName0 vs $rowName1 (Spearman=${corr.round(3)})",
-					 rowName0,rowName1,values0,values1)
-	showTableChart(scatter,"Scatterplot of $rowName0 vs $rowName1")	
+	scatterPlotValues(rowName0,rowName1,values0,values1)	
 }
 
 
@@ -286,27 +292,165 @@ def scatterPlotSelectedCols(thetab,selectedCols){
 	if(selectedCols.size() != 2){
 		err.println "ERROR: Can only scatter plot exactly two columns."
 		return;
-	}
-	
+	}	
 	col0 = selectedCols[0]
-	colName0 = getColName(thetab,col0)
-	
+	colName0 = getColName(thetab,col0)	
 	col1 = selectedCols[1]
 	colName1 = getColName(thetab,col1)
 	
-	err.println "plotting $colName0 vs $colName1"
-
 	(values0,values1) = getMatchedRowValues(thetab,col0,col1)
-	def corr = new SpearmansCorrelation().correlation(values0 as double[],values1 as double[]);
-
 	if (values0.size() != values1.size()){
 		err.println "ERROR: columns do not contain same number of values."
-	}
-		
-	scatter = xyplot("$colName0 vs $colName1 (Spearman=${corr.round(3)})",
-					 colName0,colName1,values0,values1)
-	showTableChart(scatter,"Scatterplot of $colName0 vs $colName1")	
+	}		
+	scatterPlotValues(colName0,colName1,values0,values1)	
 }
+
+def dualHistogramSelectedCols(thetab,selectedCols){			
+	if (selectedCols.size() != 2){
+		System.err.println("Dual histogram only works on two columns.");
+		return;
+	}
+
+	col0 = selectedCols[0]
+	col1 = selectedCols[1]
+
+	th = thetab.getTableHeader();  
+	tcm = th.getColumnModel(); 
+	tc0 = tcm.getColumn(col0)
+	colName0 = tc0.getHeaderValue()	
+	
+	tc1 = tcm.getColumn(col1)
+	colName1 = tc1.getHeaderValue()	
+				
+	values0 = getRowValues(thetab,col0)		
+	values1 = getRowValues(thetab,col1)	
+	
+	// compute some statistics from these values
+	statsStrs = getStatsStrs(values0,values1,colName0,colName1)
+			
+	if ((values0.size() == 0) || (values1.size()==0)){
+		System.err.println "No dual histogram of categorical values. "
+	}else{	
+		dualhist = dualhist(title:"Distribution of $colName0 and $colName1)",
+			series1:values0,
+			series1name:colName0,
+			series2:values1,
+			series2name:colName1)
+		showTableChartWithStats(dualhist,"Distribution of $colName0 and $colName1" as String,statsStrs)
+	}	
+}
+
+// Compute a few stats
+def getStatsStrs(values0,values1,colName0,colName1){
+	def statsStrs = []
+	def stats0 = new DescriptiveStatistics();
+	values0.each{stats0.addValue(it as double)}
+	def mean0 = stats0.getMean()
+	def std0 = stats0.getStandardDeviation();
+	def median0 = stats0.getPercentile(50);
+	
+	def stats1 = new DescriptiveStatistics();
+	values1.each{stats1.addValue(it as double)}
+	def mean1 = stats1.getMean()
+	def std1 = stats1.getStandardDeviation();
+	def median1 = stats1.getPercentile(50);
+	
+	DecimalFormat df = new DecimalFormat("#.###");
+	df.setMaximumFractionDigits(5);
+	desc = "<html><font color=green>$colName0</font> <b>mean:</b> ${df.format(mean0)} <font color=blue>$colName1</font> <b>mean:</b> ${df.format(mean1)}</html>"
+	statsStrs<<desc
+		
+	mwu_p = new MannWhitneyUTest().mannWhitneyUTest(values0 as double[],values1 as double[])
+	statsStrs << "Mann Whitney U p-value: ${df.format(mwu_p)}"
+	
+	//ks = new KolmogorovSmirnovTest().kolmogorovSmirnovTest(values0 as double[],values1 as double[])
+	//statsStrs << "Kolmogorov Smirnov Test: $ks"
+	
+	return(statsStrs)
+}
+
+def statsCols(thetab,selectedCols){			
+	if (selectedCols.size() != 2){
+		System.err.println("Dual histogram only works on two columns.");
+		return;
+	}
+
+	col0 = selectedCols[0]
+	col1 = selectedCols[1]
+
+	th = thetab.getTableHeader();  
+	tcm = th.getColumnModel(); 
+	tc0 = tcm.getColumn(col0)
+	colName0 = tc0.getHeaderValue()	
+	
+	tc1 = tcm.getColumn(col1)
+	colName1 = tc1.getHeaderValue()	
+				
+	values0 = getRowValues(thetab,col0)		
+	values1 = getRowValues(thetab,col1)	
+	
+	def statsStrs = []
+	def stats0 = new DescriptiveStatistics();
+	values0.each{stats0.addValue(it as double)}
+	def mean0 = stats0.getMean()
+	def std0 = stats0.getStandardDeviation();
+	def median0 = stats0.getPercentile(50);
+	
+	def stats1 = new DescriptiveStatistics();
+	values1.each{stats1.addValue(it as double)}
+	def mean1 = stats1.getMean()
+	def std1 = stats1.getStandardDeviation();
+	def median1 = stats1.getPercentile(50);
+	
+	def swing = new SwingBuilder()
+	def frame = swing.frame(title:"Statistics for $colName0 and $colName1",pack:true,show:true) {
+		borderLayout()
+		panel(constraints: BL.SOUTH){
+			vbox{
+				//statsStrs.each{stat->
+				//	textlabel = label(text: stat)
+				//}
+				textlabel = new JLabel("A <b>label</b> baby!");
+				
+				DecimalFormat df = new DecimalFormat("#.###");
+				df.setMaximumFractionDigits(5);
+				desc0 = "<html><font color=green>$colName0</font>   <b>mean:</b> ${df.format(mean0)}\t<b>median:</b> ${df.format(median0)}\t<b>std:</b>${df.format(std0)}</html>"
+				textlabel = label(text: desc0)
+					
+				desc1 = "<html><font color=blue>$colName1</font>  <b>mean:</b> ${df.format(mean1)}\t<b>median:</b> ${df.format(median1)}\t<b>std:</b>${df.format(std1)}</html>"					
+				textlabel = label(text: desc1)
+		
+				mwu_p = new MannWhitneyUTest().mannWhitneyUTest(values0 as double[],values1 as double[])
+				textlabel = label(text: "<html><b>Mann Whitney U p-value:</b>\t${df.format(mwu_p)}")
+	
+				ks = new KolmogorovSmirnovTest().kolmogorovSmirnovTest(values0 as double[],values1 as double[])
+				textlabel = label(text: "<html><b>Kolmogorov Smirnov Test:</b>\t${df.format(ks)}")
+								
+			}
+		}
+	}
+	return(swing)	
+}
+
+/****
+* Show the chart in a new window.  
+*/ 
+static showTableChartWithStats(chart,chartTitle,statsStr){
+	def swing = new SwingBuilder()
+	def frame = swing.frame(title:chartTitle,pack:true,show:true) {
+		borderLayout()
+		panel(new ChartPanel(chart),preferredSize: new java.awt.Dimension(500,300),mouseWheelEnabled:true)
+		panel(constraints: BL.SOUTH){
+			vbox{
+				statsStr.each{stat->
+					textlabel = label(text: stat)
+				}
+			}
+		}
+	}
+	return(swing)		
+}
+
 
 
 def getColName(thetab,colIdx){
@@ -430,6 +574,21 @@ def getCategoryCounts(thetab,colIdx){
 	return(counts)
 }
 
+def getColValues(thetab,rowIdx){
+	def cols = thetab.getColumnCount();
+	def values = []
+	for(int col = 0;col < cols;col++){
+		try{
+			o = thetab.getValueAt(rowIdx,col)
+			v = o as double
+			if (Double.isNaN(o)) return;
+			values.add(v)
+		}catch(Exception e){
+			// Don't do anything...
+			//err.println "WARNING: row $rowName contains non-numeric values."
+		}					
+	}
+}
 
 def getRowValues(thetab,colIdx){
 	def values = []		
@@ -441,7 +600,6 @@ def getRowValues(thetab,colIdx){
 			if (!Double.isNaN(v)) values.add(v)
 		}catch(Exception e){				
 			// Don't do anything...
-			//err.println "WARNING: column ${getColName(thetab,colIdx)} contains non-numeric values."
 		}			
 	}
 	return(values)
@@ -452,8 +610,7 @@ def getRowValues(thetab,colIdx){
 */ 
 static showTableChart(chart,chartTitle){
 	def swing = new SwingBuilder()
-	def frame = swing.frame(title:chartTitle,
-													pack:true,show:true) {
+	def frame = swing.frame(title:chartTitle,pack:true,show:true) {
 		borderLayout()
 		panel(new ChartPanel(chart),preferredSize: new java.awt.Dimension(500,300),mouseWheelEnabled:true)
 	}
