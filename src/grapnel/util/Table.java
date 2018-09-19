@@ -96,17 +96,17 @@ public class Table extends GroovyObjectSupport{
 		
 
 	/**
-		* The first row will always populate the rowNames, but sometimes we want to put the 
-		* first col in the table itself (e.g. when stuffing into JTable)
-		*/
+	* The first row will always populate the rowNames, but sometimes we want to put the 
+	* first col in the table itself (e.g. when stuffing into JTable)
+	*/
 	public Table(String fileName,String delimiter,boolean bFirstRowInTable) throws Exception{
 		setFirstColInTable(bFirstRowInTable);
 		readFile(fileName,delimiter);
 	}
 
 	/**
-		* Create a new table by reading from given file with default tab delimiter.
-		*/
+	* Create a new table by reading from given file with default tab delimiter.
+	*/
 	public Table(String fileName) throws Exception{
 		
 		readFile(fileName,"\t");
@@ -114,9 +114,9 @@ public class Table extends GroovyObjectSupport{
 	}
   
 	/**
-		* Create and read a table from a file, applying the closure to each cell 
-		* before it is saved to the table.
-		*/
+	* Create and read a table from a file, applying the closure to each cell 
+	* before it is saved to the table.
+	*/
 	public Table(String fileName,Closure c) throws Exception{
 		
 		readFile(fileName,"\t",c);
@@ -125,10 +125,10 @@ public class Table extends GroovyObjectSupport{
   
   
 	/**
-		* Create and read a table from a file, applying the closure to each cell 
-		* in the table as it is read and before it is saved to the table (e.g. to 
-		* parse out a substring of each cell, or convert to Double). 
-		*/ 
+	* Create and read a table from a file, applying the closure to each cell 
+	* in the table as it is read and before it is saved to the table (e.g. to 
+	* parse out a substring of each cell, or convert to Double). 
+	*/ 
 	public Table(String fileName,String delimiter,Closure c) throws Exception{
 		
 		readFile(fileName,delimiter,c);
@@ -136,8 +136,8 @@ public class Table extends GroovyObjectSupport{
 	}
 
 	/**
-		* Create an empty table of size given by list of row and column names.
-		*/
+	* Create an empty table of size given by list of row and column names.
+	*/
 	public Table(ArrayList<String> rNames,ArrayList<String> cNames){
 		numRows = rNames.size();
 		numCols = cNames.size();
@@ -158,8 +158,8 @@ public class Table extends GroovyObjectSupport{
 	}
 	
 	/**
-		* Assigns every cell in the table to the given object.
-		*/
+	* Assigns every cell in the table to the given object.
+	*/
 	public void assign(Object o){
 		
 		matrix.assign(o);

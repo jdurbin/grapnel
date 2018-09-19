@@ -14,19 +14,24 @@ package grapnel.util;
 * 
 */
 class OnlineTable{			
-
+	
 	//File file = null
 	//InputStream inStream;
 	Reader r
 	String sep = null;
 	
-	def headings
-	def row
+	def headingFields
+	def row	
+	
+	// Because I can never remember singular/plural
+	def getHeading(){return(headingFields)}
+	def getHeadings(){return(headingFields)}
+	def getHeadingFields(){return(headingFields)}
 
 	def OnlineTable(InputStream s,String delimiter){
 		sep = delimiter
 		r = s.newReader()
-		headings = getHeader()
+		headingFields = getHeader()
 	}
 		
 	def OnlineTable(String fileName,String delimiter){
@@ -34,7 +39,7 @@ class OnlineTable{
 		file = new File(fileName)
 		inStream = file.newInputStream()
 		r = inStream.newReader()
-		headings = getHeader()
+		headingFields = getHeader()
 	}	
 	
 	// Get the headers 
@@ -60,7 +65,7 @@ class OnlineTable{
 	// explicitly..
 	def OnlineTable(InputStream s,ArrayList h,String delimiter){		
 		r = s.newReader()
-		headings = h
+		headingFields = h
 		sep = delimiter
 	}
 	
@@ -76,9 +81,9 @@ class OnlineTable{
 			sep = /,(?=([^\"]|\"[^\"]*\")*$)/
 		}		
 		r = new File(f).newReader()
-		headings = getHeader()
-		//headings = getHeader(inStream)
-		//System.err.println "headings="+headings		 this is there ok.
+		headingFields = getHeader()
+		//headingFields = getHeader(inStream)
+		//System.err.println "headingFields="+headingFields		 this is there ok.
 	}
 		
 	/**
@@ -90,7 +95,7 @@ class OnlineTable{
 			def rfields = rowStr.split(sep,-1)
 			row = [:]
 			rfields.eachWithIndex{f,i->
-				row[headings[i]]=f
+				row[headingFields[i]]=f
 			}
 			c(row)
 		}
@@ -105,7 +110,7 @@ class OnlineTable{
 			def rfields = rowStr.split(sep,-1)
 			row = [:]
 			rfields.eachWithIndex{f,i->
-				row[headings[i]]=f
+				row[headingFields[i]]=f
 			}
 			done = c(row)
 			if (done) break;
@@ -125,14 +130,12 @@ class OnlineTable{
 			def rfields = rowStr.split(sep,-1)
 			row = [:]
 			rfields.eachWithIndex{f,i->
-				row[headings[i]]=f
+				row[headingFields[i]]=f
 			}
 			list << c(row)
 		}		
 		return(list)
 	}
 		
-	def headings(){
-		return(headings)
-	}	
+	
 }
