@@ -36,7 +36,7 @@ public class SignatureSets extends ArrayList{
 		//System.err.println "F = "+f
 		//System.err.println "F.class = "+f.class	
 		f.eachFileMatch(~/.*.cfg/){cfgFile->
-			System.err.println "CONFIG FILE: "+cfgFile
+			System.err.println "CONFIG FILE: "+cfgFile+" CFG FILE type: "+cfgFile.class
 			def ss = new SignatureSet(cfgFile);
 			// Copy the model map from the individual signature set. 
 			ss.modelName2Model.each{k,v->
