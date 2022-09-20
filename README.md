@@ -9,8 +9,6 @@
 
 ## Installation
 
-Installation is in three parts:  install required software, clone and build grapnel from github, set environment variables. 
-
 # Dependencies
 
 The only dependencies for Grapnel are a newish version of Java (1.7 or later), a newish version of [Apache Ant](http://ant.apache.org/) (1.7 or later) and a newish version of [Apache Groovy](http://groovy-lang.org) (2.0 or later).   You can install these on your own machine wherever you like, just make sure all three are in your path.  
