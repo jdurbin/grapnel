@@ -3,6 +3,7 @@
 ## About
 
 <img src="https://raw.github.com/jdurbin/grapnel/master/img/graplinghook.png" width="256"> 
+![grapnel](resources/img/graplinghook.png)
 
 A grappling hook, also called a **grapnel**, is a device that allows one to hook onto an object for the purpose of grabbing hold or gripping it when it is at a distnace or when there are no attachment points or handles.  In this spirit, Groovy **grapnel** is a collection of libraries and tools that will help you to get a grip on your data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
 
@@ -86,7 +87,7 @@ Type `csvsql` to test out the installation.  You should see the help message for
         ```   
 
     * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on your 30,000 rows x 2,000 columns tables?  Then viewtab is for you!  View, sort data, plot histograms, scatter plot pairs of rows or columns.  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html)
-    ![viewtab](https://raw.github.com/jdurbin/grapnel/master/img/viewtab.jpg)         
+    ![viewtab](resources/img/viewtab.png) 
     * **cutbyname** Like cut, but cuts columns by column name. 
     * **rename** Rename batch of files based on regular expression find and replace. 
     * **tablesize**  How big is that csv/tab file in rows/columns? 
