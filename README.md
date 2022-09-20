@@ -5,7 +5,7 @@
 ![grapnel](https://github.com/jdurbin/grapnel/raw/master/resources/img/graplinghook.png")
 
 
-A grappling hook, also called a **grapnel**, is a device that allows one to hook onto an object for the purpose of grabbing hold or gripping it when it is at a distnace or when there are no attachment points or handles.  In this spirit, Groovy **grapnel** is a collection of libraries and tools that will help you to get a grip on your data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
+**grapnel** is a collection of libraries and tools for data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
 
 ## Installation
 
