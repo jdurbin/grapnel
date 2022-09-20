@@ -2,9 +2,6 @@
 
 ## About
 
-![grapnel](https://github.com/jdurbin/grapnel/raw/master/resources/img/graplinghook.png")
-
-
 **grapnel** is a collection of libraries and tools for data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
 
 ## Installation
@@ -41,6 +38,27 @@ export JAVA_OPTS="-Xmx6000m -server -Xss40m"
 
 Type `csvsql` to test out the installation.  You should see the help message for csvsql. 
 
+## Grapnel Scripts
+
+* **scripts** Collection of command-line scripts (groovy). 
+    * **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
+ 
+        ```sql
+        csvsql "select score from people.csv where age < 40"
+        csvsql "select name,score from people.csv where age <50 and score > 100"
+        csvsql "select sum(score) from people.csv where age < 40"
+        csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
+        ```   
+
+    * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on your 30,000 rows x 2,000 columns tables?  Then viewtab is for you!  View, sort data, plot histograms, scatter plot pairs of rows or columns.  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html)
+    ![viewtab](resources/img/viewtab.png) 
+    * **cutbyname** Like cut, but cuts columns by column name. 
+    * **rename** Rename batch of files based on regular expression find and replace. 
+    * **tablesize**  How big is that csv/tab file in rows/columns? 
+
+Some of the functionality is described in blog entries on my old blog at [The Bayesian Conspiracy](http://bayesianconspiracy.blogspot.com)
+
+
 ## grapnel.jar library includes:
 
 * **grapnel.charts:**  Support for common kinds of charts: line chart, xyplot, hist.  Based on [JFreeChart](http://www.jfree.org/jfreechart/) but includes lots of sugar to make it easier to make commonly used charts and support for saving them in various formats. Also has support for creating a chart and displaying it in a GUI with a single command. 
@@ -72,24 +90,5 @@ Type `csvsql` to test out the installation.  You should see the help message for
 <br><br>
 * **swiftml** Collection of machine learning algorithms packaged nicely. Where wekaMine provides tools to easily automate large scale model selection/evaluation experiments, swiftml aims to provide a clean and easy to use interface to machine learning algorithms in the spirit of, for example, scikit-learn.  If you are looking for scikit-learn for Groovy/JVM swiftml might be what you need.  
 
-## Grapnel Scripts
-
-* **scripts** Collection of command-line scripts (groovy). 
-    * **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
- 
-        ```sql
-        csvsql "select score from people.csv where age < 40"
-        csvsql "select name,score from people.csv where age <50 and score > 100"
-        csvsql "select sum(score) from people.csv where age < 40"
-        csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
-        ```   
-
-    * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on your 30,000 rows x 2,000 columns tables?  Then viewtab is for you!  View, sort data, plot histograms, scatter plot pairs of rows or columns.  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html)
-    ![viewtab](resources/img/viewtab.png) 
-    * **cutbyname** Like cut, but cuts columns by column name. 
-    * **rename** Rename batch of files based on regular expression find and replace. 
-    * **tablesize**  How big is that csv/tab file in rows/columns? 
-
-Some of the functionality is described in blog entries on my blog at [The Bayesian Conspiracy](http://bayesianconspiracy.blogspot.com)
 
 ---
