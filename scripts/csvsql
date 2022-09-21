@@ -53,7 +53,7 @@ parser = new Parser(description: '''
 ''')
 
 parser.with{  
-  flag 's','safe',[default:false,description: 'Safe mode: scan entire file to determine column types. Default looks at up to 200 rows.']
+  flag 's','safe',[default:false,description: 'Safe mode: scan entire file to determine column types (INT, DOUBLE, VARCHAR). Default looks at up to 200 rows.']
   flag 'h','help',[default:false,description: 'Print script help.']
 }
 
