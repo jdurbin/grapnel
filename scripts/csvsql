@@ -48,6 +48,9 @@ parser = new Parser(description: '''
  csvsql "select alcohol,count(*) from beer.tab group by alcohol"
  csvsql "select brand,alcohol,price as SalesPrice from beer.tab order by price"
  
+ Quoted strings can be put in single quotes: 
+ 
+ csvsql -s "select achr,svtype,svlen from vcfstats.tab where achr='chr6'"
  
  Author:  James Durbin  
 ''')
