@@ -22,13 +22,16 @@
 	
 	csvsql is based on the [h2 database engine](http://www.h2database.com/) 
 
-* A set of ML/data analysis libraries geared for [Groovy](http://groovy.codehaus.org/), but which can be use in Java or any JVM based language as well.  
+* A set of ML/data analysis libraries geared for [Groovy](http://groovy.codehaus.org/), but which can be use in Java or any JVM based language.  
 
 # Installation
 
 ## Dependencies
 
-The only dependencies for Grapnel are a newish version of Java (1.7 or later), a newish version of [Apache Ant](http://ant.apache.org/) (1.7 or later) and a newish version of [Apache Groovy](http://groovy-lang.org) (2.0 or later).   You can install these on your own machine wherever you like, just make sure all three are in your path.  
+1. Java (1.7 or later)
+2. [Apache Ant](http://ant.apache.org/) (1.7 or later) 
+3. [Apache Groovy](http://groovy-lang.org) (2.0 or later).   
+
 
 ## Clone grapnel from github and build
 Clone and build grapnel.jar:
