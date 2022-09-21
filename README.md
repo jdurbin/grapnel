@@ -2,6 +2,10 @@
 
 ## About
 
+
+
+![viewtab](resources/img/viewtab.png) 
+
 **grapnel** is a collection of libraries and tools for data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
 
 ## Installation
