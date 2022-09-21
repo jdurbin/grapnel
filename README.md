@@ -9,7 +9,6 @@
 * **viewtab** csv/tsv file viewer suitable for > 100k row CSV files, with statistical functions. 
 
 	![viewtab](resources/img/viewtab_small.png) 
-* [csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)  A tool that lets you treat csv files like sql DBs
 
 * **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  
 	Script that lets you perform full SQL queries on csv files (including joins on multiple files).  Examples:  
