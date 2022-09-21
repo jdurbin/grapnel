@@ -6,7 +6,7 @@
 
 **Grapnel** includes:  
 
-* **viewtab** FAST csv/tsv file viewer suitable for > 100k row CSV files, with statistical functions. 
+* **viewtab** FAST csv/tsv file viewer suitable for >100k row CSV files + plots & stats
 
 	![viewtab](resources/img/viewtab_small.png) 
 
