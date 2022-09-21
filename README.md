@@ -22,7 +22,7 @@
 	
 	csvsql is based on the [h2 database engine](http://www.h2database.com/) 
 
-* A set of ML/data analysis libraries geared for [Groovy](http://groovy.codehaus.org/), but which can be use in Java or any JVM based language.  
+* **grapnel.jar** A set of ML/data analysis libraries geared for [Groovy](http://groovy.codehaus.org/), but which can be use in Java or any JVM based language.  
 
 # Installation
 
