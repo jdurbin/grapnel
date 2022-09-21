@@ -1,20 +1,37 @@
-### Groovy Grapnel    
+# Grapnel    
 
 ## About
 
 
 
-![viewtab](resources/img/viewtab_small.png) 
+**Grapnel** includes:  
 
-**grapnel** is a collection of libraries and tools for data analysis tasks.  While **grapnel** is geared towards [Groovy](http://groovy.codehaus.org/), several tools are useful as stand alone-applications, and the **grapnel** libraries provide functionality that can be use in Java or any JVM based language as well.   I think of **grapnel** is the kitchen sink of Java/Groovy functionality that I use every day in my bioinformatics/machine learning research.   
+* **viewtab** csv/tsv file viewer suitable for > 100k row CSV files, with statistical functions. 
 
-## Installation
+	![viewtab](resources/img/viewtab_small.png) 
+* [csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)  A tool that lets you treat csv files like sql DBs
 
-# Dependencies
+* **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  
+	Script that lets you perform full SQL queries on csv files (including joins on multiple files).  Examples:  
+ 
+	```sql
+	csvsql "select score from people.csv where age < 40"
+	csvsql "select name,score from people.csv where age <50 and score > 100"
+	csvsql "select sum(score) from people.csv where age < 40"
+	csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
+	```   
+	
+	csvsql is based on the [h2 database engine](http://www.h2database.com/) 
+
+* A set of ML/data analysis libraries geared for [Groovy](http://groovy.codehaus.org/), but which can be use in Java or any JVM based language as well.  
+
+# Installation
+
+## Dependencies
 
 The only dependencies for Grapnel are a newish version of Java (1.7 or later), a newish version of [Apache Ant](http://ant.apache.org/) (1.7 or later) and a newish version of [Apache Groovy](http://groovy-lang.org) (2.0 or later).   You can install these on your own machine wherever you like, just make sure all three are in your path.  
 
-# Clone grapnel from github and build
+## Clone grapnel from github and build
 Clone and build grapnel.jar:
 
 ```
@@ -22,9 +39,10 @@ git clone git://github.com/jdurbin/grapnel.git
 cd grapnel
 ant install
 ```
+
 The install should build grapnel.jar and copy it and all required 3rd party jars, including weka, to grapnel/target.
 
-# Set up Environment Variables
+## Set up Environment Variables
 
 Set the CLASSPATH environment variable to include all the jars under grapnel/target/jar, and add the scripts
 directory under grapnel to your path.  For example: 
@@ -42,28 +60,8 @@ export JAVA_OPTS="-Xmx6000m -server -Xss40m"
 
 Type `csvsql` to test out the installation.  You should see the help message for csvsql. 
 
-## Grapnel Scripts
 
-* **scripts** Collection of command-line scripts (groovy). 
-    * **[csvsql](https://github.com/jdurbin/grapnel/wiki/csvsql)**  Polished script based on [h2 database engine](http://www.h2database.com/) that lets you perform full SQL queries on csv table files (including joins on multiple files).  Some examples of things you can do with csvsql are:  
- 
-        ```sql
-        csvsql "select score from people.csv where age < 40"
-        csvsql "select name,score from people.csv where age <50 and score > 100"
-        csvsql "select sum(score) from people.csv where age < 40"
-        csvsql "select people.name,children.child from people.csv,children.csv where people.name=children.name"
-        ```   
-
-    * **viewtab** A BIG DATA spreadsheet.  Want to view data in a spreadsheet but spreadsheets choke on your 30,000 rows x 2,000 columns tables?  Then viewtab is for you!  View, sort data, plot histograms, scatter plot pairs of rows or columns.  Read more about it here: [viewtab] (http://bayesianconspiracy.blogspot.com/2012/06/quick-csvtab-file-viewer.html)
-    ![viewtab](resources/img/viewtab.png) 
-    * **cutbyname** Like cut, but cuts columns by column name. 
-    * **rename** Rename batch of files based on regular expression find and replace. 
-    * **tablesize**  How big is that csv/tab file in rows/columns? 
-
-Some of the functionality is described in blog entries on my old blog at [The Bayesian Conspiracy](http://bayesianconspiracy.blogspot.com)
-
-
-## grapnel.jar library includes:
+# grapnel library includes:
 
 * **grapnel.charts:**  Support for common kinds of charts: line chart, xyplot, hist.  Based on [JFreeChart](http://www.jfree.org/jfreechart/) but includes lots of sugar to make it easier to make commonly used charts and support for saving them in various formats. Also has support for creating a chart and displaying it in a GUI with a single command. 
 
