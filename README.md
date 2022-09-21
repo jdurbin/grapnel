@@ -32,8 +32,14 @@
 2. [Apache Ant](http://ant.apache.org/) (1.7 or later) 
 3. [Apache Groovy](http://groovy-lang.org) (2.0 or later).   
 
-
 ## Clone grapnel from github and build
+
+Set `GROOVY_HOME` environment variable to the path where groovy is installed. 
+
+```
+export GROOVY_HOME=/Users/james/groovy/
+```
+
 Clone and build grapnel.jar:
 
 ```
